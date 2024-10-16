@@ -1,0 +1,83 @@
+﻿@using InfProject.Utils
+@using WebUtilsLib;
+@model (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, int rubricCount, int objectLinkCount)
+@{
+    (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, int rubricCount, int objectLinkCount) = Model;
+    string selectedPerson = selectedUserId != 0 ? persons.First(x => x.Id == selectedUserId).Name : string.Empty;
+    // mode == "weak", "full"
+    string adds = string.IsNullOrEmpty(selectedPerson) ? string.Empty : " for " + selectedPerson;
+    string title = $"Objects Statistics{adds}";
+    ViewData["Title"] = title;
+}
+
+
+<h1 class="display-4">@ViewData["Title"]</h1>
+<div id="FilterPerson" class="FilterPerson">
+    <div class="input-group mb-3">
+        <span class="input-group-text border-0 bg-transparent">Person:</span>
+        <select class="form-select" id="userid" name="userid" aria-label="Person" asp-items="@(new SelectList(persons, "Id", "Name", selectedUserId))" onchange="searchByUserId($(this).val());">
+            <option></option>
+        </select>
+    </div>
+</div>
+
+
+<div class="container-fluid" id="SampleList">
+    <table class="table table-striped mt-0" id="searchList">
+        <thead>
+            <tr>
+                <th>Object Count</th>
+                <th>TypeId</th>
+                <th>Type Name</th>
+                <th>Type Comment</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in data)
+            {
+                <tr>
+                    <td>@item.ObjectCount</td>
+                    <td>@Html.Raw(item.TypeId == null ? "<b>!= 0</b>" : item.TypeId.ToString())</td>
+                    <td>@Html.Raw(item.TypeId == null ? "<b>All objects</b>" : item.TypeName)</td>
+                    <td>@Html.Raw(item.TypeId == null ? "<b>All types (TypeId != 0)</b>" : item.TypeComment)</td>
+                </tr>
+            }
+            <tr>
+                <td>@rubricCount</td>
+                <td>Project</td>
+                <td><b>Projects</b></td>
+                <td><b>All projects</b></td>
+            </tr>
+            <tr>
+                <td>@objectLinkCount</td>
+                <td>Link</td>
+                <td><b>Object Links</b></td>
+                <td><b>All links between objects</b></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            initDataTable({
+                paging: false,
+                searching: false,
+                fixedHeader: {
+                    header: true,
+                    footer: false
+                },
+                columns: [
+                    { orderSequence: ['desc'] },
+                    null,
+                    null,
+                    null
+                ]
+            });
+        });
+    </script>
+
+}

@@ -1,0 +1,32 @@
+﻿@model (string title, string btnText, int idr, int ido, string returl)
+@{
+    (string title, string btnText, int idr, int ido, string returl) = Model;
+}
+<link rel="stylesheet" href="~/css/dragdrop.css" />
+@* 
+<form id="addfiles" class="addfiles" method="post" enctype="multipart/form-data" asp-action="StageFiles" asp-controller="UploadFiles" onsubmit="return DnDUploadSubmit()">
+<form id="addfiles" class="addfiles" method="post" enctype="multipart/form-data">
+*@
+<form id="addfiles" class="addfiles" method="post" enctype="multipart/form-data" asp-action="StageFiles" asp-controller="UploadFiles">
+    <input type="hidden" name="idr" value="@idr" />
+    <input type="hidden" name="ido" value="@ido" />
+    <input type="hidden" name="returl" value="@returl" />
+    <div class="dragdrop">
+        <h3>@title</h3>
+
+        <div class="dropzoneContainer">
+            <div class="err"></div>
+            <div class="dropzone bi bi-cloud-upload"><div class="list"></div><input class="file" type="file" id="fileupload" name="fileupload" multiple=""></div>
+            <button id="DnDUploadChunk" type="button" class="btn btn-primary ms-3 float-end" title="Save chunks" onclick="app.chunkedUpload=true; return DnDUploadSubmit();"><i class="bi bi-save2-fill"></i> @btnText</button>
+@*             <button id="DnDUpload" type="submit" class="btn btn-primary me-3 float-end" title="Save" onclick="app.chunkedUpload=false"><i class="bi bi-save2-fill"></i> @btnText</button>
+ *@            <div id="DnDUploadWaiter" class="spinner-border text-primary ms-2 d-none" role="status">
+                <span class="visually-hidden">processing...</span>
+            </div>
+            <div class="progress mt-2 d-none" id="DnDUploadProgress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+    </div>
+</form>

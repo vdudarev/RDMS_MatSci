@@ -1,0 +1,76 @@
+﻿@using InfProject.Utils
+@using WebUtilsLib
+@model (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, string topic)
+@{
+    (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, string topic) = Model;
+    string selectedPerson = selectedUserId != 0 ? persons.First(x => x.Id == selectedUserId).Name : string.Empty;
+    string adds = string.IsNullOrEmpty(selectedPerson) ? string.Empty : " by " + selectedPerson;
+    ViewData["Title"] = "Samples by " + Model.topic + adds;
+    int total = Model.data.Sum(i => i.y);
+    string dataX = string.Join(", ", Model.data.Select(i => $"\"{i.x}\""));
+    string dataXLabel = string.Join(", ", Model.data.Select(i => $"\"{i.xLabel}\""));
+    string dataY = string.Join(", ", Model.data.Select(i => i.y));
+    string title = string.IsNullOrEmpty(selectedPerson) ? "Samples by " + topic : selectedPerson + ": samples by " + topic;
+}
+
+<h1 class="display-4">@ViewData["Title"]</h1>
+<p>Total @adds: @total samples</p>
+<div id="FilterPerson" class="FilterPerson">
+    <div class="input-group mb-3">
+        <span class="input-group-text border-0 bg-transparent">Person:</span>
+        <select class="form-select" id="userid" name="userid" aria-label="Person" asp-items="@(new SelectList(persons, "Id", "Name", selectedUserId))" onchange="searchByUserId($(this).val());">
+            <option></option>
+        </select>
+    </div>
+</div>
+
+<div>
+    <canvas id="Chart" width="800" height="400"></canvas>
+</div>
+
+
+@section Scripts {
+<script type="text/javascript">
+    var curPerson = "@selectedPerson";
+    var selectedUserId = @selectedUserId;
+    app.chart.x = [@Html.Raw(dataX)];
+    app.chart.xLabels = [@Html.Raw(dataXLabel)];
+    app.chart.y = [@Html.Raw(@dataY)];
+    app.chart.title = "@title.ConverToASCIIonly()"; // "@title.Replace("ö", "\\u00F6")";
+</script>
+<script type="module" src="~/js/chart.min.js"></script>
+<script type="module">
+    import { getRelativePosition } from '/js/helpers.mjs';
+
+    const ctx = document.getElementById('Chart').getContext('2d');
+        const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: app.chart.xLabels,
+            datasets: [{
+                label: app.chart.title,
+                data: app.chart.y,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        }
+        , options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            onClick: (e) => {
+                const canvasPosition = getRelativePosition(e, chart);
+                // Substitute the appropriate scale IDs
+                const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
+                const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
+                console.log("Chart Click: " + dataX + ", " + dataY + " [" + app.chart.xLabels[dataX] + " => " + app.chart.y[dataX] + "]");
+                document.location = '/sample/?substrate=' + app.chart.x[dataX] + '&createdbyperson=' + encodeURIComponent(curPerson);
+            }
+        }
+    });
+</script>
+}
+

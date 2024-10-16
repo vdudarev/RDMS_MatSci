@@ -1,0 +1,30 @@
+﻿@using WebUtilsLib;
+@{
+    List<string> roles = UserUtils.GetUserRoles(Context);
+}
+@if (Context.User.Identity?.IsAuthenticated ?? false)
+{
+    <h2>Hello, @Context.User.Identity.Name!</h2>
+    <p>
+        @if (roles.Count == 0)
+        {
+            <span class="text-danger">But by default you are not granted access to the system (except handovers), since you are not in any of roles. Please contact <a href="https://www.mdi.ruhr-uni-bochum.de/" target="_blank" rel="nofollow">MDI chair</a> to grant you roles...</span>
+        }
+        else
+        {
+            <span>You are successfully authenticated and in the following roles:</span>
+            <ul>
+                @foreach (var role in roles)
+                {
+                    <li><b>@role</b> (@UserUtils.GetText(@role))@Html.Raw(role == "PowerUser" ? (Context.User.HasNdaAccess() ? "<b> + NDA</b>" : "<span style='color:gray'> - no NDA access</span>") : string.Empty)</li>
+                }
+            </ul>
+        }
+    </p>
+}
+else
+{
+    <p>
+        Hello! You should <a href="/identity/account/login">login</a> to get access (only public data are available for unauthenticated users).
+    </p>
+}

@@ -1,0 +1,78 @@
+﻿@using InfProject.Utils
+@using WebUtilsLib;
+@inject InfProject.DBContext.DataContext dataContext
+@model (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, int rubricCount, int objectLinkCount)
+@{
+    (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, int rubricCount, int objectLinkCount) = Model;
+    string selectedPerson = selectedUserId != 0 ? persons.First(x => x.Id == selectedUserId).Name : string.Empty;
+    // mode == "weak", "full"
+    string adds = string.IsNullOrEmpty(selectedPerson) ? string.Empty : " for " + selectedPerson;
+
+    // Ideas and Plans
+    var objectsData = await dataContext.GetList_ExecDevelopment<dynamic>($@"select * from dbo.vSample as S
+where S.TenantId=@TenantId and S.TypeId=@SampleTypeId
+and S.ObjectId NOT IN (
+    select ChildObjectId from dbo.vObjectLinkObject WHERE ChildTypeId=@SampleTypeId AND ParentTypeId IN (@RequestForSynthesisTypeId, @IdeasAndPlansTypeId)
+)
+ORDER BY _created desc", new { TenantId = dataContext.TenantId, 
+        SampleTypeId = InfProject.DBContext.DataContext.SampleTypeId, 
+        RequestForSynthesisTypeId = InfProject.DBContext.DataContext.RequestForSynthesisTypeId,
+        IdeasAndPlansTypeId = InfProject.DBContext.DataContext.IdeasAndPlansTypeId
+    });
+
+    string title = $"Unclassified Samples";
+    ViewData["Title"] = title;
+}
+
+<h1 class="display-4">@ViewData["Title"]</h1>
+<p>
+    Unclassified Samples are samples upwards connected with neither initial <u>idea or experiment plans</u> or <u>request for synthesis</u>. 
+    Hence the purpose of their creation is undocumented.
+</p>
+
+<table id="grid" class="table table-striped mt-0" id="tableObjects">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>System</th>
+            <th>Name / Description</th>
+            <th>Created by</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in objectsData)
+        {
+            <tr>
+                <td>@item._created</td>
+                <td>@item.Elements.Substring(1, item.Elements.Length-2)</td>
+                <td><a href="/object/@item.ObjectNameUrl">@Html.Raw(item.ObjectName)</a> <small>@Html.Raw(item.ObjectDescription)</small></td>
+                <td>@dataContext.GetUser((int)item._createdBy!).Result</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script src="~/js/moment.js" type="text/javascript"></script>
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+    <script src="~/js/datetime-moment.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            // https://datatables.net/plug-ins/sorting/datetime-moment
+            // https://momentjs.com/docs/#/displaying/
+            $.fn.dataTable.moment('M/D/YYYY h:mm:ss A');
+            initDataTable("#grid", {
+                paging: false,
+                searching: false,
+                fixedHeader: {
+                    header: true,
+                    footer: false
+                }
+                //, order: [ [1, 'asc']]
+            });
+        });
+    </script>
+}

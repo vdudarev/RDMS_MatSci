@@ -1,0 +1,46 @@
+﻿@model ObjectInfo
+@using InfProject.DBContext;
+@using WebUtilsLib;
+@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@inject DataContext dataContext
+@{
+    // LinkTypeObjectId test:
+// https://localhost:7100/object/appsettings_development-25993
+// https://localhost:7100/object/test-2-25987
+// https://localhost:7100/adminobject/edititem/25987/?returl=%2Fobject%2Ftest-2-25987
+    if (!Context.User.IsInRole(UserGroups.PowerUser) && !Context.User.IsInRole(UserGroups.Administrator))
+        throw new UnauthorizedAccessException("User is not PowerUser or Administrator");
+
+    // model (ObjectInfo obj, TypeInfo dbType, ControllerContext controllerContext, ICompositeViewEngine viewEngine)
+    ObjectInfo obj = Model;
+    //(ObjectInfo obj, TypeInfo dbType, ControllerContext controllerContext, ICompositeViewEngine viewEngine) = Model;
+    TypeInfo dbType = ViewBag.dbType;
+    var types = (await dataContext.GetTypes()).Where(x => !x.IsHierarchical).ToList();
+    var jsontypes = Newtonsoft.Json.JsonConvert.SerializeObject(types);
+
+    int? typeIdForRubric = dbType.TypeIdForRubric;
+    string returl = string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["returl"] : Context.Request.Query["returl"];
+
+    ViewData["Title"] = $"Editing links for object {obj.ObjectName} ({dbType.TypeName})";
+
+    RubricInfo rubric = await dataContext.GetRubricById(obj.RubricId ?? 0);
+    (RubricInfo rubric, ObjectInfo obj) breadCrumbs = (rubric, obj);
+/// https://github.com/sinanbozkus/FormHelper
+}
+<partial name="RubricBreadCrumbs" model=@breadCrumbs />
+
+<h1 class="display-4">@Html.Raw(ViewData["Title"])</h1>
+
+<partial name="_ObjectLinkObject" model=@obj />
+
+@section Scripts {
+
+    <script type="text/javascript">app.objectId = @obj.ObjectId;</script>
+    <script type="text/javascript">app.types = @Html.Raw(jsontypes);</script>
+    <script type="text/javascript">
+    $(document).ready(function () {
+
+
+    });
+    </script>
+}

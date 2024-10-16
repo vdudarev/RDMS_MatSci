@@ -1,0 +1,38 @@
+﻿@model (RubricInfo rubric, ObjectInfo obj) 
+@inject InfProject.DBContext.DataContext dataContext
+@{
+	int RubricId = Model.rubric?.RubricId ?? 0;
+	var path = RubricId!=0 ? await dataContext.GetRubricPath(RubricId) : new List<RubricInfo>();
+	int rownum = 1;
+}
+<nav aria-label="breadcrumb" id="topBreadcrumb">
+	<ol itemscope itemtype="http://schema.org/BreadcrumbList" class="breadcrumb">
+@*
+		<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+			<a href="/" itemprop="item" data-id="0"><span itemprop="name">Home</span></a>
+			<meta itemprop="position" content="@(rownum++)" />
+		</li>
+*@
+		@for (int i=0; i<path.Count; i++)
+		{
+			<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+				<a itemprop="item" href="/rubric/@path[i].RubricNameUrl" data-id="@path[i].RubricId" data-level="@path[i].Level" title="@path[i].RubricName"><span itemprop="name">@Html.Raw(path[i].RubricName)</span></a>
+				<meta itemprop="position" content="@(rownum++)" />
+			</li>
+		}
+		@if (Model.obj != null && Model.obj.ObjectId != 0)
+		{
+			<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+				<a itemprop="item" href="/object/@Model.obj.ObjectNameUrl" data-id="@Model.obj.ObjectId" data-type="@Model.obj.TypeId" title="@Model.obj.ObjectName"><span itemprop="name">@Html.Raw(Model.obj.ObjectName)</span></a>
+				<meta itemprop="position" content="@(rownum++)" />
+			</li>
+		}
+		@if (RubricId == 0 && !string.IsNullOrEmpty(Model.rubric?.RubricName))
+		{
+			<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+				<span itemprop="name">@Html.Raw(Model.rubric?.RubricName)</span>
+				<meta itemprop="position" content="@(rownum++)" />
+			</li>
+		}
+	</ol>
+</nav>

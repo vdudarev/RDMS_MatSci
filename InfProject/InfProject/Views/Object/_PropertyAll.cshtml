@@ -1,0 +1,114 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@using Newtonsoft.Json;
+@model ObjectInfo
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    ObjectInfo obj = Model;
+    var listFloat = await dataContext.Property_GetPropertyFloat(Model.ObjectId);
+    var listInt = await dataContext.Property_GetPropertyInt(Model.ObjectId);
+    var listString = await dataContext.Property_GetPropertyString(Model.ObjectId);
+    var listBigString = await dataContext.Property_GetPropertyBigString(Model.ObjectId);
+    listFloat = listFloat.Where(x => x.Row == null || x.Row == -1).ToList();
+    listInt = listInt.Where(x => x.Row == null || x.Row == -1).ToList();
+    listString = listString.Where(x => x.Row == null || x.Row == -1).ToList();
+    listBigString = listBigString.Where(x => x.Row == null || x.Row == -1).ToList();
+}
+
+<div class="props">
+    <h3>Property values (except table)</h3>
+
+    @if (listFloat.Count > 0)
+    {
+        <table class="table table-striped caption-top">
+            <caption>Floating-point properties</caption>
+            <thead><tr>
+@*                <th>Row</th>*@
+                <th>Name</th><th>Value</th><th>Epsilon</th><th>Comment</th>
+            </tr></thead>
+            <tbody>
+            @foreach (var item in listFloat)
+            {
+                <tr class="datarow" data-id="@item.PropertyFloatId" data-sortcode="@item.SortCode" data-mode="Float">
+@*                    <td class="rowNumber">@item.Row</td>*@
+                    <td class="name">@Html.Raw(InfProject.Models.Extension_ObjectInfo.GetTemplateIcon(obj, item.Row) + item.PropertyName)</td>
+                    <td class="value">@item.Value</td>
+                    <td class="valueEpsilon">@item.ValueEpsilon</td>
+                    <td class="comment">@item.Comment</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    } else
+    {
+        <p>No floating-point properties found</p>
+    }
+
+    @if (listInt.Count > 0)
+    {
+        <table class="table table-striped caption-top">
+            <caption>Integer properties</caption>
+            <thead><tr>
+@*                <th>Row</th>*@
+                <th>Name</th><th>Value</th><th>Comment</th>
+            </tr></thead>
+            <tbody>
+                @foreach (var item in listInt)
+                {
+                    <tr class="datarow" data-id="@item.PropertyIntId" data-sortcode="@item.SortCode" data-mode="Int">
+@*                        <td class="rowNumber">@item.Row</td>*@
+                        <td class="name">@Html.Raw(InfProject.Models.Extension_ObjectInfo.GetTemplateIcon(obj, item.Row) + item.PropertyName)</td>
+                        <td class="value">@item.Value</td>
+                        <td class="comment">@item.Comment</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No integer properties found</p>
+    }
+
+    @if (listString.Count > 0)
+    {
+        <table class="table table-striped caption-top">
+            <caption>String properties</caption>
+            <thead><tr>
+@*                <th>Row</th>*@
+                <th>Name</th><th>Value</th><th>Comment</th>
+            </tr></thead>
+            <tbody>
+            @foreach (var item in listString)
+            {
+                <tr class="datarow" data-id="@item.PropertyStringId" data-sortcode="@item.SortCode" data-mode="String">
+@*                        <td class="rowNumber">@item.Row</td>*@
+                        <td class="name">@Html.Raw(InfProject.Models.Extension_ObjectInfo.GetTemplateIcon(obj, item.Row) + item.PropertyName)</td>
+                        <td class="value">@Html.Raw(item.Value)</td>
+                        <td class="comment">@item.Comment</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No string properties found</p>
+    }
+
+
+    @if (listBigString.Count > 0)
+    {
+        @foreach (var item in listBigString)
+        {
+            <div class="card datarow mb-2" data-id="@item.PropertyBigStringId" data-sortcode="@item.SortCode" data-mode="BigString"><div class="card-body">
+                    <h5 class="name">@Html.Raw(InfProject.Models.Extension_ObjectInfo.GetTemplateIcon(obj, item.Row) + item.PropertyName)</h5>
+                <div class="value">@Html.Raw(item.Value)</div>
+                <div class="comment">@Html.Raw(item.Comment) @Html.Raw(item.Row > 0 || item.Row==-1 ? $" <small>[Row={item.Row}]</small>": string.Empty)</div>
+            </div></div>
+        }
+    } else
+    {
+        <p>No big string properties found</p>
+    }
+</div>

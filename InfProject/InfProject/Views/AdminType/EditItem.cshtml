@@ -1,0 +1,128 @@
+﻿@model TypeInfo
+@using InfProject.DBContext;
+@using WebUtilsLib;
+@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@inject DataContext dataContext
+@{
+    if (!Context.User.IsInRole(UserGroups.Administrator))
+        throw new UnauthorizedAccessException("User is not an Administrator");
+
+    TypeInfo type = Model;
+    ControllerContext controllerContext = ViewBag.controllerContext;
+    ICompositeViewEngine viewEngine = ViewBag.viewEngine;
+    List<TypeInfo> types = await dataContext.GetTypes();
+    var jsontypes = Newtonsoft.Json.JsonConvert.SerializeObject(types);
+    int? typeIdForRubric = type.TypeIdForRubric;
+    int.TryParse(string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["idr"] : Context.Request.Query["idr"], out int idr);
+    string returl = string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["returl"] : Context.Request.Query["returl"];
+
+    var listTreeTypes = types.Where(t => t.IsHierarchical).OrderByDescending(t => t.TypeId).ToList();
+    var listTableNames = types.DistinctBy(t => t.TableName).OrderBy(t => t.TableName).ToList();
+
+    if (type.TypeId != 0)
+    {
+        ViewData["Title"] = $"Editing type {type.TypeName}";
+    }
+    else { 
+        ViewData["Title"] = $"Creating a new type";
+    }
+
+/// https://github.com/sinanbozkus/FormHelper
+}
+
+<h1 class="display-4">@Html.Raw(ViewData["Title"])</h1>
+<form asp-formhelper="true" asp-action="UpdateInsert" asp-controller="AdminType" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" name="returl" value="@returl" />
+    <input type="hidden" name="TypeId" value="@type.TypeId" />
+    <input type="hidden" name="UrlPrefix" value="@type.UrlPrefix" />
+    <table class="table">
+        <tbody>
+            @if (type.TypeId != 0)
+            {
+                <tr><th><label asp-for="TypeId" class="control-label"></label></th><td>@type.TypeId</td></tr>
+            }
+            <tr>
+                <th><label asp-for="TypeName" class="control-label"></label></th>
+                <td>
+                    <input asp-for="TypeName" class="form-control" placeholder="Inpuе Type Name" />
+                    <span asp-validation-for="TypeName" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr id="TableName">
+                <th><label asp-for="TableName" class="control-label"></label></th>
+                <td>
+                    <select class="form-select" asp-for="TableName" onchange="if ($(this).val()!='RubricInfo') $('#trTypeIdForRubric').show(); else $('#trTypeIdForRubric').hide();">
+                        @for (int i = 0; i < listTableNames.Count; i++)
+                        {
+                            <option value="@listTableNames[i].TableName">@(listTableNames[i].TableName == "RubricInfo" ? "RubricInfo (Hierarchical)" : listTableNames[i].TableName)</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr id="trTypeIdForRubric" style="@(type.IsHierarchical ? "display: none;" : "")">
+                <th><label asp-for="TypeIdForRubric" class="control-label"></label></th>
+                <td>
+                    <select class="form-select" asp-for="TypeIdForRubric">
+                        @for (int i = 0; i < listTreeTypes.Count; i++)
+                        {
+                            <option value="@listTreeTypes[i].TypeId">@listTreeTypes[i].TypeName</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label asp-for="ValidationSchema" class="control-label"></label></th>
+                <td>
+                    <input asp-for="ValidationSchema" class="form-control" placeholder="Input Validation Schema Path" />
+                    <span asp-validation-for="ValidationSchema" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <th><label asp-for="DataSchema" class="control-label"></label></th>
+                <td>
+                    <input asp-for="DataSchema" class="form-control" placeholder="Input Data Schema Path" />
+                    <span asp-validation-for="DataSchema" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <th><label asp-for="FileRequired" class="control-label"></label></th>
+                <td>
+                    <input type="checkbox" asp-for="FileRequired" class="form-check-input" value="true" />
+                    <span asp-validation-for="FileRequired" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <th><label asp-for="SettingsJson" class="control-label"></label></th>
+                <td>
+                    <textarea asp-for="SettingsJson" class="form-control" placeholder="Settings in JSON"></textarea>
+                    <span asp-validation-for="SettingsJson" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <th><label asp-for="TypeComment" class="control-label"></label></th>
+                <td>
+                    <textarea asp-for="TypeComment" class="form-control" placeholder="Any descriptive definition (or purpose) for the type"></textarea>
+                    <span asp-validation-for="TypeComment" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <th><a href="@(string.IsNullOrEmpty(returl) ? Url.Action("Index", "AdminType", new { id = type.TypeId }) : "javascript:window.close();")" class="btn btn-secondary"><i class="bi bi-list-task"></i> Back to the Type List</a></th>
+                <td><button type="submit" class="btn btn-primary" title="Save"><i class="bi bi-save2-fill"></i> Save</button></td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/EditItem.js"></script>
+    <script type="text/javascript">app.typeId = @type.TypeId;</script>
+    <script type="text/javascript">app.types = @Html.Raw(jsontypes);</script>
+    @if (idr != 0) {
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#RubricId").val("@idr");
+            });
+        </script>
+    }
+}

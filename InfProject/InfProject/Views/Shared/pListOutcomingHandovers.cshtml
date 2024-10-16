@@ -1,0 +1,53 @@
+﻿@model (UserContext userCtx, List<HandoverSample> outcoming, List<WebAppUser> users, string rawUrl)
+@using WebUtilsLib;
+@using InfProject.Utils;
+@{
+    (UserContext userCtx, List<HandoverSample> outcoming, List<WebAppUser> users, string rawUrl) = Model;
+    WebAppUser sender, recepient;
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name / Sample</th>
+            <th>Amount</th>
+            <th>Sent</th>
+            <th>Your Comments</th>
+            <th>Recipient</th>
+            <th>Received</th>
+            <th>Recipient Comments</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (HandoverSample handover in outcoming)
+        {
+            recepient = users.First(x => x.Id == handover.DestinationUserId);
+            <tr class="@(handover.DestinationConfirmed==null ? "table-warning" : "table-success")">
+                <td><a href="/object/@handover.SampleObjectNameUrl">@handover.ObjectName</a> / <small>@handover.SampleObjectName</small></td>
+                <td>@handover.Amount @handover.MeasurementUnit</td>
+                <td>@handover._created</td>
+                <td>@handover.ObjectDescription</td>
+                <td><a href="@($"mailto:{recepient.Email}")">@Html.Raw($"{recepient.Name}{(string.IsNullOrEmpty(recepient.Project) ? string.Empty : $" ({recepient.Project})")}")</a></td>
+                @if (userCtx.access == AccessControl.None /* Admin*/
+               && handover.DestinationConfirmed == null)
+                {
+                    <td colspan="2">
+                        <form method="post" asp-controller="Handover" asp-action="ConfirmHandover" onsubmit="return DisableButton('btnConfirmHandover')">
+                            <input type="hidden" name="returl" value="@rawUrl" />
+                            <input type="hidden" name="SampleObjectId" value="@handover.SampleObjectId" />
+                            <input type="hidden" name="HandoverObjectId" value="@handover.ObjectId" />
+                            <div class="form-group">
+                                <textarea required rows="3" maxlength="128" class="form-control" id="DestinationComments" name="DestinationComments" aria-describedby="DestinationCommentsHelp" placeholder="Comments for sender (required)"></textarea>
+                                <button id="btnConfirmHandover" type="submit" class="btn btn-primary w-100" title="Confirm"><i class="bi bi-check-circle"></i> Confirm handover</button>
+                            </div>
+                        </form>
+                    </td>
+                }
+                else
+                {
+                    <td>@handover.DestinationConfirmed</td>
+                    <td>@handover.DestinationComments</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

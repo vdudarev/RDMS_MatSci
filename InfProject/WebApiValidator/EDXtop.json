@@ -1,0 +1,33 @@
+{
+  "DeletePreviousCompositions": false,
+  "Compositions": [
+    {
+      "CompositionElements": [ { "CompoundIndex_0step10+ElementName_Ni+ValueAbsolute_Null+ValuePercent_R": {} } ],
+      "DeletePreviousProperties": true,
+      "Properties": [ { "PropertyId_0+Type_2+Name_Measurement_Area+Value_I+ValueEpsilon_Null+SortCode_0+RowNull+Comment_Null": {} } ]
+    }
+  ],
+  "DeletePreviousProperties": true,
+  "Properties": [
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "V",
+      "Value": 0,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 1,
+      "Comment": "Minimal V content"
+    },
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "V",
+      "Value": 36.400001525878906,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 2,
+      "Comment": "Maximal V content"
+    }
+  ]
+}

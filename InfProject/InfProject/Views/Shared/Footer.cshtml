@@ -1,0 +1,57 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using WebUtilsLib
+@inject InfProject.DBContext.DataContext dataContext
+@inject SignInManager<IdentityManagerUI.Models.ApplicationUser> SignInManager
+@inject UserManager<IdentityManagerUI.Models.ApplicationUser> UserManager
+<footer class="border-top footer text-muted">
+    <div class="container">
+        <span title="RDMS updated on @InfProject.Utils.FileUtils.Version()">&copy; 2022-@DateTime.Now.Year</span> - @dataContext.Tenant.TenantName Database - <a asp-area="" asp-controller="Home" asp-action="Doc">Documentation</a>, <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>, <a asp-area="" asp-controller="Home" asp-action="TermsOfService">Terms of Service</a>
+        @if (this.User.IsInRole("Administrator"))
+        {
+            @Html.Raw(" [")
+
+            <a asp-area="IdentityManager" asp-controller="Home" asp-action="Users">Users</a>
+
+            @Html.Raw("]")
+            @Html.Raw(" [")
+
+            <a asp-area="IdentityManager" asp-controller="Home" asp-action="Roles">Roles</a>
+
+            @Html.Raw("]")
+
+            @if (User.Identity.Name.Contains("vic.dudarev"))
+            {
+                @Html.Raw(" [")
+
+                <a asp-area="" asp-controller="Srv" asp-action="Index">Srv</a>
+                <a asp-area="" asp-controller="Srv" asp-action="Wafer">Wafer</a>
+
+                @Html.Raw("]")
+            }
+            @if (User.Identity.Name.Contains("vic.dudarev") || User.Identity.Name.Contains("azadeh.taheri.m"))
+            {
+                @Html.Raw(" [")
+                <a asp-area="" asp-controller="Test" asp-action="Index">Test Synth</a>
+                @Html.Raw("]")
+            }
+
+        }
+        @if (Context.User.IsInRole(UserGroups.Administrator) || Context.User.IsInRole(UserGroups.PowerUser) || Context.User.IsInRole(UserGroups.User))
+        {
+            @if (Context.User.IsInRole(UserGroups.Administrator) || Context.User.IsInRole(UserGroups.PowerUser))
+            {
+                <a asp-area="" asp-controller="UploadFiles" asp-action="Index">Staged files</a>
+            }
+            if (User.HasClaim(InfProject.Controllers.VroUiController.ClaimNameToUseVroUi))
+            {
+                @Html.Raw(" [")
+                <a asp-area="" asp-controller="VroUi" asp-action="Index">SQL</a>
+                @Html.Raw("]")
+            }
+        }
+    </div>
+</footer>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/jquery.timers.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>

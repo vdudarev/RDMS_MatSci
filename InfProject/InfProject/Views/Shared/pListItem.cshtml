@@ -1,0 +1,51 @@
+﻿@using InfProject.Utils;
+@using WebUtilsLib;
+@model (ObjectInfo obj, string rawUrl, UserContext userCtx, bool showDate, int? RubricId)
+@inject IConfiguration config
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    (ObjectInfo obj, string rawUrl, UserContext userCtx, bool showDate, int? RubricId) = Model;
+    string adds4Link = string.Empty;
+    if (RubricId != null && RubricId != obj.RubricId)
+    {
+        adds4Link = " [Link]";
+    }
+}
+<div class="list-group-item flex-column align-items-start type-@obj.TypeId" id="@($"listitem{obj.ObjectId}")" data-id="@obj.ObjectId" data-typeid="@obj.TypeId" data-externalid="@obj.ExternalId" data-rubricid="@obj.RubricId" data-sortcode="@obj.SortCode">
+    @if (showDate)
+    {
+        <small class="date"><span class="date">@obj._created</span> by @dataContext.GetUser((int)obj._createdBy!).Result</small>
+    }
+    <a href="/object/@obj.ObjectNameUrl" class="d-flex w-100 justify-content-between" data-id="@obj.ObjectId" name="@("o"+obj.ObjectId)" id="@("o"+obj.ObjectId)">
+        <h5 id="@($"name{obj.ObjectId}")" class="mb-1 name">@Html.Raw(obj.ObjectName)</h5>
+        <small>@(userCtx.userCanAdd ? obj.AccessControl.ToString() : string.Empty) <span class="typename">@((await dataContext.GetType(obj.TypeId)).TypeName)</span>@adds4Link</small>
+    </a>
+    <div class="mb-1 description d-flex w-100 justify-content-between">
+        <div>
+            @Html.Raw(obj.ObjectDescription)
+            @if (!string.IsNullOrEmpty(obj.ObjectFilePath))
+            {
+                var fi = new FileItem(obj.ObjectId, obj.TypeId, obj.ObjectFilePath, enableAnalysis: false);
+                @await Html.PartialAsync("../Shared/pShowFile", fi)
+                <small><a class="filetype @FileUtils.GetFileTypeClass(obj.ObjectFile)" href="/file/download/@obj.ObjectId">@Html.Raw(fi.IsImage ? $"<img src=\"/file/download/{obj.ObjectId}\" class=\"preview21\" alt=\"\" />" : string.Empty)@obj.ObjectFile</a></small>
+            }
+        </div>
+        <div class="ctrlButtons" style="min-width:100px; margin-left:1rem">
+            @if (userCtx.isAdmin && !showDate)
+            {
+                <a href="javascript:void(0)" onclick="DeleteModal(@obj.ObjectId, @obj.TypeId, @($"$('#name{obj.ObjectId}').html()"))" class="btn btn-danger btndelete d-block float-end ms-3" title="Delete"><i class="bi bi-trash"></i></a>
+            }
+            @if (!Context.IsWriteDenied(obj.AccessControl, (int)obj._createdBy))
+            {
+                <a href="/adminobject/edititem/@obj.ObjectId/?returl=@rawUrl" class="btn btn-primary btnedit float-end ms-3" title="Edit"><i class="bi bi-pencil"></i></a>
+
+                (int TypeId, int ObjectId, int RubricId, string rawUrl) customEditSettings = (obj.TypeId, obj.ObjectId, obj.RubricId ?? 0, rawUrl);
+                <partial name="pCustomEditLink" model=@customEditSettings />
+            }
+            @if (!string.IsNullOrEmpty(adds4Link))
+            {
+                <a href="javascript:void(0)" onclick="AdjustLink(@RubricId, @obj.ObjectId)" class="btn btn-secondary btnedit float-end ms-3" title="Adjust Link"><i class="bi bi-link-45deg"></i></a>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,77 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@using Newtonsoft.Json;
+@using InfProject.DBContext;
+@using WebUtilsLib
+@model ObjectInfo
+@inject DataContext dataContext
+@{
+    UserContext userCtx = UserUtils.GetUserContext(Context);
+    var list = await dataContext.ObjectLinkObject_GetLinkedObjects(Model.ObjectId);
+    bool showMultipleLinkTypes = list.Select(x => x.LinkTypeObjectId ?? 0).Distinct().Count() > 1;
+    IEnumerable<InfProject.Models.TypeInfo> types = (await dataContext.GetTypes()).Where(x => !x.IsHierarchical);
+    int prevTypeId = 0, curTypeId = 0, curTypeIdCount = 0;  // to distinguish on TypeId
+    int? prevLinkTypeObjectId = null;
+    int curLinkTypeObjectId = 0, curLinkTypeObjectIdCount = 0;  // to distinguish on LinkTypeObjectId
+    string linkTypeObjectName;
+    var pDfDModel = (types, userCtx);
+}
+<link rel="stylesheet" href="~/css/dragdrop.css" />
+<div class="dragdrop">
+    <h3>Associated Objects</h3>
+
+    <div class="dropzoneContainer">
+        @if (list.Count > 0)
+        {
+            @foreach (ObjectInfoLinked row in list)
+            {
+                curTypeId = row.TypeId;
+                curLinkTypeObjectId = row.LinkTypeObjectId ?? 0;
+
+                if (showMultipleLinkTypes && curLinkTypeObjectId != prevLinkTypeObjectId)
+                {
+                    if (prevLinkTypeObjectId.HasValue)
+                    {
+                        @Html.Raw("</ul></div>")
+                        @Html.Raw("</ul></div>")
+                        prevTypeId = 0;
+                    }
+                    prevLinkTypeObjectId = curLinkTypeObjectId;
+                    linkTypeObjectName = string.IsNullOrEmpty(row.LinkTypeObjectName) ? "(unmarked)" : row.LinkTypeObjectName;
+                    @Html.Raw($"<button class=\"me-3 mt-3 btn btn-dark\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseLinkType{curLinkTypeObjectId}\" aria-expanded=\"false\" aria-controls=\"collapseLinkType{curLinkTypeObjectId}\">{linkTypeObjectName} [{list.Where(x => (x.LinkTypeObjectId??0) == curLinkTypeObjectId).Count()}]</button>");
+                    @Html.Raw($"<div class=\"collapse\" id=\"collapseLinkType{curLinkTypeObjectId}\"><ul class=\"list-group associated-content ms-4\">");
+                }
+
+                if (curTypeId != prevTypeId) {
+                    if (prevTypeId != 0)
+                    {
+                        @Html.Raw("</ul></div>")
+                    }
+                    prevTypeId = curTypeId;
+                    @Html.Raw($"<button class=\"me-3 mt-1 btn btn-secondary\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseType{curLinkTypeObjectId}_{curTypeId}\" aria-expanded=\"false\" aria-controls=\"collapseType{curLinkTypeObjectId}_{curTypeId}\">{dataContext.GetType(curTypeId).Result.TypeName} [{list.Where(x=>x.TypeId==curTypeId && (x.LinkTypeObjectId??0) == curLinkTypeObjectId).Count()}]</button>");
+                    @Html.Raw($"<div class=\"collapse\" id=\"collapseType{curLinkTypeObjectId}_{curTypeId}\"><ul class=\"list-group associated-content ms-4\">");
+                }
+                <li class="alert alert-success alert-dismissible" role="alert" data-id="@row.ObjectId">@Html.Raw(row.ObjectName) [@types.FirstOrDefault(x => x.TypeId==row.TypeId)?.TypeName]
+                    @if (!string.IsNullOrEmpty(row.LinkTypeObjectName))
+                    {
+                        <small><a href="/object/@row.LinkTypeObjectNameUrl"><i class="bi bi-link ms-5 me-1"></i>@row.LinkTypeObjectName</a></small>
+                    }
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="Delete(this)"></button>
+                </li>
+            }
+            @Html.Raw("</ul></div>")
+            if (showMultipleLinkTypes)
+            {
+                @Html.Raw("</ul></div>")
+            }
+        }
+        <partial name="pDropzoneContainer" />
+    </div>
+
+    <partial name="pDropzoneForDrag" model=@pDfDModel />
+</div>
+<script type="text/javascript" src="~/js/dragdrop.js"></script>
+
+
+
+

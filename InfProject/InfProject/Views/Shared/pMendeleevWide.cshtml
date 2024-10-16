@@ -1,0 +1,1168 @@
+﻿@model bool
+@{
+    bool showCompoundTable = Model;
+}
+<link rel="stylesheet" href="/css/style_Mendeleev.css" type="text/css" />
+<div id="Mendeleev" class="Mendeleev smallPTable wide noborders">
+<table>
+<tr>
+    <td rowspan="2" class="b0 periods">
+        <div class="rotate ru">Периоды</div>
+        <div class="rotate en">Periods</div>
+    </td>
+    <th colspan="19" class="b0"><span class="ru">Группы элементов</span><span class="en">Groups</span></th>
+</tr>
+        <tr class="b0">
+    <th>1</th>
+    <th>2</th>
+    <th></th>
+    <th>3</th>
+    <th>4</th>
+    <th>5</th>
+    <th>6</th>
+    <th>7</th>
+    <th>8</th>
+    <th>9</th>
+    <th>10</th>
+    <th>11</th>
+    <th>12</th>
+    <th>13</th>
+    <th>14</th>
+    <th>15</th>
+    <th>16</th>
+    <th>17</th>
+    <th>18</th>
+</tr>
+<tr>
+    <th class="period b0">1</th>
+    <td>
+       <div class="pink element" data-name="H">
+         <div class="name">H</div>
+         <div class="number">1</div>
+         <div class="nameFull ru">Водород</div>
+         <div class="nameFull en">Hydrogen</div>
+         <div class="massa">1,008</div>
+        </div>
+    </td>
+    <td colspan="17" class="b0"></td>
+    <td>
+       <div class="pink element" data-name="He">
+         <div class="name">He</div>
+         <div class="number">2</div>
+         <div class="nameFull ru">Гелий</div>
+         <div class="nameFull en">Helium</div>
+         <div class="massa">4,003</div>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th class="period b0">2</th>
+    <td>
+       <div class="pink element" data-name="Li">
+         <div class="name">Li</div>
+         <div class="number">3</div>
+         <div class="nameFull ru">Литий</div>
+         <div class="nameFull en">Lithium</div>
+         <div class="massa">6,941</div>
+       </div>
+    </td>
+    <td>
+       <div class="pink element" data-name="Be">
+         <div class="name">Be</div>
+         <div class="number">4</div>
+         <div class="nameFull ru">Бериллий</div>
+         <div class="nameFull en">Beryllium</div>
+         <div class="massa">9,0122</div>
+       </div>
+    </td>
+    <td colspan="11" class="b0"></td>
+    <td>     
+       <div class="yellow element" data-name="B">
+         <div class="name">B</div>
+         <div class="number">5</div>
+         <div class="nameFull ru">Бор</div>
+         <div class="nameFull en">Borum</div>
+         <div class="massa">10,811</div>
+       </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="C">
+         <div class="name">C</div>
+         <div class="number">6</div>
+         <div class="nameFull ru">Углерод</div>
+         <div class="nameFull en">Carboneum</div>
+         <div class="massa">12,011</div>
+      </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="N">
+         <div class="name">N</div>
+         <div class="number">7</div>
+         <div class="nameFull ru">Азот</div>
+         <div class="nameFull en">Nitrogenium</div>
+         <div class="massa">14,007</div>
+      </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="O">
+         <div class="name">O</div>
+         <div class="number">8</div>
+         <div class="nameFull ru">Кислород</div>
+         <div class="nameFull en">Oxygenium</div>
+         <div class="massa">15,999</div>
+      </div>
+    </td>
+    <td>      
+       <div class="yellow element" data-name="F">
+         <div class="name">F</div>
+         <div class="number">9</div>
+         <div class="nameFull ru">Фтор</div>
+         <div class="nameFull en">Fluorum</div>
+         <div class="massa">18,998</div>
+        </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="Ne">
+         <div class="name">Ne</div>
+         <div class="number">10</div>
+         <div class="nameFull ru">Неон</div>
+         <div class="nameFull en">Neon</div>
+         <div class="massa">20,179</div>
+      </div>
+    </td>
+</tr>
+<tr>
+            <th class="period b0">3</th>
+    <td>
+       <div class="pink element" data-name="Na">
+         <div class="name">Na</div>
+         <div class="number">11</div>
+         <div class="nameFull ru">Натрий</div>
+         <div class="nameFull en">Natrium</div>
+         <div class=massa>22,99</div>
+        </div>
+    </td>
+    <td>
+       <div class="pink element" data-name="Mg">
+         <div class="name">Mg</div>
+         <div class="number">12</div>
+         <div class="nameFull ru">Магний</div>
+         <div class="nameFull en">Magnesium</div>
+         <div class="massa">24,312</div>
+        </div>
+    </td>
+    <td colspan="11" class="b0"></td>
+    <td>
+       <div class="yellow element" data-name="Al">
+         <div class="name">Al</div>
+         <div class="number">13</div>
+         <div class="nameFull ru">Алюминий</div>
+         <div class="nameFull en">Aluminium</div>
+         <div class="massa">26,092</div>
+        </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Si">
+         <div class="name">Si</div>
+         <div class="number">14</div>
+         <div class="nameFull ru">Кремний</div>
+         <div class="nameFull en">Silicium</div>
+         <div class="massa">28,086</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="P">
+         <div class="name">P</div>
+         <div class="number">15</div>
+         <div class="nameFull ru">Фосфор</div>
+         <div class="nameFull en">Phosphorus</div>
+         <div class="massa">30,974</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="S">
+         <div class="name">S</div>
+         <div class="number">16</div>
+         <div class="nameFull ru">Сера</div>
+         <div class="nameFull en">Sulfur</div>
+         <div class="massa">32,064</div>
+        </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Cl">
+         <div class="name">Cl</div>
+         <div class="number">17</div>
+         <div class="nameFull ru">Хлор</div>
+         <div class="nameFull en">Chlorum</div>
+         <div class="massa">35,453</div>
+        </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Ar">
+         <div class="name">Ar</div>
+         <div class="number">18</div>
+         <div class="nameFull ru">Аргон</div>
+         <div class="nameFull en">Argon</div>
+         <div class="massa">39,948</div>
+        </div>
+    </td>
+</tr>
+<tr>
+    <th class="period b0">4</th>
+    <td>
+       <div class="pink element" data-name="K">
+         <div class="name">K</div>
+         <div class="number">19</div>
+         <div class="nameFull ru">Калий</div>
+         <div class="nameFull en">Kalium</div>
+         <div class="massa">39,102</div>
+       </div>
+    </td>
+    <td>
+       <div class="pink element" data-name="Ca">
+         <div class="name">Ca</div>
+         <div class="number">20</div>
+         <div class="nameFull ru">Кальций</div>
+         <div class="nameFull en">Calcium</div>
+         <div class="massa">40,08</div>
+       </div>
+    </td>
+    <td class="b0"></td>
+    <td>
+       <div class="blue element" data-name="Sc">
+         <div class="number">21</div>
+         <div class="name">Sc</div>
+         <div class="nameFull ru">Скандий</div>
+         <div class="nameFull en">Scandium</div>
+         <div class="massa">44,956</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Ti">
+         <div class="number">22</div>
+         <div class="name">Ti</div>
+         <div class="nameFull ru">Титан</div>
+         <div class="nameFull en">Titanium</div>
+         <div class="massa">47,956</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="V">
+         <div class="number">23</div>
+         <div class="name">V</div>
+         <div class="nameFull ru">Ванадий</div>
+         <div class="nameFull en">Vanadium</div>
+         <div class="massa">50,941</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Cr">
+         <div class="number">24</div>
+         <div class="name">Cr</div>
+         <div class="nameFull ru">Хром</div>
+         <div class="nameFull en">Chromium</div>
+         <div class="massa">51,996</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Mn">
+         <div class="number">25</div>
+         <div class="name">Mn</div>
+         <div class="nameFull ru">Марганец</div>
+         <div class="nameFull en">Manganum</div>
+         <div class="massa">54,938</div>
+        </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Fe">
+         <div class="number">26</div>
+         <div class="name">Fe</div>
+         <div class="nameFull ru">Железо</div>
+         <div class="nameFull en">Ferrum</div>
+         <div class="massa">55,849</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Co">
+         <div class="number">27</div>
+         <div class="name">Co</div>
+         <div class="nameFull ru">Кобальт</div>
+         <div class="nameFull en">Cobaltum</div>
+         <div class="massa">58,933</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Ni">
+         <div class="number">28</div>
+         <div class="name">Ni</div>
+         <div class="nameFull ru">Никель</div>
+         <div class="nameFull en">Niccolum</div>
+         <div class="massa">58,7</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Cu">
+         <div class="number">29</div>
+         <div class="name">Cu</div>
+         <div class="nameFull ru">Медь</div>
+         <div class="nameFull en">Cuprum</div>
+         <div class="massa">63,546</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Zn">
+         <div class="number">30</div>
+         <div class="name">Zn</div>
+         <div class="nameFull ru">Цинк</div>
+         <div class="nameFull en">Zincum</div>
+         <div class="massa">65,37</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Ga">
+         <div class="name">Ga</div>
+         <div class="number">31</div>
+         <div class="nameFull ru">Галлий</div>
+         <div class="nameFull en">Gallium</div>
+         <div class="massa">69,72</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Ge">
+         <div class="name">Ge</div>
+         <div class="number">32</div>
+         <div class="nameFull ru">Германий</div>
+         <div class="nameFull en">Germanium</div>
+         <div class="massa">72,59</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="As">
+         <div class="name">As</div>
+         <div class="number">33</div>
+         <div class="nameFull ru">Мышьяк</div>
+         <div class="nameFull en">Arsenicum</div>
+         <div class="massa">74,922</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Se">
+         <div class="name">Se</div>
+         <div class="number">34</div>
+         <div class="nameFull ru">Селен</div>
+         <div class="nameFull en">Selenium</div>
+         <div class="massa">78,96</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Br">
+         <div class="name">Br</div>
+         <div class="number">35</div>
+         <div class="nameFull ru">Бром</div>
+         <div class="nameFull en">Bromum</div>
+         <div class="massa">79,904</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Kr">
+         <div class="name">Kr</div>
+         <div class="number">36</div>
+         <div class="nameFull ru">Криптон</div>
+         <div class="nameFull en">Krypton</div>
+         <div class="massa">83,8</div>
+       </div>
+    </td>
+</tr>
+<tr>
+            <th class="period b0">5</th>
+    <td>
+       <div class="pink element" data-name="Rb">
+         <div class="name">Rb</div>
+         <div class="number">37</div>
+         <div class="nameFull ru">Рубидий</div>
+         <div class="nameFull en">Rubidium</div>
+         <div class="massa">85,468</div>
+       </div>
+    </td>
+    <td>
+       <div class="pink element" data-name="Sr">
+         <div class="name">Sr</div>
+         <div class="number">38</div>
+         <div class="nameFull ru">Стронций</div>
+         <div class="nameFull en">Strontium</div>
+         <div class="massa">87,62</div>
+       </div>
+    </td>
+    <td class="b0"></td>
+    <td>
+       <div class="blue element" data-name="Y">
+         <div class="number">39</div>
+         <div class="name">Y</div>
+         <div class="nameFull ru">Иттрий</div>
+         <div class="nameFull en">Yttrium</div>
+         <div class="massa">88,906</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Zr">
+         <div class="number">40</div>
+         <div class="name">Zr</div>
+         <div class="nameFull ru">Цирконий</div>
+         <div class="nameFull en">Zirconium</div>
+         <div class="massa">91,22</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Nb">
+         <div class="number">41</div>
+         <div class="name">Nb</div>
+         <div class="nameFull ru">Ниобий</div>
+         <div class="nameFull en">Niobium</div>
+         <div class="massa">92,906</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Mo">
+         <div class="number">42</div>
+         <div class="name">Mo</div>
+         <div class="nameFull ru">Молибден</div>
+         <div class="nameFull en">Molybdaenum</div>
+         <div class="massa">95,94</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Tc">
+         <div class="number">43</div>
+         <div class="name">Tc</div>
+         <div class="nameFull ru">Технеций</div>
+         <div class="nameFull en">Technetium</div>
+         <div class="massa">[99]</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Ru">
+         <div class="number">44</div>
+         <div class="name">Ru</div>
+         <div class="nameFull ru">Рутений</div>
+         <div class="nameFull en">Ruthenium</div>
+         <div class="massa">101,07</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Rh">
+         <div class="number">45</div>
+         <div class="name">Rh</div>
+         <div class="nameFull ru">Родий</div>
+         <div class="nameFull en">Rhodium</div>
+         <div class="massa">102,906</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Pd">
+         <div class="number">46</div>
+         <div class="name">Pd</div>
+         <div class="nameFull ru">Палладий</div>
+         <div class="nameFull en">Palladium</div>
+         <div class="massa">106,4</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Ag">
+         <div class="number">47</div>
+         <div class="name">Ag</div>
+         <div class="nameFull ru">Серебро</div>
+         <div class="nameFull en">Argentum</div>
+         <div class="massa">107,868</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Cd">
+         <div class="number">48</div>
+         <div class="name">Cd</div>
+         <div class="nameFull ru">Кадмий</div>
+         <div class="nameFull en">Cadmium</div>
+         <div class="massa">112,41</div>
+       </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="In">
+         <div class="name">In</div>
+         <div class="number">49</div>
+         <div class="nameFull ru">Индий</div>
+         <div class="nameFull en">Indium</div>
+         <div class="massa">114,82</div>
+      </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Sn">
+         <div class="name">Sn</div>
+         <div class="number">50</div>
+         <div class="nameFull ru">Олово</div>
+         <div class="nameFull en">Stannum</div>
+         <div class="massa">118,69</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Sb">
+         <div class="name">Sb</div>
+         <div class="number">51</div>
+         <div class="nameFull ru">Сурьма</div>
+         <div class="nameFull en">Stibium</div>
+         <div class="massa">121,75</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Te">
+         <div class="name">Te</div>
+         <div class="number">52</div>
+         <div class="nameFull ru">Теллур</div>
+         <div class="nameFull en">Tellurium</div>
+         <div class="massa">127,6</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="I">
+         <div class="name">I</div>
+         <div class="number">53</div>
+         <div class="nameFull ru">Иод</div>
+         <div class="nameFull en">Jodum</div>
+         <div class="massa">126,905</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Xe">
+         <div class="name">Xe</div>
+         <div class="number">54</div>
+         <div class="nameFull ru">Ксенон</div>
+         <div class="nameFull en">Xenon</div>
+         <div class="massa">131,3</div>
+       </div>
+    </td>
+</tr>
+<tr>
+    <th class="period b0">6</th>
+    <td>
+       <div class="pink element" data-name="Cs">
+         <div class="name">Cs</div>
+         <div class="number">55</div>
+         <div class="nameFull ru">Цезий</div>
+         <div class="nameFull en">Caesium</div>
+         <div class="massa">132,905</div>
+       </div>
+    </td>
+    <td>
+       <div class="pink element" data-name="Ba">
+         <div class="name">Ba</div>
+         <div class="number">56</div>
+         <div class="nameFull ru">Барий</div>
+         <div class="nameFull en">Barium</div>
+         <div class="massa">137,34</div>
+       </div>
+    </td>
+    <td class="b0">*</td>
+    <td>
+       <div class="blue element" data-name="Lu">
+         <div class="number">71</div>
+         <div class="name">Lu</div>
+         <div class="nameFull ru">Лютеций</div>
+         <div class="nameFull en">Lutetium</div>
+         <div class="massa">174,97</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Hf">
+         <div class="number">72</div>
+         <div class="name">Hf</div>
+         <div class="nameFull ru">Гафний</div>
+         <div class="nameFull en">Hafnium</div>
+         <div class="massa">178,49</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Ta">
+         <div class="number">73</div>
+         <div class="name">Ta</div>
+         <div class="nameFull ru">Тантал</div>
+         <div class="nameFull en">Tantalum</div>
+         <div class="massa">180,948</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="W">
+         <div class="number">74</div>
+         <div class="name">W</div>
+         <div class="nameFull ru">Вольфрам</div>
+         <div class="nameFull en">Wolfram</div>
+         <div class="massa">183,85</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Re">
+         <div class="number">75</div>
+         <div class="name">Re</div>
+         <div class="nameFull ru">Рений</div>
+         <div class="nameFull en">Rhenium</div>
+         <div class="massa">186,207</div>
+      </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Os">
+         <div class="number">76</div>
+         <div class="name">Os</div>
+         <div class="nameFull ru">Осмий</div>
+         <div class="nameFull en">Osmium</div>
+         <div class="massa">190,2</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Ir">
+         <div class="number">77</div>
+         <div class="name">Ir</div>
+         <div class="nameFull ru">Иридий</div>
+         <div class="nameFull en">Iridium</div>
+         <div class="massa">192,22</div>
+        </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Pt">
+         <div class="number">78</div>
+         <div class="name">Pt</div>
+         <div class="nameFull ru">Платина</div>
+         <div class="nameFull en">Platinum</div>
+         <div class="massa">195,09</div>
+        </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Au">
+         <div class="number">79</div>
+         <div class="name">Au</div>
+         <div class="nameFull ru">Золото</div>
+         <div class="nameFull en">Aurum</div>
+         <div class="massa">196,967</div>
+        </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Hg">
+         <div class="number">80</div>
+         <div class="name">Hg</div>
+         <div class="nameFull ru">Ртуть</div>
+         <div class="nameFull en">Hydrargyrum</div>
+         <div class="massa">200,59</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Tl">
+         <div class="name">Tl</div>
+         <div class="number">81</div>
+         <div class="nameFull ru">Таллий</div>
+         <div class="nameFull en">Thallium</div>
+         <div class="massa">204,37</div>
+       </div>
+    </td>
+    <td> 
+       <div class="yellow element" data-name="Pb">
+         <div class="name">Pb</div>
+         <div class="number">82</div>
+         <div class="nameFull ru">Свинец</div>
+         <div class="nameFull en">Plumbum</div>
+         <div class="massa">207,19</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Bi">
+         <div class="name">Bi</div>
+         <div class="number">83</div>
+         <div class="nameFull ru">Висмут</div>
+         <div class="nameFull en">Bismuthum</div>
+         <div class="massa">208,98</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="Po">
+         <div class="name">Po</div>
+         <div class="number">84</div>
+         <div class="nameFull ru">Полоний</div>
+         <div class="nameFull en">Polonium</div>
+         <div class="massa">[210]</div>
+       </div>
+    </td>
+    <td>
+       <div class="yellow element" data-name="At">
+         <div class="name">At</div>
+         <div class="number">85</div>
+         <div class="nameFull ru">Астат</div>
+         <div class="nameFull en">Astatium</div>
+         <div class="massa">[210]</div>
+       </div>
+    </td>
+    <td>     
+       <div class="yellow element" data-name="Rn">
+         <div class="name">Rn</div>
+         <div class="number">86</div>
+         <div class="nameFull ru">Радон</div>
+         <div class="nameFull en">Radon</div>
+         <div class="massa">[222]</div>
+       </div>
+    </td>
+</tr>
+<tr>
+    <th class="period b0">7</th>
+    <td>
+       <div class="pink element" data-name="Fr">
+         <div class="name">Fr</div>
+         <div class="number">87</div>
+         <div class="nameFull ru">Франций</div>
+         <div class="nameFull en">Francium</div>
+         <div class="massa">[223]</div>
+       </div>
+    </td>
+    <td>
+       <div class="pink element" data-name="Ra">
+         <div class="name">Ra</div>
+         <div class="number">88</div>
+         <div class="nameFull ru">Радий</div>
+         <div class="nameFull en">Radium</div>
+         <div class="massa">[226]</div>
+       </div>
+    </td>
+    <td class="b0">**</td>
+    <td>
+       <div class="blue element" data-name="Lr">
+         <div class="number">103</div>
+         <div class="name">Lr</div>
+         <div class="nameFull ru">Лоуренсий</div>
+         <div class="nameFull en">Lawrencium</div>
+         <div class="massa">[260]</div>
+       </div>
+    </td>
+    <td> 
+       <div class="blue element" data-name="Rf">
+         <div class="number">104</div>
+         <div class="name">Rf</div>
+         <div class="nameFull ru">Резерфордий</div>
+         <div class="nameFull en">Rutherfordium</div>
+         <div class="massa">[267]</div>
+       </div>
+    </td>
+     <td>
+       <div class="blue element" data-name="Db">
+         <div class="number">105</div>
+         <div class="name">Db</div>
+         <div class="nameFull ru">Дубний</div>
+         <div class="nameFull en">Dubnium</div>
+         <div class="massa">[268]</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Sg">
+         <div class="number">106</div>
+         <div class="name">Sg</div>
+         <div class="nameFull ru">Сиборгий</div>
+         <div class="nameFull en">Seaborgium</div>
+         <div class="massa">[269]</div>
+        </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Bh">
+         <div class="number">107</div>
+         <div class="name">Bh</div>
+         <div class="nameFull ru">Борий</div>
+         <div class="nameFull en">Bohrium</div>
+         <div class="massa">[270]</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Hn">
+         <div class="number">108</div>
+         <div class="name">Hn</div>
+         <div class="nameFull ru">Хассий</div>
+         <div class="nameFull en">Hassium</div>
+         <div class="massa">[277]</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Mt">
+         <div class="number">109</div>
+         <div class="name">Mt</div>
+         <div class="nameFull ru">Мейтнерий</div>
+         <div class="nameFull en">Meitnerium</div>
+         <div class="massa">[278]</div>
+       </div>
+    </td>
+    <td>
+       <div class="blue element" data-name="Ds">
+         <div class="number">110</div>
+         <div class="name">Ds</div>
+         <div class="nameFull ru">Дармштадтий</div>
+         <div class="nameFull en">Darmstadtium</div>
+         <div class="massa">[281]</div>
+       </div>
+    </td>
+    <td>
+      <div class="blue element" data-name="Rg">
+        <div class="number">111</div>
+        <div class="name">Rg</div>
+        <div class="nameFull ru">Рентгений</div>
+        <div class="nameFull en">Roentgenium</div>
+        <div class="massa">[282]</div>
+      </div>
+    </td>
+    <td>
+      <div class="blue element" data-name="Cn">
+        <div class="number">112</div>
+        <div class="name">Cn</div>
+        <div class="nameFull ru">Коперниций</div>
+        <div class="nameFull en">Copernicium</div>
+        <div class="massa">[285]</div>
+      </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="Nh">
+        <div class="number">113</div>
+        <div class="name">Nh</div>
+        <div class="nameFull ru">Нихоний</div>
+        <div class="nameFull en">Nihonium</div>
+        <div class="massa">[286]</div>
+      </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="Fl">
+        <div class="number">114</div>
+        <div class="name">Fl</div>
+        <div class="nameFull ru">Флеровий</div>
+        <div class="nameFull en">Flerovium</div>
+        <div class="massa">[289]</div>
+      </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="Mc">
+        <div class="number">115</div>
+        <div class="name">Mc</div>
+        <div class="nameFull ru">Московий</div>
+        <div class="nameFull en">Moscovium</div>
+        <div class="massa">[290]</div>
+      </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="Lv">
+        <div class="number">116</div>
+        <div class="name">Lv</div>
+        <div class="nameFull ru">Ливерморий</div>
+        <div class="nameFull en">Livermorium</div>
+        <div class="massa">[293]</div>
+      </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="Ts">
+        <div class="number">117</div>
+        <div class="name">Ts</div>
+        <div class="nameFull ru">Теннессин</div>
+        <div class="nameFull en">Tennessine</div>
+        <div class="massa">[294]</div>
+      </div>
+    </td>
+    <td>
+      <div class="yellow element" data-name="Og">
+        <div class="number">118</div>
+        <div class="name">Og</div>
+        <div class="nameFull ru">Оганесон</div>
+        <div class="nameFull en">Oganesson</div>
+        <div class="massa">[294]</div>
+      </div>
+    </td>
+</tr>
+<tr><td colspan="20" class="b0"><div style="width:1px; height:10px;"></div></td></tr>
+<tr>
+    <td colspan="3" class="b0"></td>
+    <td class="b0">*</td>
+    <td>
+       <div class="green element" data-name="La">
+         <div class="number">57</div>
+         <div class="name">La</div>
+         <div class="nameFull ru">Лантан</div>
+         <div class="nameFull en">Lanthanum</div>
+         <div class="massa">138,906</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Ce">
+         <div class="number">58</div>
+         <div class="name">Ce</div>
+         <div class="nameFull ru">Церий</div>
+         <div class="nameFull en">Cerium</div>
+         <div class="massa">140,12</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Pr">
+         <div class="number">59</div>
+         <div class="name">Pr</div>
+         <div class="nameFull ru">Празеодим</div>
+         <div class="nameFull en">Praseodymium</div>
+         <div class="massa">140,908</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Nd">
+         <div class="number">60</div>
+         <div class="name">Nd</div>
+         <div class="nameFull ru">Неодим</div>
+         <div class="nameFull en">Neodymium</div>
+         <div class="massa">144,24</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Pm">
+         <div class="number">61</div>
+         <div class="name">Pm</div>
+         <div class="nameFull ru">Прометий</div>
+         <div class="nameFull en">Promethium</div>
+         <div class="massa">[145]</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Sm">
+         <div class="number">62</div>
+         <div class="name">Sm</div>
+         <div class="nameFull ru">Самарий</div>
+         <div class="nameFull en">Samarium</div>
+         <div class="massa">150,4</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Eu">
+         <div class="number">63</div>
+         <div class="name">Eu</div>
+         <div class="nameFull ru">Европий</div>
+         <div class="nameFull en">Europium</div>
+         <div class="massa">151,96</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Gd">
+         <div class="number">64</div>
+         <div class="name">Gd</div>
+         <div class="nameFull ru">Гадолиний</div>
+         <div class="nameFull en">Gadolinium</div>
+         <div class="massa">157,25</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Tb">
+         <div class="number">65</div>
+         <div class="name">Tb</div>
+         <div class="nameFull ru">Тербий</div>
+         <div class="nameFull en">Terbium</div>
+         <div class="massa">158,926</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Dy">
+         <div class="number">66</div>
+         <div class="name">Dy</div>
+         <div class="nameFull ru">Диспрозий</div>
+         <div class="nameFull en">Dysprosium</div>
+         <div class="massa">162,5</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Ho">
+         <div class="number">67</div>
+         <div class="name">Ho</div>
+         <div class="nameFull ru">Гольмий</div>
+         <div class="nameFull en">Holmium</div>
+         <div class="massa">164,93</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Er">
+         <div class="number">68</div>
+         <div class="name">Er</div>
+         <div class="nameFull ru">Эрбий</div>
+         <div class="nameFull en">Erbium</div>
+         <div class="massa">167,26</div>
+       </div>
+    </td>
+    <td>
+        <div class="green element" data-name="Tm">
+         <div class="number">69</div>
+         <div class="name">Tm</div>
+         <div class="nameFull ru">Тулий</div>
+         <div class="nameFull en">Thulium</div>
+         <div class="massa">168,934</div>
+       </div>
+    </td>
+    <td>
+       <div class="green element" data-name="Yb">
+         <div class="number">70</div>
+         <div class="name">Yb</div>
+         <div class="nameFull ru">Иттербий</div>
+         <div class="nameFull en">Ytterbium</div>
+         <div class="massa">173,04</div>
+       </div>
+    </td>
+    <td colspan="2" class="b0"></td>
+</tr>
+<tr>
+    <td colspan="3" class="b0"></td>
+    <td class="b0">**</td>
+    <td>
+       <div class="greenD element" data-name="Ac">
+         <div class="number">89</div>
+         <div class="name">Ac</div>
+         <div class="nameFull ru">Актиний</div>
+         <div class="nameFull en">Actinium</div>
+         <div class="massa">[227]</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Th">
+         <div class="number">90</div>
+         <div class="name">Th</div>
+         <div class="nameFull ru">Торий</div>
+         <div class="nameFull en">Thorium</div>
+         <div class="massa">232,038</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Pa">
+         <div class="number">91</div>
+         <div class="name">Pa</div>
+         <div class="nameFull ru">Протактиний</div>
+         <div class="nameFull en">Protactinium</div>
+         <div class="massa">231,04</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="U">
+         <div class="number">92</div>
+         <div class="name">U</div>
+         <div class="nameFull ru">Уран</div>
+         <div class="nameFull en">Uranium</div>
+         <div class="massa">238,03</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Np">
+         <div class="number">93</div>
+         <div class="name">Np</div>
+         <div class="nameFull ru">Нептуний</div>
+         <div class="nameFull en">Neptunium</div>
+         <div class="massa">[237]</div>
+     </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Pu">
+         <div class="number">94</div>
+         <div class="name">Pu</div>
+         <div class="nameFull ru">Плутоний</div>
+         <div class="nameFull en">Plutonium</div>
+         <div class="massa">[244]</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Am">
+         <div class="number">95</div>
+         <div class="name">Am</div>
+         <div class="nameFull ru">Америций</div>
+         <div class="nameFull en">Americium</div>
+         <div class="massa">[243]</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Cm">
+         <div class="number">96</div>
+         <div class="name">Cm</div>
+         <div class="nameFull ru">Кюрий</div>
+         <div class="nameFull en">Curium</div>
+         <div class="massa">[247]</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Bk">
+         <div class="number">97</div>
+         <div class="name">Bk</div>
+         <div class="nameFull ru">Берклий</div>
+         <div class="nameFull en">Berkelium</div>
+         <div class="massa">[247]</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Cf">
+         <div class="number">98</div>
+         <div class="name">Cf</div>
+         <div class="nameFull ru">Калифорний</div>
+         <div class="nameFull en">Californium</div>
+         <div class="massa">[251]</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Es">
+         <div class="number">99</div>
+         <div class="name">Es</div>
+         <div class="nameFull ru">Эйнштейний</div>
+         <div class="nameFull en">Einsteinium</div>
+         <div class="massa">[252]</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Fm">
+         <div class="number">100</div>
+         <div class="name">Fm</div>
+         <div class="nameFull ru">Фермий</div>
+         <div class="nameFull en">Fermium</div>
+         <div class="massa">[257]</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="Md">
+         <div class="number">101</div>
+         <div class="name">Md</div>
+         <div class="nameFull ru">Менделевий</div>
+         <div class="nameFull en">Mendelevium</div>
+         <div class="massa">[258]</div>
+       </div>
+    </td>
+    <td>
+       <div class="greenD element" data-name="No">
+         <div class="number">102</div>
+         <div class="name">No</div>
+         <div class="nameFull ru">Нобелий</div>
+         <div class="nameFull en">Nobelium</div>
+         <div class="massa">[259]</div>
+       </div>
+    </td>
+    </td>
+    <td colspan="2" class="b0"></td>
+</tr>
+</table>
+<div class="selectedElementsResult"><span class="en">Chosen elements</span>:
+    <span class="selectedSystem"></span>
+    <span class="inactive"><span class="en">empty</span></span>
+@if (showCompoundTable){
+            <div id="searchcomposition" style="display:none;">
+                <table class="compoundTable" id="SearchCompoundTable">
+                    <thead><tr><th></th><th></th><th colspan="3" class="cell">Absolute</th><th><i class="bi bi-info-circle" data-toggle="tooltip" data-placement="top" title="Absolute values take precedence over percentage"></i></th><th colspan="3" class="cell">Percentage</th><th></th></tr></thead>
+                    <tbody id="SearchCompoundTableBody">
+                        <tr data-element="">
+                            <td class="drag-handler"></td>
+                            <th class="cell"><input type="hidden" name="element" value=""></th>
+                            <td class="cell"><input name="ValueAbsoluteMin" class="form-control" placeholder="min" onkeyup="Mendeleev_doMain()"></td>
+                            <td class="cell text-nowrap"> ≤ N ≤ </td>
+                            <td class="cell"><input name="ValueAbsoluteMax" class="form-control" placeholder="max" onkeyup="Mendeleev_doMain()"></td>
+                            <td class="cell">or</td>
+                            <td class="cell"><input name="ValuePercentMin" class="form-control" placeholder="min" onkeyup="Mendeleev_doMain()"></td>
+                            <td class="cell text-nowrap">≤ N % ≤ </td>
+                            <td class="cell"><input name="ValuePercentMax" class="form-control" placeholder="max" onkeyup="Mendeleev_doMain()"></td>
+                            <th class="cell">
+                                <button type="button" class="btn btn-danger btndelete" title="Delete" onclick="DeleteSearchCompoundTableElement(this)"><i class="bi bi-trash"></i></button>
+                            </th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+</div>
+<div class="result"></div>
+<div class="afterresult"></div>
+</div>

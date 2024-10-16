@@ -1,0 +1,29 @@
+$color-main: #333;
+$color-back: #2e3a52;
+$color-back-light: #36748f; /*#31a8d2;*/
+$color-back-menu: #EEE;
+$color-link: #555;
+$color-link-spec: #990000;
+$color-link-light: white;
+$color-ccc: #ccc;
+$color-price: black/*#017002*/;
+$color-back-nav: #404040;
+$width-menu: 310px;
+$padding-menu-sm: 15px 7px;
+
+$color-border: rgba(0,0,0,.125);
+$active-bg-color: rgba(0,0,0,.07);
+
+
+%menu-toggler {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $color-link-light;
+    outline: none;
+    display: inline-block;
+
+    &:focus {
+        outline: none;
+    }
+}

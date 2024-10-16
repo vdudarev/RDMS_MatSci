@@ -1,0 +1,344 @@
+﻿@model ObjectInfo
+@using InfProject.DBContext;
+@using WebUtilsLib;
+@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@inject DataContext dataContext
+@{
+    // LinkTypeObjectId test:
+// https://localhost:7100/object/appsettings_development-25993
+// https://localhost:7100/object/test-2-25987
+// https://localhost:7100/adminobject/edititem/25987/?returl=%2Fobject%2Ftest-2-25987
+    if (!Context.User.IsInRole(UserGroups.PowerUser) && !Context.User.IsInRole(UserGroups.Administrator))
+        throw new UnauthorizedAccessException("User is not PowerUser or Administrator");
+
+    // model (ObjectInfo obj, TypeInfo dbType, ControllerContext controllerContext, ICompositeViewEngine viewEngine)
+    ObjectInfo obj = Model;
+    //(ObjectInfo obj, TypeInfo dbType, ControllerContext controllerContext, ICompositeViewEngine viewEngine) = Model;
+    TypeInfo dbType = ViewBag.dbType;
+    ControllerContext controllerContext = ViewBag.controllerContext;
+    ICompositeViewEngine viewEngine = ViewBag.viewEngine;
+    var types = (await dataContext.GetTypes()).Where(x => !x.IsHierarchical).ToList();
+    var jsontypes = Newtonsoft.Json.JsonConvert.SerializeObject(types);
+    int? typeIdForRubric = dbType.TypeIdForRubric;
+    int.TryParse(string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["idr"] : Context.Request.Query["idr"], out int idr);
+    string returl = string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["returl"] : Context.Request.Query["returl"];
+    int countProperties = await dataContext.Property_GetAllPropertiesCount(obj.ObjectId);
+
+    string idoSt = string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["ido"] : Context.Request.Query["ido"];
+    int.TryParse(idoSt, out int ido);
+
+    List<RubricInfo> listRubrics = new List<RubricInfo>();
+    if (typeIdForRubric.HasValue && typeIdForRubric.Value != 0)
+    {
+        listRubrics = await dataContext.GetList_RubricTree_AccessControl(typeIdForRubric.Value, Context.GetAccessControlFilter());
+    }
+
+    if (obj.ObjectId != 0)
+    {
+        ViewData["Title"] = $"Editing object {obj.ObjectName} ({dbType.TypeName})";
+    }
+    else { 
+        ViewData["Title"] = $"Creating new object ({dbType.TypeName})";
+    }
+
+    RubricInfo rubric = await dataContext.GetRubricById(obj.RubricId ?? idr);
+    (RubricInfo rubric, ObjectInfo obj) breadCrumbs = (rubric, null);
+    (ObjectInfo obj, string objectFormPrefix) propFormModel = (obj, objectFormPrefix: string.Empty);
+/// https://github.com/sinanbozkus/FormHelper
+}
+<partial name="RubricBreadCrumbs" model=@breadCrumbs />
+
+<partial name="pDataModel" model="false" />
+
+<!-- Modal https://getbootstrap.com/docs/5.0/components/modal/ - Select elements -->
+<div class="modal fade" id="myModalMendeleev" tabindex="-1" aria-labelledby="myModalMendeleevLabel" aria-hidden="true">
+    <div class="modal-dialog" style="min-width:800px;">
+        <form method="post" asp-controller="AdminTree" asp-action="UpdateInsert">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myModalMendeleevLabel">Select elements</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <partial name="pMendeleevWide" model="false" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <!--button type="submit" class="btn btn-primary" title="Save"><i class="bi bi-save2-fill"></i> Save</button></td-->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<h1 class="display-4">@Html.Raw(ViewData["Title"])</h1>
+<form asp-formhelper="true" asp-action="UpdateInsert" asp-controller="AdminObject" method="post" enctype="multipart/form-data" id="editForm">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" id="returl" name="returl" value="@returl" />
+    <input type="hidden" id="ido" name="ido" value="@ido" />
+    <input type="hidden" id="ObjectId" name="ObjectId" value="@obj.ObjectId" />
+    <input type="hidden" id="TenantId" name="TenantId" value="@obj.TenantId" />
+    <input type="hidden" id="ExternalId" name="ExternalId" value="@obj.ExternalId" />
+    <input type="hidden" id="IsPublished" name="ispublished" value="true" />
+    <input type="hidden" id="ObjectFilePath" name="objectfilepath" value="@obj.ObjectFilePath" />
+    <table class="table" id="values">
+        <tbody>
+            <tr id="trType"><th>Type</th><td>
+                    <select class="form-select" asp-for="TypeId">
+                        <option value="">=- select the type -=</option>
+                        @for (int i = 0; i < types.Count; i++)
+                        {
+                            <option value="@types[i].TypeId">@types[i].TypeName</option>
+                        }
+                    </select>
+            </td></tr>
+            @if (obj.ObjectId != 0)
+            {
+                <tr id="trObjectId">
+                    <th><label asp-for="ObjectId" class="control-label"></label>
+                        @if ((obj.RubricId ?? 0) != 0) {
+                            <a href="@("/rubric/" + listRubrics.First(x => x.RubricId==obj.RubricId).RubricNameUrl + "/#o" + obj.ObjectId)"><i class="bi bi-arrow-right"></i></a>
+                        }
+                    </th>
+                    <td>@obj.ObjectId <span style="float:right; @(obj.ExternalId.HasValue ? "display:block; " : "display:none;")">ExternalId: @obj.ExternalId</span></td>
+                </tr>
+                <tr id="tr_created"><th><label asp-for="_created" class="control-label"></label></th><td>@obj._created</td></tr>
+            }
+            @if (obj._createdBy is not null)
+            {
+                <tr id="tr_createdBy"><th><label asp-for="_createdBy" class="control-label"></label></th><td>@dataContext.GetUser((int)obj._createdBy).Result</td></tr>
+            }
+            @if (obj._created != obj._updated)
+            {
+                <tr id="tr_updated"><th><label asp-for="_updated" class="control-label"></label></th><td>@obj._updated</td></tr>
+                <tr id="tr_updatedBy"><th><label asp-for="_updatedBy" class="control-label"></label></th><td>@dataContext.GetUser((int)obj._updatedBy!).Result</td></tr>
+            }
+            <tr id="trRubricId">
+                <th><label asp-for="RubricId" class="control-label"></label>
+                    @if (@obj.RubricId.HasValue && @obj.RubricId.Value != 0)
+                    {
+                        <a href="@("/rubric/" + listRubrics.First(x => x.RubricId==obj.RubricId).RubricNameUrl)/"><i class="bi bi-arrow-right"></i></a>
+                    }
+                </th>
+                <td>
+                    @if (listRubrics.Count==0)
+                    {
+                        <input asp-for="RubricId" type="number" class="form-control" placeholder="Input integer for RubricId">
+                    }
+                    else
+                    {
+                        <div class="input-group">
+                            <select class="form-select form-control" asp-for="RubricId">
+                                <option value="">=- select the section -=</option>
+                                @for (int i = 0; i < listRubrics.Count; i++)
+                                {
+                                    <option value="@listRubrics[i].RubricId">@(new string('_', listRubrics[i].Level) + listRubrics[i].RubricName)</option>
+                                }
+                            </select>
+                            <a id="eyeLinkRubric" class="btn btn-outline-secondary collapsed" data-bs-toggle="collapse" data-bs-target="#collapseLinkRubric" aria-expanded="false" aria-controls="collapseLinkRubric" onclick="LinkRubricClick()"><i class="bi bi-eye me-1"></i>Show Links</a>
+                        </div>
+                        
+                        <div class="collapse" id="collapseLinkRubric">
+                            <!-- id="RubricId" name="RubricId" -->
+                            <script>
+                                async function LinkRubricClick() {
+                                    if ($("#LinkRubricSelect").html() != "") {
+                                        return;
+                                    }
+                                    const content = $("#RubricId").html();
+                                    $("#LinkRubricSelect").append(content.replace('<option value="">=- select the section -=</option>', ''));
+                                    let data = await $.ajax({
+                                        async: true,
+                                        type: "GET",
+                                        url: "/ajax/getobjectlinkrubricbyobject",   // GetObjectLinkRubricByObject
+                                        data: { objectId: @obj.ObjectId },
+                                        dataType: "json"
+                                    });
+                                    //console.log(data);
+                                    $.each(data.objectLinkRubric, function (i, item) {
+                                        //console.log("i=" + i + ", item=" + item + ", item.rubricId=" + item.rubricId);
+                                        // $("#LinkRubricSelect").val(item.rubricId).change();
+                                        $("#LinkRubricSelect option[value=" + item.rubricId + "]").attr("selected", "selected");
+                                    });
+                                    $("#updateLinkRubric").val("1");
+                                }
+                                function AddToCSV() {
+                                    const val = $("#LinkRubricSelect").val();
+                                    if (isNaN(val) || parseInt(val) < 0) {
+                                        return;
+                                    }
+                                    let csv = $("#LinkRubricCSV").val();
+
+                                    if (("," + csv + ",").indexOf("," + val + ",") >= 0) {
+                                        return;
+                                    }
+                                    csv = csv + (csv == "" ? "" : ",") + val;
+                                    $("#LinkRubricCSV").val(csv);
+                                }
+
+                            </script>
+@*                             <div class="input-group mt-2">
+                                <span class="input-group-text border-0 bg-transparent">Rubrics IDs (CSV):</span>
+                                <input type="text" class="form-control" id="LinkRubricCSV" name="LinkRubricCSV" value="" />
+                            </div> *@
+                            <div class="input-group mt-2">
+                                <input type="hidden" id="updateLinkRubric" name="updateLinkRubric" value="0" />
+                                <select multiple class="form-select form-control" name="LinkRubricSelect" id="LinkRubricSelect" style="height:150px"></select>
+@*                                 <a class="btn btn-outline-success" onclick="AddToCSV()">Add Link to Rubric</a>
+ *@                            </div>
+                        </div>
+                    }
+                </td>
+            </tr>
+            <tr id="trSortCode">
+                <th><label asp-for="SortCode" class="control-label"></label></th>
+                <td>
+                    <input asp-for="SortCode" type="number" class="form-control" placeholder="Input integer for sort">
+                </td>
+            </tr>
+            <tr id="trAccessControl">
+                <th><label asp-for="AccessControl" class="control-label"></label></th>
+                <td>
+                    <select class="form-select" asp-for="AccessControl">
+                        <option value="0">public</option>
+                        <option value="1">protected</option>
+                        <option value="2">protectedNDA</option>
+                        <option value="3">private</option>
+                    </select>
+                </td>
+            </tr>
+            <tr id="trObjectName">
+                <th><label asp-for="ObjectName" class="control-label"></label></th>
+                <td>
+                    <input asp-for="ObjectName" class="form-control" required />
+                    <span asp-validation-for="ObjectName" class="text-danger"></span>
+                    <!--input type="text" class="form-control" id="ObjectName" name="objectname" value="@obj.ObjectName" /-->
+            </td></tr>
+            <tr id="trObjectNameUrl">
+                <th><label asp-for="ObjectNameUrl" class="control-label"></label></th>
+                <td>
+                    <input asp-for="ObjectNameUrl" class="form-control" placeholder="Input unique URL part" />
+                    <span asp-validation-for="ObjectNameUrl" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr id="trObjectFilePath">
+                <th><label asp-for="ObjectFilePath" class="control-label"></label></th>
+                <td>
+                    @if (!string.IsNullOrEmpty(obj.ObjectFilePath))
+                    {
+                        <span id="@("objValidator" + obj.ObjectId)" class="title validator d-none"><i class="bi bi-hourglass-split"></i></span>
+                        <a href="javascript:void(0);" title="Data to upload" id="@("objData" + obj.ObjectId)" class="objData d-none" onclick="ShowDatabaseDataForObject(@obj.ObjectId)"><i class="bi bi-database-add bi-bag-check"></i></a>
+                        <span id="@("objReload" + obj.ObjectId)" class="title reload d-none"><i class="bi bi-hourglass-split"></i></span>
+
+                        <a href="/file/download/@obj.ObjectId">@obj.ObjectFile</a> 
+                        <input type="checkbox" name="deletefile" id="deletefile" value="1" /> @Html.Raw("remove file")
+                        <sup class="text-muted">@obj.ObjectFileHash</sup>
+                    }
+                    <div>
+                        @if (!string.IsNullOrEmpty(obj.ObjectFilePath))
+                        {
+                            <a id="validation" href="javascript:void(0);" class="btn btn-outline-primary me-2" onclick="ValidateFileType(@obj.ObjectId)"><i class="bi bi-check2-all"></i> validate</a>
+                            <a id="reload" href="javascript:void(0);" class="btn btn-outline-primary me-2" onclick="(async function() { $('#reloadWaiter').removeClass('d-none'); await ReloadFileType(@obj.ObjectId); $('#reloadWaiter').addClass('d-none'); })()"><i class="bi bi-database-up"></i> reload</a>
+                            <div id="reloadWaiter" class="spinner-border text-primary ms-2 d-none" role="status">
+                                <span class="visually-hidden">processing...</span>
+                            </div>
+                        }
+                        @if (countProperties > 0)
+                        {
+                            <a id="deleteProps" href="javascript:void(0);" class="btn btn-outline-danger me-2" onclick="(async function() { $('#deletePropsWaiter').removeClass('d-none'); await DeleteProperties(@obj.ObjectId); $('#deletePropsWaiter').addClass('d-none'); window.location.reload(); })()"><i class="bi bi-x-lg"></i> delete @countProperties properties</a>
+                            <div id="deletePropsWaiter" class="spinner-border text-primary ms-2 d-none" role="status">
+                                <span class="visually-hidden">processing...</span>
+                            </div>
+                        }
+                        @if (Context.User.IsInRole(UserGroups.Administrator))  // admin only
+                        {
+                            int linkedObjects = await dataContext.ObjectLinkObject_GetLinkedObjectsCount(obj.ObjectId);
+                            if (linkedObjects > 0)
+                            {
+                                <a id="deleteAssoc" href="javascript:void(0);" class="btn btn-outline-danger me-2" onclick="(async function() { $('#deleteAssocWaiter').removeClass('d-none'); await DeleteAssocObjects(@obj.ObjectId); $('#deleteAssocWaiter').addClass('d-none'); window.location.reload(); })()"><i class="bi bi-x-lg"></i> delete @linkedObjects associated objects</a>
+                                <div id="deleteAssocWaiter" class="spinner-border text-primary ms-2 d-none" role="status">
+                                    <span class="visually-hidden">processing...</span>
+                                </div>
+                            }
+                        }
+                    </div>
+                    @Html.Raw(string.IsNullOrEmpty(obj.ObjectFilePath) ? string.Empty : "Upload replacement:")
+                    
+                    
+                    <input class="form-control" type="file" id="fileupload" name="fileupload">
+                    <span asp-validation-for="ObjectFilePath" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr id="trObjectDescription">
+                <th><label asp-for="ObjectDescription" class="control-label"></label></th>
+                <td>
+                    <textarea asp-for="ObjectDescription" class="form-control"></textarea>
+                    <span asp-validation-for="ObjectDescription" class="text-danger"></span>
+                </td>
+            </tr>
+
+
+            @if (dbType.TableName != "ObjectInfo") {  // for Objects, that have additional fields:
+                string objectPartialView = TypeInfo.GetObjectPartialView(dbType.TableName);
+                // https://stackoverflow.com/questions/31905624/where-are-the-controllercontext-and-viewengines-properties-in-mvc-6-controller
+                ViewEngineResult result = viewEngine.FindView(controllerContext, objectPartialView, false);
+                if (result.Success /*System.IO.File.Exists($@"Views\AdminObject\{objectPartialView}.cshtml")*/)    // custom View exists => Use it
+                {
+                    <partial name=@objectPartialView model=@obj />
+                }
+                else // use common generic View
+                {
+                    <partial name="_Object" model=@obj />
+                }
+            }
+
+            @if (dbType.GetSettingsIncludePropertiesForm()) {  // show form for properties according to "IncludePropertiesFrom" settings in type
+                <tr id="trObjectProperties">
+                    <td colspan="2">
+                        <input type="hidden" name="UpdateInsert_PropertiesFromForm" value="1" />
+                        <partial name="pEditItem_PropertiesForm" model=@propFormModel />
+                    </td>
+                </tr>
+            }
+
+            <tr id="trButtons">
+                <th><a href="@(string.IsNullOrEmpty(returl) ? Url.Action("List", "AdminObject", new { id = obj.TypeId }) : "javascript:window.history.back();")" class="btn btn-secondary"><i class="bi bi-list-task"></i> @(string.IsNullOrEmpty(returl) ? "Back to the List" : "Close and back to the Site")</a></th>
+                <td><button type="submit" class="btn btn-primary" title="Save"><i class="bi bi-save2-fill"></i> Save</button></td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+@if (obj.ObjectId != 0)
+{
+    <partial name="_ObjectLinkObject" model=@obj />
+    <partial name="_PropertyAll" model=@obj />
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/sortablejs-make/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script type="text/javascript" src="~/js/EditItem.js"></script>
+    <script type="text/javascript">app.objectId = @obj.ObjectId;</script>
+    <script type="text/javascript">app.types = @Html.Raw(jsontypes);</script>
+    @if (idr != 0) {
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#RubricId").val("@idr");
+            });
+        </script>
+    }
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('#collapseLinkRubric').on('hidden.bs.collapse', function () {    // This event is fired when a collapse element has been hidden from the user(will wait for CSS transitions to complete).
+            $("#eyeLinkRubric").html('<i class="bi bi-eye me-1"></i>Show Links');
+            // console.log("hidden");
+        });
+        $('#collapseLinkRubric').on('shown.bs.collapse', function () {    // This event is fired when a collapse element has been made visible to the user(will wait for CSS transitions to complete).
+            $("#eyeLinkRubric").html('<i class="bi bi-eye-slash me-1"></i>Hide Links');
+            // console.log("shown");
+        });
+        $("#ObjectName").focus();
+    });
+    </script>
+}

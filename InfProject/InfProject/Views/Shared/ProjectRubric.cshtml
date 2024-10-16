@@ -1,0 +1,211 @@
+﻿@using InfProject.Utils
+@using WebUtilsLib
+@model RubricInfo
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    var rubric = Model;
+    string projectName = rubric.RubricName;
+    int[] projectUsers = (await dataContext.GetUserIdsByClaim(claimType: "Project", claimValue: projectName)).ToArray();
+    UserContext userCtx = UserUtils.GetUserContext(Context);
+    if (!Context.IsReadDenied(AccessControl.Protected, 0))
+    {
+        List<HandoverSample> current = await dataContext.GetCurrentSamplesForUsersAccordingToHandovers(projectUsers);
+        List<HandoverSample> incoming = await dataContext.GetHandoverSamplesForUsers(projectUsers, Handover.HandoverType.Incoming);
+        List<HandoverSample> outcoming = await dataContext.GetHandoverSamplesForUsers(projectUsers, Handover.HandoverType.Outcoming);
+        List<WebAppUser> users = await dataContext.GetUserListAll();
+        WebAppUser user = await dataContext.GetUser(userCtx.userId);
+        WebAppUser sender, recepient;
+        var rawUrl = System.Net.WebUtility.UrlEncode(Context.Request.Path);
+        <div>
+@*
+    To Do: Project Rubric <b>@projectName</b>.<br />
+    UserId:  @string.Join(", ", projectUsers.ToArray());
+    <hr />
+*@
+            <button class="btn btn-primary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#handoverProject" aria-expanded="false" aria-controls="handoverProject"><i class="bi bi-truck"></i> Show Handover Report for Project</button>
+
+            <div id="handoverProject" class="collapse" data-count="@(incoming.Count + outcoming.Count)">
+                <h3>Current Samples</h3>
+                <p><small>Collection of samples that are now physically held by the project @projectName staff (according to samples' handover information - last record).</small></p>
+                @if (current?.Count > 0)
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name / Sample</th>
+                                <th>Amount</th>
+                                <th>Sender</th>
+                                <th>Sent</th>
+                                <th>Sender Comments</th>
+                                <th>Recipient</th>
+                                <th>Received</th>
+                                <th>Your Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (HandoverSample handover in current)
+                            {
+                                sender = users.First(x => x.Id == handover._createdBy);
+                                recepient = users.First(x => x.Id == handover.DestinationUserId);
+                                <tr class="@(handover.DestinationConfirmed==null ? "table-warning" : "table-success")">
+                                    <td><a href="/object/@handover.SampleObjectNameUrl">@handover.ObjectName</a> / <small>@handover.SampleObjectName</small></td>
+                                    <td>@handover.Amount @handover.MeasurementUnit</td>
+                                    <td><a href="@($"mailto:{sender.Email}")">@Html.Raw($"{sender.Name}{(string.IsNullOrEmpty(sender.Project) ? string.Empty : $" ({sender.Project})")}")</a></td>
+                                    <td>@handover._created</td>
+                                    <td>@handover.ObjectDescription</td>
+                                    <td><a href="@($"mailto:{recepient.Email}")">@Html.Raw($"{recepient.Name}{(string.IsNullOrEmpty(recepient.Project) ? string.Empty : $" ({recepient.Project})")}")</a></td>
+                                    @if ((userCtx.userId == handover.DestinationUserId || userCtx.access == AccessControl.None /* Admin*/)
+                               && handover.DestinationConfirmed == null)
+                                    {
+                                        <td colspan="2">
+                                            <form method="post" asp-controller="Handover" asp-action="ConfirmHandover" onsubmit="return DisableButton('btnConfirmHandover')">
+                                                <input type="hidden" name="returl" value="@rawUrl" />
+                                                <input type="hidden" name="SampleObjectId" value="@handover.SampleObjectId" />
+                                                <input type="hidden" name="HandoverObjectId" value="@handover.ObjectId" />
+                                                <div class="form-group">
+                                                    <textarea required rows="3" maxlength="128" class="form-control" id="DestinationComments" name="DestinationComments" aria-describedby="DestinationCommentsHelp" placeholder="Comments for sender (required)"></textarea>
+                                                    <button id="btnConfirmHandover" type="submit" class="btn btn-primary w-100" title="Confirm"><i class="bi bi-check-circle"></i> Confirm handover</button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>@handover.DestinationConfirmed</td>
+                                        <td>@handover.DestinationComments</td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>No current samples.</p>
+                }
+
+
+                <h3>Incoming Handovers for project @projectName</h3>
+                @if (incoming?.Count > 0)
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name / Sample</th>
+                                <th>Amount</th>
+                                <th>Sender</th>
+                                <th>Sent</th>
+                                <th>Sender Comments</th>
+                                <th>Recipient</th>
+                                <th>Received</th>
+                                <th>Your Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (HandoverSample handover in incoming)
+                            {
+                                sender = users.First(x => x.Id == handover._createdBy);
+                                recepient = users.First(x => x.Id == handover.DestinationUserId);
+                                <tr class="@(handover.DestinationConfirmed==null ? "table-warning" : "table-success")">
+                                    <td><a href="/object/@handover.SampleObjectNameUrl">@handover.ObjectName</a> / <small>@handover.SampleObjectName</small></td>
+                                    <td>@handover.Amount @handover.MeasurementUnit</td>
+                                    <td><a href="@($"mailto:{sender.Email}")">@Html.Raw($"{sender.Name}{(string.IsNullOrEmpty(sender.Project) ? string.Empty : $" ({sender.Project})")}")</a></td>
+                                    <td>@handover._created</td>
+                                    <td>@handover.ObjectDescription</td>
+                                    <td><a href="@($"mailto:{recepient.Email}")">@Html.Raw($"{recepient.Name}{(string.IsNullOrEmpty(recepient.Project) ? string.Empty : $" ({recepient.Project})")}")</a></td>
+                                    @if ((userCtx.userId == handover.DestinationUserId || userCtx.access == AccessControl.None /* Admin*/)
+                               && handover.DestinationConfirmed == null)
+                                    {
+                                        <td colspan="2">
+                                            <form method="post" asp-controller="Handover" asp-action="ConfirmHandover" onsubmit="return DisableButton('btnConfirmHandover')">
+                                                <input type="hidden" name="returl" value="@rawUrl" />
+                                                <input type="hidden" name="SampleObjectId" value="@handover.SampleObjectId" />
+                                                <input type="hidden" name="HandoverObjectId" value="@handover.ObjectId" />
+                                                <div class="form-group">
+                                                    <textarea required rows="3" maxlength="128" class="form-control" id="DestinationComments" name="DestinationComments" aria-describedby="DestinationCommentsHelp" placeholder="Comments for sender (required)"></textarea>
+                                                    <button id="btnConfirmHandover" type="submit" class="btn btn-primary w-100" title="Confirm"><i class="bi bi-check-circle"></i> Confirm handover</button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>@handover.DestinationConfirmed</td>
+                                        <td>@handover.DestinationComments</td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>No incoming handovers.</p>
+                }
+
+
+
+                <h3>Outcoming Handovers from project @projectName</h3>
+                @if (outcoming?.Count > 0)
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name / Sample</th>
+                                <th>Amount</th>
+                                <th>Sender</th>
+                                <th>Sent</th>
+                                <th>Comments</th>
+                                <th>Recipient</th>
+                                <th>Received</th>
+                                <th>Recipient Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (HandoverSample handover in outcoming)
+                            {
+                                sender = users.First(x => x.Id == handover._createdBy);
+                                recepient = users.First(x => x.Id == handover.DestinationUserId);
+                                <tr class="@(handover.DestinationConfirmed==null ? "table-warning" : "table-success")">
+                                    <td><a href="/object/@handover.SampleObjectNameUrl">@handover.ObjectName</a> / <small>@handover.SampleObjectName</small></td>
+                                    <td>@handover.Amount @handover.MeasurementUnit</td>
+                                    <td><a href="@($"mailto:{sender.Email}")">@Html.Raw($"{sender.Name}{(string.IsNullOrEmpty(sender.Project) ? string.Empty : $" ({sender.Project})")}")</a></td>
+                                    <td>@handover._created</td>
+                                    <td>@handover.ObjectDescription</td>
+                                    <td><a href="@($"mailto:{recepient.Email}")">@Html.Raw($"{recepient.Name}{(string.IsNullOrEmpty(recepient.Project) ? string.Empty : $" ({recepient.Project})")}")</a></td>
+                                    @if (userCtx.access == AccessControl.None /* Admin*/
+                               && handover.DestinationConfirmed == null)
+                                    {
+                                        <td colspan="2">
+                                            <form method="post" asp-controller="Handover" asp-action="ConfirmHandover" onsubmit="return DisableButton('btnConfirmHandover')">
+                                                <input type="hidden" name="returl" value="@rawUrl" />
+                                                <input type="hidden" name="SampleObjectId" value="@handover.SampleObjectId" />
+                                                <input type="hidden" name="HandoverObjectId" value="@handover.ObjectId" />
+                                                <div class="form-group">
+                                                    <textarea required rows="3" maxlength="128" class="form-control" id="DestinationComments" name="DestinationComments" aria-describedby="DestinationCommentsHelp" placeholder="Comments for sender (required)"></textarea>
+                                                    <button id="btnConfirmHandover" type="submit" class="btn btn-primary w-100" title="Confirm"><i class="bi bi-check-circle"></i> Confirm handover</button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>@handover.DestinationConfirmed</td>
+                                        <td>@handover.DestinationComments</td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>No outcoming handovers.</p>
+                }
+
+                <p>To add a handover, please go to the sample page and create a handover associated with the sample.</p>
+            </div>
+
+        </div>
+    }
+}

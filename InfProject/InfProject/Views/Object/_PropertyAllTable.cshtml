@@ -1,0 +1,44 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@using Newtonsoft.Json;
+@using System.Linq;
+@using WebUtilsLib
+@model ObjectInfo
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    ObjectInfo obj = Model;
+    List<dynamic> listAll;
+    System.Data.DataTable dt;
+    if (obj.ObjectName == "_Template")
+    {
+        listAll = await dataContext.Property_GetTemplateTablePropertiesForType(obj.TypeId);
+        // if (listAll.Count == 0)
+        // {
+        //     return Content($"<html><h3>Empty template</h3><p>No properties defined as a template for table (with Row=-1 use properties in object named \"_Template\")</p></html>", "text/html");
+        // }
+        dt = WebUtilsLib.DBUtils.FeedTableTemplate(listAll);
+
+    } else
+    {
+        listAll = await dataContext.Property_GetPropertiesAllUnionForObject(obj.ObjectId);
+        dt = WebUtilsLib.DBUtils.FeedTablePropertiesFromList(listAll, sourceObjectIdMode: 1);
+    }
+    TableView tv = new TableView(dt) { Title = string.Empty, EmptyMessage = "No properties for rendering in a table found" };
+}
+<div id="AllPropertiesTable" class="props" style="position:relative;">
+    <h3>The table @Html.Raw(obj.ObjectName=="_Template" ? $" <span class=\"text-danger\">{InfProject.Models.Extension_ObjectInfo.GetTemplateIcon(obj, -1)} template</span>" : string.Empty)</h3>
+    @if (!Context.IsWriteDenied(obj.AccessControl, (int)obj._createdBy) && obj.ObjectName != "_Template")
+    {
+        <form class="ms-4" method="post" enctype="multipart/form-data" action="/propertiestable/uploadtablepropertiesexcel/@obj.ObjectId" style="float:right">
+            <input class="form-control" type="file" name="fileupload" style="width:340px">
+            <button type="submit" class="btn btn-danger" style="width:340px"><i class="bi bi-table"></i> <i class="bi bi-upload ms-1"></i>&nbsp;&nbsp;&nbsp;Upload / Replace table from Excel</button>
+        </form>
+    }
+    @if (!Context.IsReadDenied(obj.AccessControl, (int)obj._createdBy))
+    {
+        <div class="ms-4" style="float:right"><a href="/propertiestable/downloadtablepropertiesexcel/@obj.ObjectId" class="btn btn-primary" style="width:300px"><i class="bi bi-download"></i> <i class="bi bi-table ms-1"></i>&nbsp;&nbsp;&nbsp;Download properties in Excel</a></div>
+    }
+    <div style="clear:both"></div>
+
+    <partial name="pShowTable" model=@tv />
+</div>

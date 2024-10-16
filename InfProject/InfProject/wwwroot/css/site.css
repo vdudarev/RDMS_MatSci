@@ -1,0 +1,97 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.smallSample {
+    font-size: .6rem;
+    color:gray;
+}
+.err { color:red; }
+h1 small {
+    font-size: 1rem;
+}
+.small {
+}
+
+.header {
+    position: sticky; top: 0;
+}
+
+.preview21 { max-width:300px; height:21px; margin-right:9px; }
+.preview { max-width:300px; max-height:200px; }
+.associated-content .preview { max-width: 150px; max-height: 100px; }
+.objectInfo .preview { max-width: 900px; max-height: 900px; }
+
+#editForm td[data-field="key"], #editForm td[data-field="value"] {
+    word-break: break-all;
+}
+
+.level0 {}
+.level1 {padding-left:2em !important;}
+.level2 {padding-left:3.5em !important;}
+.level3 {padding-left:5em !important;}
+.level4 {padding-left:6.5em !important;}
+.level5 {padding-left:8em !important;}
+.acl0{font-weight:bold;}
+.acl1{color:darkslategrey;}
+.acl2{color:lightgray;}
+.required::after { content:'*'; color:red; }
+.list-group-item small.date { position:absolute; bottom:0; left:2px; font-size:0.6em; }
+
+.cntBtns {
+}
+.ctrlButtons { margin-left:1rem; }
+
+
+.cntBtns button {
+    display: block;
+    float: right;
+}
+.props { margin-top: 2rem; }
+.modal-title span, .modal-body span { font-size:60%; color:gray; }
+
+div.datarow .comment            { font-style:italic; color:gray; }
+div.datarow .comment::before    { content: "Comment: "; }
+
+.filetype::before { display: inline-block; font-family: "bootstrap-icons"; padding-right: 9px; content: '\F50B'; }
+
+.filetype-zip::before, .filetype-7z::before, .filetype-rar::before { content: '\F391'; }
+.filetype-mp4::before { content: '\F37B'; }
+.filetype-pdf::before { content: '\F63E'; }
+.filetype-doc::before, .filetype-docx::before { content: '\F38D'; }
+.filetype-ppt::before, .filetype-pptx::before { content: '\F381'; }
+.filetype-htm::before, .filetype-html::before { content: '\F749'; }
+
+
+.filetype-xml::before { content: '\F76B'; }
+.filetype-txt::before { content: '\F38B'; }
+.filetype-csv::before { content: '\F743'; }
+.filetype-xls::before, .filetype-xlsx::before, .filetype-opj::before, .filetype-opju::before { content: '\F389'; }
+
+.filetype-bin::before, .filetype-dat::before, .filetype-::before { content: '\F35C'; }
+/*.filetype-png::before, .filetype-jpeg::before, .filetype-jpg::before, .filetype-gif::before, .filetype-tif::before, .filetype-tiff::before, .filetype-bmp::before { content: '\F36D'; }
+*/
+.filetype-png::before, .filetype-jpeg::before, .filetype-jpg::before, .filetype-gif::before, .filetype-tif::before, .filetype-tiff::before, .filetype-bmp::before { display:none; padding-right:0; content:''; }
+
+.title .bi {
+    padding-right: 7px;
+}
+.title .bi-bag-check::before, .title .bi-bag-check, .title .bi-database-check { color:green; }
+.title .bi-bag-x::before, .title .bi-bag-x, .title .bi-database-exclamation { color:red; }
+.title .bi-hourglass-split::before { color:blue; }
+.title .bi-database-add::before { color:blue; }

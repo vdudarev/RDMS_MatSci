@@ -1,0 +1,24 @@
+﻿@using System.ComponentModel.DataAnnotations;
+@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@using InfProject.Utils;
+@using Newtonsoft.Json;
+@using System.Text
+@using WebUtilsLib;
+@model (ObjectInfo obj, TypeInfo type, ControllerContext controllerContext, ICompositeViewEngine viewEngine)
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    (ObjectInfo obj, TypeInfo type, ControllerContext controllerContext, ICompositeViewEngine viewEngine) = Model;
+}
+@if (!string.IsNullOrEmpty(type.UrlPrefix)) // ideas-or-experiment-plans => pExtension_ideas-or-experiment-plans
+{  // for Objects, that have additional fields:
+    string pViewName = $"pExtension_{type.UrlPrefix}";
+    ViewEngineResult result = viewEngine.FindView(controllerContext, pViewName, false);
+    if (result.Success)    // custom View exists => Use it
+    {
+        <partial name=@pViewName model=@Model />
+    }
+    else
+    {
+        @Html.Raw($"<!-- no visual extension component found [{pViewName}] -->")
+    }
+}

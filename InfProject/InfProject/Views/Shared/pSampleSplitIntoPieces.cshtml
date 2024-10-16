@@ -1,0 +1,26 @@
+﻿@model int
+<form asp-formhelper="true" asp-action="SampleSplitIntoPieces" asp-controller="Custom" method="post" id="splitIntoPiecesForm" onsubmit="return sumbitSplitIntoPieces();">
+    <input type="hidden" id="ObjectId" name="ObjectId" value="@Model" />
+    <h4>Split the Sample into Parts/Pieces</h4>
+    <p>
+        <span class="required">Parts/Pieces Count</span><br />
+        <input required min="2" type="number" id="PiecesCount" name="PiecesCount" class="form-control" placeholder="for example: 4 "></input>
+    </p>
+    <p>
+        <span class="required">Parts/Pieces Description</span><br />
+        <textarea required id="SplitIntoPiecesDescription" name="SplitIntoPiecesDescription" class="form-control" placeholder="for example: Cutted "></textarea>
+    </p>
+    <div id="alertsSplitIntoPieces"></div>
+    <button type="submit" class="btn btn-primary" title="Split"><i class="bi bi-vr"></i> Split into Parts/Pieces</button>
+    <script>
+        function sumbitSplitIntoPieces() {
+            if ($("#SplitIntoPiecesDescription").val() == "") {
+                SpawnError("Add <u>Split into Pieces Description</u>, please...", "#alertsSplitIntoPieces");
+                SetFocus("SplitIntoPiecesDescription");
+                return false;
+            }
+            SpawnError(null, "#alertsSplitIntoPieces");
+            return true;
+        }
+    </script>
+</form>

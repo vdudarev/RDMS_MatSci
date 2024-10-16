@@ -1,0 +1,73 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@inject InfProject.DBContext.DataContext dataContext
+@model Sample
+@{
+    Model.Elements = Model.Elements?.Trim('-');
+    var type = await dataContext.GetType(Model.TypeId);
+}
+<tr>
+    <th><label asp-for="Elements" class="control-label"></label></th>
+    <td id="ElementsTD">
+        <div class="input-group">
+            <input asp-for="Elements" class="form-control" placeholder="chemical system: for example As-Ga" onchange="UpdateCompositionTableBySystem()" />
+            <a class="btn btn-outline-secondary btnshowperiodictable" onclick="Mendeleev_showTable()">elements</a>
+        </div>
+        <span asp-validation-for="Elements" class="text-danger"></span>
+        @{
+            if (type.TableName == "Composition")  // composition
+            {
+                <div id="composition">
+                    @{
+                        var obj = ViewContext.ViewData.ModelState;
+                        if (obj.TryGetValue(string.Empty, out Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateEntry value) && value.Errors.Count > 0)
+                        {
+                            @Html.Raw($"<span class='text-danger field-validation-error'>{value.Errors[0].ErrorMessage}</span>")
+                        }
+                    }
+                    <table class="compoundTable" id="compoundTable">
+                        <thead><tr><th></th><th></th><th class="ps-3">Absolute</th><th></th><th class="ps-3">Percentage</th><th></th><th></th></tr></thead>
+                        <tbody id="compoundTableBody">
+                            <tr data-element="">
+                                <td class="drag-handler"></td>
+                                <th class="cell"><input type="hidden" name="element" value=""></th>
+                                <td class="cell"><input name="ValueAbsolute" class="form-control" placeholder="absolute content"></td>
+                                <td class="cell">or</td>
+                                <td class="cell"><input name="ValuePercent" class="form-control" placeholder="percentage"></td>
+                                <td class="cell">%</td>
+                                <th class="cell">
+                                    <button type="button" class="btn btn-danger btndelete" title="Delete" onclick="DeleteCompoundTableElement(this)"><i class="bi bi-trash"></i></button>
+                                </th>
+                            </tr>
+                            @{
+                                List<Composition.CompositionItem> rows = new List<Composition.CompositionItem>();
+                                if (ViewContext.ModelState.ErrorCount > 0 && Context.Request.Method == "POST")
+                                {
+                                    rows = InfProject.Utils.ReflectionUtils.GetCompositionItemsFromRequest(Context.Request.Form);
+                                }
+                                else if (Model.SampleId != 0)
+                                {
+                                    rows = await dataContext.GetComposition(Model.SampleId);
+                                }
+                            }
+                            @foreach (var item in rows)
+                            {
+                                <tr data-element="@item.ElementName">
+                                    <td class="drag-handler"></td>
+                                    <th class="cell">@item.ElementName <input type="hidden" name="element" value="@item.ElementName"></th>
+                                    <td class="cell"><input name="@(item.ElementName+"_ValueAbsolute")" class="form-control" placeholder="absolute content" value="@item.ValueAbsolute"></td>
+                                    <td class="cell">or</td>
+                                    <td class="cell"><input name="@(item.ElementName+"_ValuePercent")" class="form-control" placeholder="percentage" value="@(item.ValueAbsolute > 0 ? "" : item.ValuePercent.ToString())"></td>
+                                    <td class="cell">%</td>
+                                    <th class="cell">
+                                        <button type="button" class="btn btn-danger btndelete" title="Delete" onclick="DeleteCompoundTableElement(this)"><i class="bi bi-trash"></i></button>
+                                    </th>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+    </td>
+</tr>

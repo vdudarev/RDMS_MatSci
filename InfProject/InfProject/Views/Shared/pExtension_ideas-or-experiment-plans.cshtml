@@ -1,0 +1,76 @@
+﻿@using System.ComponentModel.DataAnnotations;
+@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@using InfProject.Utils;
+@using Newtonsoft.Json;
+@using System.Text
+@using System.Data
+@using System.Linq
+@using WebUtilsLib;
+@model (ObjectInfo obj, TypeInfo type, ControllerContext controllerContext, ICompositeViewEngine viewEngine)
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    (ObjectInfo obj, TypeInfo type, ControllerContext controllerContext, ICompositeViewEngine viewEngine) = Model;
+    int templateObjectId = await dataContext.GetTypeTemplateObjectId(obj.TypeId);
+    List<dynamic> listAll;
+    if (templateObjectId != 0)
+    {
+        listAll = await dataContext.Property_GetPropertiesAllUnionForObject_Join_Template(obj.ObjectId, obj.TypeId);
+        listAll = listAll.OrderBy(x => x.ObjectSortCode).ThenBy(x => x.PropertyName).ToList();    // to enable user redefine columns order
+    }
+    else
+    {
+        listAll = await dataContext.Property_GetPropertiesAllUnionForObject(obj.ObjectId);
+    }
+    listAll = listAll.Where(x => (x.PropertyName.StartsWith("Measurements Report => "))).ToList();
+    List<string> measurementColumnNames = new List<string>();   // column names with measurements
+    StringBuilder stringBuilder = new StringBuilder();
+    foreach (var item in listAll)
+    {
+        string columnName = item.PropertyName.Replace("Measurements Report => ", string.Empty);
+        string typeIdCSV = null;
+        // if template is not set, then property value IS TypeId_CSV
+        if (templateObjectId == 0)
+        {
+            typeIdCSV = item.Value.ToString();
+        }
+        // if template is set, then property value == 1 Makes column tyrned ON and TypeId_CSV is contained within TemplateComment
+        else
+        {
+            if (item.Value != "1")    // it's required to turn on the columns in a report
+                continue;
+            typeIdCSV = item.TemplateComment;
+        }
+        measurementColumnNames.Add(columnName);
+        // this is done for safe parsing CSV to avoid SQL-injections:
+        typeIdCSV = string.Join(", ", typeIdCSV.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(x => { int.TryParse(x, out int t); return t; }).Where(x => x != 0).Select(x => x.ToString()));
+        if (!string.IsNullOrEmpty(typeIdCSV))
+        {
+            stringBuilder.AppendLine($"  , (select count(ObjectLinkObjectId) FROM [dbo].[vObjectLinkObject] WHERE ParentObjectId=S.ObjectId AND ChildTypeId IN ({typeIdCSV})) as [{columnName}]");
+        }
+    }
+    string sql = $@"select '<a href=""/object/' + ObjectNameUrl + '"">' + CAST(ExternalId as varchar(16)) + '</a>' as SampleId, ObjectName, ElemNumber as [N], RTRIM(LTRIM([Elements], '-'), '-') as [System],
+   	    (select TOP 1 OI.ObjectName from dbo.ObjectLinkObject as OLO
+          	INNER JOIN dbo.ObjectInfo as OI ON OLO.LinkedObjectId=OI.ObjectId AND OI.TenantId=S.TenantId
+   		WHERE OLO.ObjectId=S.ObjectId AND OI.TypeId={InfProject.DBContext.DataContext.SubstrateTypeId}) as [SubstrateMaterial]
+  	{stringBuilder.ToString()}
+from vro.vrovSample as S
+INNER JOIN dbo.ObjectLinkObject as OLO ON OLO.ObjectId={obj.ObjectId} AND S.ObjectId=OLO.LinkedObjectId
+where TenantId={dataContext.TenantId} AND TypeId={InfProject.DBContext.DataContext.SampleTypeId}";
+    DataTable dt = await dataContext.GetTable_ExecDevelopment(sql);
+    TableView tv = new TableView(dt) { EmptyMessage = "No records", Title = null, 
+        RenderHtmlString = (int row, int column, object value) =>
+        {
+            if (dt.Columns[column].ColumnName == "System")
+            {
+                return (value?.ToString() ?? string.Empty, " class=\"fw-bold\"");
+            }
+            else if (measurementColumnNames.Contains(dt.Columns[column].ColumnName) && value?.ToString() == "0")
+            {
+                return ("0", " class=\"text-danger fw-bold\"");
+            }
+            return (value?.ToString() ?? string.Empty, null);
+        } 
+    };
+}
+<h3>Report (Samples and Measurements)</h3>
+<partial name="pShowTable" model=@tv />

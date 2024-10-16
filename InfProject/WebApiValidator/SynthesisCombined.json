@@ -1,0 +1,183 @@
+{
+  "ProcessingStep": [
+    {
+      "ObjectId": 49700,
+      "Parameters": [
+        {
+          "name": "target source configuration => substrate bias => RF substrate bias => bias power forward",
+          "value": "30"
+        }
+      ]
+    },
+    {
+      "ObjectId": 49701,
+      "Parameters": [
+        {
+          "name": "general process parameters => flow PG",
+          "value": "40"
+        },
+        {
+          "name": "general process parameters => process duration",
+          "value": "270"
+        },
+        {
+          "name": "general process parameters => process pressure",
+          "value": "1"
+        },
+        {
+          "name": "general process parameters => start vacuum",
+          "value": "0.0006"
+        },
+        {
+          "name": "general process parameters => substrate rotation",
+          "value": "26"
+        },
+        {
+          "name": "general process parameters => substrate temperature",
+          "value": "20"
+        },
+        {
+          "name": "general process parameters => table height",
+          "value": "25"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => ignition power cathode 3",
+          "value": "120"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => power cathode 3",
+          "value": "100"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => pre clean power 3",
+          "value": "100"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => pre clean pressure cathode 3",
+          "value": "10"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => pre clean time 3",
+          "value": "300"
+        },
+        {
+          "name": "general process parameters => process gas",
+          "value": "Ar"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => target material 3",
+          "value": "Pt"
+        }
+      ]
+    },
+    {
+      "ObjectId": 49702,
+      "Parameters": [
+        {
+          "name": "general process parameters => flow PG",
+          "value": "80"
+        },
+        {
+          "name": "general process parameters => flow RG 1",
+          "value": "40"
+        },
+        {
+          "name": "general process parameters => process duration",
+          "value": "3600"
+        },
+        {
+          "name": "general process parameters => process pressure",
+          "value": "1"
+        },
+        {
+          "name": "general process parameters => start vacuum",
+          "value": "0.0007"
+        },
+        {
+          "name": "general process parameters => substrate rotation",
+          "value": "0"
+        },
+        {
+          "name": "general process parameters => substrate temperature",
+          "value": "300"
+        },
+        {
+          "name": "general process parameters => table height",
+          "value": "25"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => current cathode 2",
+          "value": "0.344"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => ignition power cathode 2",
+          "value": "100"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => power cathode 2",
+          "value": "123"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => pre clean power 2",
+          "value": "100"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => pre clean pressure cathode 2",
+          "value": "10"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => pre clean time 2",
+          "value": "300"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => voltage cathode 2",
+          "value": "368"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => ignition power cathode 4",
+          "value": "50"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => power forward cathode 4",
+          "value": "298"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => power reflected cathode 4",
+          "value": "6"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => pre clean power 4",
+          "value": "100"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => pre clean pressure cathode 4",
+          "value": "10"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => pre clean time 4",
+          "value": "300"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => voltage cathode 4",
+          "value": "268"
+        },
+        {
+          "name": "general process parameters => process gas",
+          "value": "Ar"
+        },
+        {
+          "name": "general process parameters => reactive gas 1",
+          "value": "O2"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => target material 2",
+          "value": "Co"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => target material 4",
+          "value": "Fe"
+        }
+      ]
+    }
+  ]
+}

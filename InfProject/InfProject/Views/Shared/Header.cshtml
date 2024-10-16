@@ -1,0 +1,64 @@
+﻿@using WebUtilsLib
+@inject InfProject.DBContext.DataContext dataContext
+<header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <div class="container-fluid">
+            <a id="topa" class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@dataContext.Tenant.TenantName Database</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Search" asp-action="Index">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="AdminTree" asp-action="Index">Tree Edit</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="AdminObject" asp-action="Index">List Edit</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Handover" asp-action="Index">Handover</a>
+                    </li>
+
+                    @if (Context.User.IsInRole(UserGroups.Administrator) || Context.User.IsInRole(UserGroups.PowerUser) || Context.User.IsInRole(UserGroups.User))
+                    {
+                        <li id="reportsli" class="nav-item me-2 d-none">
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownReports" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Reports
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownReports">
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="SamplesByElement">Samples by element</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="SamplesBySubstrate">Samples by substrate</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="SamplesByYear">Samples by year</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="SamplesByMonth">Samples by month</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="SamplesDocByMonth">Ext.Stats by month</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="SamplesEmpty">Empty samples (weak)</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="SamplesEmptyFull">Empty samples (full)</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="ObjectsStatistics">Objects Statistics</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="UsersStatistics">Users Statistics</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="RequestsForSynthesis">Requests for Synthesis</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="IdeasAndPlans">Ideas And Plans</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="UnclassifiedSamples">Unclassified samples</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    }
+                    <li id="sidformli" class="nav-item d-none">
+                        <form id="sidform" class="input-group" method="get" action="/object/id/" onsubmit="return headerSidSubmit();">
+                            <input id="sid" name="sid" type="number" step="1" min="1" max="2147483647" class="form-control" placeholder="find ObjectId" required />
+                            <input name="typeid" type="hidden" value="0" />
+                            <input name="smode" type="hidden" value="id" />
+@*                          <span id="sid_err" class="input-group-text d-none" title="please use an integer number"><i class="bi bi-exclamation-octagon"></i></span>*@
+                            <button class="input-group-text"><i class="bi bi-binoculars"></i></button>
+                        </form>
+                    </li>
+                </ul>
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </nav>
+</header>

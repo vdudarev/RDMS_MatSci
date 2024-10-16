@@ -1,0 +1,28 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@model ObjectInfo
+<tr>
+    <th colspan="2" class="text-danger text-center">@Model.GetType() - generic form start</th>
+</tr>
+@foreach (PropertyInfo propertyInfo in Model.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly ))
+{
+    DisplayAttribute attr = propertyInfo.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
+    if (attr == null || attr.GroupName=="HIDDEN")
+    {
+        <input type="hidden" name="@propertyInfo.Name" value="@propertyInfo.GetValue(Model)" />
+    }
+    else
+    {
+        <tr>
+            <th>
+                @Html.Raw(attr?.Name)
+            </th>
+            <td>
+                <input type="text" class="form-control" name="@propertyInfo.Name" value="@propertyInfo.GetValue(Model)" />
+            </td>
+        </tr>
+    }
+}
+<tr>
+    <th colspan="2" class="text-danger text-center">@Model.GetType() - generic form end</th>
+</tr>

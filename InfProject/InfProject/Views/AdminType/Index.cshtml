@@ -1,0 +1,104 @@
+﻿@using WebUtilsLib;
+@model List<TypeInfo>
+@{
+    ViewData["Title"] = $"All types";
+    // https://icons.getbootstrap.com/
+    if (!Context.User.IsInRole(UserGroups.Administrator))
+        throw new UnauthorizedAccessException("User is not Administrator");
+}
+
+<!-- Modal https://getbootstrap.com/docs/5.0/components/modal/ -->
+<div class="modal fade" id="myModalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-controller="AdminType" asp-action="Delete">
+            <input type="hidden" name="typeid" value="0" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger btndelete" title="Delete"><i class="bi bi-trash"></i> Delete</button></td>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<h1 class="display-4">All types</h1>
+<p>For Hierarchical data types Table must be RubricInfo</p>
+<table class="table" id="grid">
+    <thead><tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Table</th>
+        <th>Description</th>
+        <th>File Required</th>
+        <th>Validation Schema / Data Schema</th>
+        <th>Settings</th>
+        <th style="width:160px"><a href="@Url.Action("NewItem", "AdminType")" title="Add Type" class="btn btn-success btnadd" role="button"><i class="bi bi bi-folder-plus"></i></a> Actions</th>
+    </tr></thead>
+    <tbody>
+    @foreach (var row in Model)
+    {
+        <tr class="datarow" data-typeid="@row.TypeId" data-typename="@row.TypeName">
+            <td>@Html.Raw(row.TypeId)</td>
+            <td><b>@Html.Raw(row.TypeName)</b></td>
+            <td data-edit-name="SortCode">@row.TableName</td>
+            <td>@Html.Raw(row.TypeComment)</td>
+            <td>@(row.FileRequired ? "yes" : "no")</td>
+            <td>@row.ValidationSchema / @row.DataSchema</td>
+            <td>@(string.IsNullOrEmpty(row.SettingsJson) ? string.Empty : "+")</td>
+            <th class="cntBtns">
+                <form method="post" action="/admintype/delete" class="d-block float-end">
+                    <input type="hidden" name="typeId" value="@row.TypeId" />
+                    <button type="button" class="btn btn-danger btndelete" title="Delete"><i class="bi bi-trash"></i></button>
+                </form>
+                <a href="@Url.Action("EditItem", "AdminType", new { id = row.TypeId })" class="btn btn-primary btnedit d-block float-end me-3" title="Edit"><i class="bi bi-pencil"></i></a>
+            </th>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section Scripts {
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function GetCurrentTypeData(obj) {
+            var row = $(obj).closest("tr.datarow");
+            var TypeId = row.attr("data-typeid");
+            console.log("GetCurrentTypeData TypeId = " + TypeId);
+            var obj = row.data();
+            console.log("obj = " + JSON.stringify(obj));
+            return obj;
+        }
+
+        // edit on click
+        //$("#grid tbody tr td").click(function () {
+        //    document.location = $(this).parent().find(".btnedit").attr("href");
+        //});
+
+        $(document).ready(function(){
+            $(".btndelete").click(function () {   // delete (+ children)
+                var data = GetCurrentTypeData(this);
+                $("#myModalDelete input[name='typeid']").val(data.typeid);
+                $("#myModalDelete .modal-body").html("You are going to delete <u>" + data.typename + "</u> type. Are you sure? <span>[TypeId=" + $("#myModalDelete input[name='typeid']").val() + "]</span>");
+                ShowModal("myModalDelete");
+            });
+            initDataTable("#grid", {
+                paging: false,
+                searching: false,
+                fixedHeader: {
+                    header: true,
+                    footer: false
+                },
+                order: [
+                    [1, 'asc']
+                ]
+            });
+        });
+    </script>
+}

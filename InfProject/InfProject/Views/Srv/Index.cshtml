@@ -1,0 +1,174 @@
+﻿@model (IWebHostEnvironment host, IConfiguration config, IEmailSender mailSender, SmtpConfiguration smtpConfig, UserManager<ApplicationUser> userManager)
+@using System.Data
+@using Dapper
+@using System.Data.SqlClient
+@using IdentityManagerUI.Models
+@using Microsoft.AspNetCore.Identity.UI.Services
+@using InfProject.Utils
+@using Microsoft.AspNetCore.Identity
+@using WebUtilsLib
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    ViewData["Title"] = "Service";
+
+    System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+    bool isAdmin = currentUser.IsInRole("Administrator");
+    bool HasClaim_Name = currentUser.HasClaim(c => c.Type.EndsWith("/identity/claims/name"));
+    string Claim_Name = string.Empty; // currentUser.Claims.SingleOrDefault(c => c.Type == "Name")?.Value;
+    var appUser = Model.userManager.GetUserAsync(currentUser).Result; // Get user id
+
+}
+<h1 class="display-4">Service</h1>
+<p><b>TenantId</b>: @dataContext.TenantId</p>
+
+<div>
+    <h2>Identity</h2>
+    <p><b>appUser</b>: @appUser</p>
+    <p><b>appUser.id</b>: @appUser.Id</p>
+    <p><b>isAdmin</b>: @isAdmin</p>
+    <p><b>HasClaim_Name</b>: @HasClaim_Name</p>
+    <p><b>Claim_Name</b>: @Claim_Name</p>
+    @foreach (var cl in currentUser.Claims)
+    {
+        <li><u>@cl.Type</u> @cl.Value</li>
+    }
+
+    <h2>IWebHostEnvironment</h2>
+    <p><b>IsAuthenticated</b>: @System.Security.Principal.WindowsIdentity.GetCurrent().IsAuthenticated</p>
+    <p><b>UserName</b>: @System.Security.Principal.WindowsIdentity.GetCurrent().Name</p>
+    <p><b>RoleClaimType</b>: @System.Security.Principal.WindowsIdentity.GetCurrent().RoleClaimType</p>
+    <p><b>WebRootPath</b>: @Model.host.WebRootPath</p>
+    <p><b>ContentRootPath</b>: @Model.host.ContentRootPath</p>
+    <p><b>IsProduction</b>: @Model.host.IsProduction()</p>
+    <p><b>ToString</b>: @Model.ToString()</p>
+
+    <h2>IConfiguration</h2>
+    <p class="inactive">Path To Storage Root: @Model.config.GetStorageRoot()</p>
+
+</div>
+
+
+<hr />
+<h2>Instance information</h2>
+@{
+    //Model.config.GetConnectionString(name)
+    var connectionStrings = Model.config.GetSection("ConnectionStrings").GetChildren();
+    Dictionary<string, string> dic = new Dictionary<string, string>();
+    <table class="table table-striped">
+    <tr><th>TenantId</th><th>Tenant Name</th><th>Tenant Url</th></tr>
+    @foreach (var connectionString in connectionStrings)
+    {
+        string name = connectionString.Key;
+        string value = connectionString.Value;
+        @Html.Raw($"<tr class=\"table-primary\"><td colspan=\"3\"><h3>{name}</h3></td></tr>")
+        @Html.Raw($"<tr class=\"table-primary\"><td></td><td colspan=\"2\">{value}</td></tr>")
+        @if (name.StartsWith("InfDB"))
+        {
+            if (dic.TryGetValue(value, out string key))
+            {
+                @Html.Raw($"<tr><td></td><td colspan=\"2\">See above <b>{key}</b></td></tr>")
+                continue;
+            }
+            dic.Add(value, name);
+            IDbConnection connection = null;
+            try
+            {
+                try
+                {
+                    connection = new SqlConnection(value);
+                    var res = await connection.QueryAsync<dynamic>($"SELECT * FROM dbo.Tenant ORDER BY TenantId");
+                    <ul>
+                        @foreach (var tenant in res)
+                        {
+                            @Html.Raw($"<tr><td>{tenant.TenantId}</td><td>{tenant.TenantName}</td><td><a href=\"https://{tenant.TenantUrl}\" target=\"_blank\">{tenant.TenantUrl}</a></td></tr>")
+                        }
+                    </ul>
+                }
+                finally
+                {
+                    connection?.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                @Html.Raw($"<tr><td></td><td colspan=\"2\"><span style='color:red'><b>Exception</b>: {ex.GetType()} {ex.Message}</span></td></tr>")
+            }
+        }
+    }
+    </table>
+}
+
+
+
+
+<hr />
+<h2>SMTP Config</h2>
+
+<p>
+    <a class="btn btn-primary btn-sm" id="btnCollapseFilterAdditionalGroup" data-bs-toggle="collapse" href="#collapseFilterAdditionalGroup" role="button" aria-expanded="false" aria-controls="collapseFilterAdditionalGroup">
+        Sensitive info
+    </a>
+</p>
+<div class="collapse collapseFilterAdditionalGroup" id="collapseFilterAdditionalGroup">
+    @if (appUser.Email == "vic.dudarev@gmail.com")
+    {
+        <p>Host:Port: @Model.smtpConfig.Host:@Model.smtpConfig.Port</p>
+        <p>UseSSL: @Model.smtpConfig.UseSSL</p>
+        <p>Credentials (domain, user, password): @Model.smtpConfig.CredentialsDomain, @Model.smtpConfig.CredentialsUserName, @Model.smtpConfig.CredentialsPassword</p>
+        <p>From (Name, Email): @Model.smtpConfig.FromName, @Model.smtpConfig.FromEmail</p>
+    } else
+    {
+        <p>Sorry, this is available only to Victor Dudarev...</p>
+    }
+</div>
+
+
+<hr />
+<h2>Send Email Message</h2>
+<form method="post" asp-controller="srv" asp-action="SendMail">
+    <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">Subject</label>
+        <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" value="Test subject">
+    </div>
+    <div class="form-group">
+        <label for="htmlMessage">Message</label>
+        <textarea class="form-control" id="htmlMessage" name="htmlMessage" placeholder="HTML Message">Test message in HTML</textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Send Message</button>
+    </div>
+</form>
+
+<hr />
+
+
+@if (this.User.IsInRole("Administrator") && User.Identity.Name.Contains("vic.dudarev"))
+{
+    <h2>Execute SQL on all databases</h2>
+    <form method="post" asp-controller="srv" asp-action="ExecSQLAll">
+        <div class="form-group">
+            <label for="htmlMessage">SQL</label>
+            <textarea class="form-control" id="sql" name="sql" placeholder="SQL"></textarea>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Execute on all databasees</button>
+        </div>
+    </form>
+    <hr />
+}
+
+
+<h2>Recalculate File Hash</h2>
+<form method="post" asp-controller="srv" asp-action="RecalculateFileHash">
+    <input type="checkbox" class="form-check-input" id="allTenants" name="allTenants" value="true" />
+    <button type="submit" class="btn btn-primary">Recalculate File Hash</button>
+</form>
+
+<h2>Upload Jan's data</h2>
+<a href="/uploadjansdata/">Upload Jan's data</a>
+
+<p>Release date: @Html.Raw(FileUtils.Version()) (runtime @System.Reflection.Assembly.GetExecutingAssembly().ImageRuntimeVersion)</p>

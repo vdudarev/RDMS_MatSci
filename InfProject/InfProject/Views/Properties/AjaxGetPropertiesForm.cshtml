@@ -1,0 +1,12 @@
+﻿@model (string objectFormPrefix, int typeId)
+@using InfProject.DBContext;
+@using System.Text
+@using WebUtilsLib;
+@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@inject DataContext dataContext
+@{
+    Layout = null;
+    (string objectFormPrefix, int typeId) = Model;
+    (ObjectInfo obj, string objectFormPrefix) propFormModel = (new ObjectInfo() { TypeId = typeId }, objectFormPrefix);
+}
+<partial name="pEditItem_PropertiesForm" model=@propFormModel />

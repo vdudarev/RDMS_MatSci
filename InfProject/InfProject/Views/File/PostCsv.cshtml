@@ -1,0 +1,108 @@
+﻿@using InfProject.Models;
+@using System.Linq;
+@using InfProject.Utils;
+@model (System.Data.DataTable, string, byte[], System.Text.Encoding)
+@inject InfProject.DBContext.DataContext dataContext
+@{
+	// FULL analog of Csv.html, but data is coming from the POST request body
+	(System.Data.DataTable dt, string delimiter, byte[] data, System.Text.Encoding enc) = Model;
+	TableView tv = new TableView(dt) { EmptyMessage = "No records", Title = $"CSV Viewer for POST data" };
+	ViewData["Title"] = tv.Title;
+	List<string> columnNames = dt.Columns.Cast<System.Data.DataColumn>().Select(x => x.ColumnName).ToList();
+	string columnOptionsAll = string.Empty;
+	columnNames.ForEach(x => { columnOptionsAll += $"<option value=\"{x}\">{x}</option>"; });
+	string columnOptionsMultiple = columnNames.Skip(1).Select(x => $"<option selected value=\"{x}\">{x}</option>").Aggregate(string.Empty, (a, b) => a + b);
+}
+<partial name="pShowTable" model=@tv />
+<hr>
+
+<div>
+    <div id="PlotParameters" class="FilterText">
+        <div class="input-group mb-3">
+            <span class="input-group-text border-0 bg-transparent">X axis:</span>
+            <select class="form-select" id="AxisX" name="AxisX" aria-label="AxisX">
+				@Html.Raw(columnOptionsAll)
+            </select>
+            <span class="input-group-text border-0 bg-transparent">Y axis:</span>
+			<select class="form-select" id="AxisY" name="AxisY" aria-label="AxisY" multiple>
+				@Html.Raw(columnOptionsMultiple)
+			</select>
+			<span class="input-group-text border-0 bg-transparent"> </span>
+			<button class="btn btn-outline-secondary buttonSearch" type="button">Draw plot</button>
+		</div>
+	</div>
+</div>
+
+<div>
+	<div id="myChartErr" class="text-danger"></div>
+	<canvas id="myChartCanvas"></canvas>
+</div>
+<div id="buttons" class="d-none"></div>
+
+<div class="mt-5">
+	<h3>Materials Library Visualization</h3>
+	<p>Exclude elements (e.g., substrate):</p>
+	<p id="skipElements">
+		@{
+			ChemicalElementsValidator validator = new ChemicalElementsValidator();
+			var elements = validator.GetChemicalElementsOnly(columnNames);
+			foreach (var item in elements)
+			{
+				<input type="checkbox" name="@item" value="@item" style="margin-left:3em"> @item
+			}
+		}
+	</p>
+	<button type="button" class="btn btn-primary mr-2" style="margin-right:10px" onclick="DrawWafer()">Draw Materials Library</button>
+	<div id="forEdx"></div>
+	<div id="divCsv" class="d-none">@enc.GetString(data).TrimStart('\uFEFF')</div>
+</div>
+
+@section Scripts {
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/d3.v6.min.js" charset="utf-8"></script>
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/sortablejs-make/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script type="text/javascript">
+		var columns = [@Html.Raw(string.Join(',', columnNames.ConvertAll(x => $"\"{x}\"")))];  // Index + Available Elements
+		var delimiter = '@delimiter';
+		// var csvUrl = "/prefix/obj.ObjectId";	//	/file/download/...
+		var csv = document.getElementById("divCsv").innerText;
+		var myChart = null;
+		var waferCoords342 = null;
+		let data = d3.dsv(";", "/test/coords342mm.csv");
+
+		function DrawWafer() {
+			// chemicalElements
+			let config = { skipElements: [] };
+			$("#skipElements input[type=checkbox]:checked").each(function(){
+				config.skipElements.push($(this).attr("name"));
+			});
+			// console.log(config);
+			let data = d3.dsv(";", "/test/coords342mm.csv").then(function (data) {    // columns: "Spectrum", "X (mm)", "Y (mm)"
+				waferCoords342 = data;
+				// ViewWafer(csvUrl, delimiter, "#forEdx", config);
+				ViewWafer(d3.dsvFormat(delimiter).parse(csv), "#forEdx", config);
+			});
+		}
+
+		function ActionsOnLoad(){
+			initDataTable();
+
+			//myChart = new CsvChart(csvUrl, delimiter, columns, "#myChartErr", "#AxisX", "#AxisY");
+			myChart = new CsvChart(d3.dsvFormat(delimiter).parse(csv), columns, "#myChartErr", "#AxisX", "#AxisY");
+
+			if (@dt.Rows.Count == 342 || @dt.Rows.Count == 420) {
+				DrawWafer();
+			}
+		}
+
+        $(document).ready(function () {
+console.log("Post CSV: $(document).ready...");
+			ActionsOnLoad();
+        });
+    </script>
+}
+

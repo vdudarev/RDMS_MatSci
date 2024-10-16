@@ -1,0 +1,68 @@
+﻿@using InfProject.Models;
+@using System.Linq;
+@inject InfProject.DBContext.DataContext dataContext
+@{
+	ViewData["Title"] = $"Wafers";
+}
+<h1 class="display-4">@ViewData["Title"]</h1>
+
+<div>
+	<div id="forEdx"></div>
+</div>
+<hr>
+<div>
+	<div id="forEdx420"></div>
+</div>
+
+@section Scripts {
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/d3.v6.min.js" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+			//000008958_00.00_9522.csv
+			//d3.dsv(",", "/test/coords.csv").then(function (data) {    // columns: p, x, y
+			//	waferCoords342 = data;
+			//	console.log(waferCoords342);
+			//	console.log(waferCoords342.columns);
+			//	console.log(waferCoords342[0]);
+			//	console.log(waferCoords342[0]["p"] + ": x = " + waferCoords342[0]["x"] + "; y = " + waferCoords342[0]["y"]);
+			//});
+			d3.dsv(";", "/test/coords342mm.csv").then(function (data) {    // columns: "Spectrum", "X (mm)", "Y (mm)"
+				waferCoords342 = data;
+				/*
+				console.log(waferCoords342);
+				console.log(waferCoords342.columns);
+				console.log(waferCoords342[0]);
+				console.log(waferCoords342[0]["Spectrum"] + ": x = " + waferCoords342[0]["X (mm)"] + "; y = " + waferCoords342[0]["Y (mm)"]);
+				*/
+
+				// var file = "/test/000008958_00.00_9522.csv";
+				var file = "/test/000008958_00.00_9522_2.csv";
+				ViewWafer(file, ";", "#forEdx",
+					{
+						IndexColumnName: "Spectrum",
+						XColumnName: "X (mm)",
+						YColumnName: "Y (mm)",
+						sliceColumns: 3
+					}
+				);
+
+
+				var file = "/test/6490_420.csv";
+				ViewWafer(file, "\t", "#forEdx420",
+					{
+						IndexColumnName: "Spectrum",
+						XColumnName: "X (mm)",
+						YColumnName: "Y (mm)",
+						sliceColumns: 4,
+						skipElements: ["O"]
+					}
+				);
+			});
+
+        });
+
+    </script>
+}
+

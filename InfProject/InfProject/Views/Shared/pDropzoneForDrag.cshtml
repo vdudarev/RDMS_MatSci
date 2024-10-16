@@ -1,0 +1,35 @@
+﻿@using WebUtilsLib
+@using InfProject.DBContext;
+@inject DataContext dataContext
+@model (IEnumerable<InfProject.Models.TypeInfo> types, UserContext userCtx)
+@{
+    (IEnumerable<InfProject.Models.TypeInfo> types, UserContext userCtx) = Model;
+    // Link type objects
+    var linkTypeObjects = await dataContext.ObjectInfo_GetList_AccessControl(DataContext.LinkTypeTypeId, accessControl: (int)userCtx.access, userId: userCtx.userId);
+}
+<div class="fordrag">
+    <div class="input-group mb-3">
+        <span class="input-group-text border-0 bg-transparent">Search </span>
+        <select class="form-select" id="otypeId" name="otypeId" aria-label="otypeId" oninput="DoObjectSearch();">
+            <option value="0">all</option>
+            @foreach (var item in types)
+            {
+                <option value="@item.TypeId">@item.TypeName</option>
+            }
+        </select>
+        <span class="input-group-text border-0 bg-transparent">objects:</span>
+        <input id="oname" name="oname" class="form-control fieldSearch" type="text" placeholder="Input Object Name" onkeyup="DoObjectSearch();">
+        <button class="btn btn-outline-secondary buttonSearch" type="button" onclick="DoObjectSearch();">Search</button>
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text border-0 bg-transparent"><b>Link type</b> </span>
+        <select class="form-select" id="linkTypeObjectId" name="linkTypeObjectId" aria-label="linkTypeObjectId">
+            <option value="0">=- not specified -=</option>
+            @foreach (var item in linkTypeObjects)
+            {
+                <option value="@item.ObjectId">@item.ObjectName</option>
+            }
+        </select>
+    </div>
+    <ul class="list-group" id="listContainer"></ul>
+</div>

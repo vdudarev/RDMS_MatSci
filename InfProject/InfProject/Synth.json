@@ -1,0 +1,862 @@
+{
+  "ProcessingStep": [
+    {
+      "ObjectId": 49700,
+      "Parameters": [
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 4520,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 4520,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => substrate bias => RF substrate bias => bias power forward",
+          "type": "Float",
+          "value": "30",
+          "sortcode": 4520,
+          "comment": "W"
+        }
+      ]
+    },
+    {
+      "ObjectId": 49701,
+      "Parameters": [
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 140,
+          "comment": "Torr"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 150,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 160,
+          "comment": "°C"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 170,
+          "comment": "RPM"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 230,
+          "comment": "mm"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 250,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 260,
+          "comment": "sccm"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 1980,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2010,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2020,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2030,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2060,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "String",
+          "value": "K3",
+          "sortcode": 180
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "String",
+          "value": "K3",
+          "sortcode": 1635
+        },
+        {
+          "name": "general process parameters => flow PG",
+          "type": "Float",
+          "value": "40",
+          "sortcode": 260,
+          "comment": "sccm"
+        },
+        {
+          "name": "general process parameters => process duration",
+          "type": "Float",
+          "value": "270",
+          "sortcode": 150,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => process gas",
+          "type": "String",
+          "value": "Ar",
+          "sortcode": 180
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 140,
+          "comment": "Torr"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 150,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 160,
+          "comment": "°C"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 170,
+          "comment": "RPM"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 230,
+          "comment": "mm"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 250,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 260,
+          "comment": "sccm"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 1980,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 2010,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 2020,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 2030,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190902-K3-2",
+          "sortcode": 2060,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "String",
+          "value": "190902-K3-2",
+          "sortcode": 180
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "String",
+          "value": "190902-K3-2",
+          "sortcode": 1635
+        },
+        {
+          "name": "general process parameters => process pressure",
+          "type": "Float",
+          "value": "1",
+          "sortcode": 250,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => start vacuum",
+          "type": "Float",
+          "value": "0.0006",
+          "sortcode": 140,
+          "comment": "Torr"
+        },
+        {
+          "name": "general process parameters => substrate rotation",
+          "type": "Float",
+          "value": "26",
+          "sortcode": 170,
+          "comment": "RPM"
+        },
+        {
+          "name": "general process parameters => substrate temperature",
+          "type": "Float",
+          "value": "20",
+          "sortcode": 160,
+          "comment": "°C"
+        },
+        {
+          "name": "general process parameters => table height",
+          "type": "Float",
+          "value": "25",
+          "sortcode": 230,
+          "comment": "mm"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => ignition power cathode 3",
+          "type": "Float",
+          "value": "120",
+          "sortcode": 1980,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => power cathode 3",
+          "type": "Float",
+          "value": "100",
+          "sortcode": 2060,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => pre clean power 3",
+          "type": "Float",
+          "value": "100",
+          "sortcode": 2010,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => pre clean pressure cathode 3",
+          "type": "Float",
+          "value": "10",
+          "sortcode": 2030,
+          "comment": "mTorr"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => Mag3-Pulsed DC => pre clean time 3",
+          "type": "Float",
+          "value": "300",
+          "sortcode": 2020,
+          "comment": "s"
+        },
+        {
+          "name": "target source configuration => Cathode 3 => target material",
+          "type": "String",
+          "value": "Pt",
+          "sortcode": 1635
+        }
+      ]
+    },
+    {
+      "ObjectId": 49702,
+      "Parameters": [
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 140,
+          "comment": "Torr"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 150,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 160,
+          "comment": "°C"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 170,
+          "comment": "RPM"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 200,
+          "comment": "sccm"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 230,
+          "comment": "mm"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 250,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 260,
+          "comment": "sccm"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 970,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 1000,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 1010,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 1020,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 1050,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 1060,
+          "comment": "V"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 1070,
+          "comment": "A"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2810,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2840,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2850,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2860,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2890,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2900,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "Float",
+          "value": "K3",
+          "sortcode": 2910,
+          "comment": "V"
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "String",
+          "value": "K3",
+          "sortcode": 180
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "String",
+          "value": "K3",
+          "sortcode": 190
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "String",
+          "value": "K3",
+          "sortcode": 955
+        },
+        {
+          "name": "general process parameters => chamber",
+          "type": "String",
+          "value": "K3",
+          "sortcode": 2295
+        },
+        {
+          "name": "general process parameters => flow PG",
+          "type": "Float",
+          "value": "80",
+          "sortcode": 260,
+          "comment": "sccm"
+        },
+        {
+          "name": "general process parameters => flow RG 1",
+          "type": "Float",
+          "value": "40",
+          "sortcode": 200,
+          "comment": "sccm"
+        },
+        {
+          "name": "general process parameters => process duration",
+          "type": "Float",
+          "value": "3600",
+          "sortcode": 150,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => process gas",
+          "type": "String",
+          "value": "Ar",
+          "sortcode": 180
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 140,
+          "comment": "Torr"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 150,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 160,
+          "comment": "°C"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 170,
+          "comment": "RPM"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 200,
+          "comment": "sccm"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 230,
+          "comment": "mm"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 250,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 260,
+          "comment": "sccm"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 970,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 1000,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 1010,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 1020,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 1050,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 1060,
+          "comment": "V"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 1070,
+          "comment": "A"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 2810,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 2840,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 2850,
+          "comment": "s"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 2860,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 2890,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 2900,
+          "comment": "W"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "Float",
+          "value": "190904-K3-1",
+          "sortcode": 2910,
+          "comment": "V"
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "String",
+          "value": "190904-K3-1",
+          "sortcode": 180
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "String",
+          "value": "190904-K3-1",
+          "sortcode": 190
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "String",
+          "value": "190904-K3-1",
+          "sortcode": 955
+        },
+        {
+          "name": "general process parameters => process id",
+          "type": "String",
+          "value": "190904-K3-1",
+          "sortcode": 2295
+        },
+        {
+          "name": "general process parameters => process pressure",
+          "type": "Float",
+          "value": "1",
+          "sortcode": 250,
+          "comment": "mTorr"
+        },
+        {
+          "name": "general process parameters => reactive gas 1",
+          "type": "String",
+          "value": "O2",
+          "sortcode": 190
+        },
+        {
+          "name": "general process parameters => start vacuum",
+          "type": "Float",
+          "value": "0.0007",
+          "sortcode": 140,
+          "comment": "Torr"
+        },
+        {
+          "name": "general process parameters => substrate rotation",
+          "type": "Float",
+          "value": "0",
+          "sortcode": 170,
+          "comment": "RPM"
+        },
+        {
+          "name": "general process parameters => substrate temperature",
+          "type": "Float",
+          "value": "300",
+          "sortcode": 160,
+          "comment": "°C"
+        },
+        {
+          "name": "general process parameters => table height",
+          "type": "Float",
+          "value": "25",
+          "sortcode": 230,
+          "comment": "mm"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => current cathode 2",
+          "type": "Float",
+          "value": "0.344",
+          "sortcode": 1070,
+          "comment": "A"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => ignition power cathode 2",
+          "type": "Float",
+          "value": "100",
+          "sortcode": 970,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => power cathode 2",
+          "type": "Float",
+          "value": "123",
+          "sortcode": 1050,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => pre clean power 2",
+          "type": "Float",
+          "value": "100",
+          "sortcode": 1000,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => pre clean pressure cathode 2",
+          "type": "Float",
+          "value": "10",
+          "sortcode": 1020,
+          "comment": "mTorr"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => pre clean time 2",
+          "type": "Float",
+          "value": "300",
+          "sortcode": 1010,
+          "comment": "s"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => Mag2-DC => voltage cathode 2",
+          "type": "Float",
+          "value": "368",
+          "sortcode": 1060,
+          "comment": "V"
+        },
+        {
+          "name": "target source configuration => Cathode 2 => target material",
+          "type": "String",
+          "value": "Co",
+          "sortcode": 955
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => ignition power cathode 4",
+          "type": "Float",
+          "value": "50",
+          "sortcode": 2810,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => power forward cathode 4",
+          "type": "Float",
+          "value": "298",
+          "sortcode": 2890,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => power reflected cathode 4",
+          "type": "Float",
+          "value": "6",
+          "sortcode": 2900,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => pre clean power 4",
+          "type": "Float",
+          "value": "100",
+          "sortcode": 2840,
+          "comment": "W"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => pre clean pressure cathode 4",
+          "type": "Float",
+          "value": "10",
+          "sortcode": 2860,
+          "comment": "mTorr"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => pre clean time 4",
+          "type": "Float",
+          "value": "300",
+          "sortcode": 2850,
+          "comment": "s"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => Mag4-RF => voltage cathode 4",
+          "type": "Float",
+          "value": "268",
+          "sortcode": 2910,
+          "comment": "V"
+        },
+        {
+          "name": "target source configuration => Cathode 4 => target material",
+          "type": "String",
+          "value": "Fe",
+          "sortcode": 2295
+        }
+      ]
+    }
+  ]
+}

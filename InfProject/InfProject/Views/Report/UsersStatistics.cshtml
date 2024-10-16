@@ -1,0 +1,152 @@
+﻿@using InfProject.Utils
+@using WebUtilsLib;
+@inject InfProject.DBContext.DataContext dataContext
+@model (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, int rubricCount, int objectLinkCount)
+@{
+    (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, int rubricCount, int objectLinkCount) = Model;
+    string selectedPerson = selectedUserId != 0 ? persons.First(x => x.Id == selectedUserId).Name : string.Empty;
+    // mode == "weak", "full"
+    string adds = string.IsNullOrEmpty(selectedPerson) ? string.Empty : " for " + selectedPerson;
+
+    var objectsData = await dataContext.GetList_ExecDevelopment<dynamic>($@"select RANK() OVER(ORDER BY count(OI.ObjectId) DESC) AS [Rank], U.Id,
+[dbo].[fn_GetUserClaimCSV](U.Id, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name') as [Name],
+[dbo].[fn_GetUserClaimCSV](U.Id, 'Project') as Project,
+count(OI.ObjectId) as [Count]
+from dbo.AspNetUsers as U
+LEFT OUTER JOIN dbo.ObjectInfo as OI ON OI._createdBy=U.Id
+WHERE TenantId=@TenantId AND U.Id != 0
+GROUP BY U.Id
+ORDER BY [Count] desc", new { TenantId = dataContext.TenantId });
+
+    var rubricsData = await dataContext.GetList_ExecDevelopment<dynamic>($@"select RANK() OVER(ORDER BY count(RI.RubricId) DESC) AS [Rank], U.Id,
+[dbo].[fn_GetUserClaimCSV](U.Id, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name') as [Name],
+[dbo].[fn_GetUserClaimCSV](U.Id, 'Project') as Project,
+count(RI.RubricId) as [Count]
+from dbo.AspNetUsers as U
+LEFT OUTER JOIN dbo.RubricInfo as RI ON RI._createdBy=U.Id
+WHERE TenantId=@TenantId AND U.Id != 0
+GROUP BY U.Id
+ORDER BY [Count] desc", new { TenantId = dataContext.TenantId });
+
+    var linksData = await dataContext.GetList_ExecDevelopment<dynamic>($@"select RANK() OVER(ORDER BY count(OLO.ObjectLinkObjectId) DESC) AS [Rank], U.Id,
+[dbo].[fn_GetUserClaimCSV](U.Id, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name') as [Name],
+[dbo].[fn_GetUserClaimCSV](U.Id, 'Project') as Project,
+count(OLO.ObjectLinkObjectId) as [Count]
+from dbo.AspNetUsers as U
+LEFT OUTER JOIN dbo.ObjectLinkObject as OLO ON OLO._createdBy=U.Id AND OLO.ObjectId IN (select ObjectId from dbo.ObjectInfo where TenantId=@TenantId)
+WHERE U.Id != 0
+GROUP BY U.Id
+ORDER BY [Count] desc", new { TenantId = dataContext.TenantId });
+
+
+
+    string title = $"Users Statistics";
+    ViewData["Title"] = title;
+}
+
+<h1 class="display-4">@ViewData["Title"]</h1>
+
+<div class="accordion" id="accordionExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseObjects" aria-expanded="true" aria-controls="collapseObjects">
+                Objects Score Board
+            </button>
+        </h2>
+        <div id="collapseObjects" class="accordion-collapse collapse show" aria-labelledby="headingObjects" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <table class="table table-striped mt-0" id="tableObjects">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Project</th>
+                            <th>Entities Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in objectsData)
+                        {
+                            <tr>
+                                <td>@item.Rank</td>
+                                <td>@item.Name</td>
+                                <td>@item.Project</td>
+                                <td>@item.Count</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingProjects">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProjects" aria-expanded="true" aria-controls="collapseProjects">
+                Projects Score Board
+            </button>
+        </h2>
+        <div id="collapseProjects" class="accordion-collapse collapse" aria-labelledby="headingProjects" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <table class="table table-striped mt-0" id="tableProjects">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Project</th>
+                            <th>Entities Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in rubricsData)
+                        {
+                            <tr>
+                                <td>@item.Rank</td>
+                                <td>@item.Name</td>
+                                <td>@item.Project</td>
+                                <td>@item.Count</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingLinks">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLinks" aria-expanded="true" aria-controls="collapseLinks">
+                Links Score Board
+            </button>
+        </h2>
+        <div id="collapseLinks" class="accordion-collapse collapse" aria-labelledby="headingLinks" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <table class="table table-striped mt-0" id="tableLinks">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Project</th>
+                            <th>Entities Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in linksData)
+                        {
+                            <tr>
+                                <td>@item.Rank</td>
+                                <td>@item.Name</td>
+                                <td>@item.Project</td>
+                                <td>@item.Count</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+}

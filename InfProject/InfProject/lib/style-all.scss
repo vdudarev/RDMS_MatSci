@@ -1,0 +1,128 @@
+﻿@import "bootstrap/functions";
+@import "bootstrap/variables";
+
+@import "bootstrap/mixins/breakpoints";
+@import "bootstrap/mixins/grid-framework";
+@import "bootstrap/mixins/grid";
+@import "bootstrap/mixins/hover";
+@import "bootstrap/mixins/visibility";
+
+@import "variables";
+
+
+.menu-cat {
+    background-color: white;
+    padding: 2px 0;
+    border: 1px solid $color-border;
+    border-radius: $border-radius;
+
+    ul {
+        position: absolute;
+        top: -3px;
+        right: -302px;
+        width: 300px;
+        display: none;
+        padding: 2px 0;
+        margin: 0;
+        background-color: white;
+        border: 1px solid $color-border;
+        border-radius: $border-radius;
+        border-color: $color-border;
+        z-index: 2;
+    }
+
+    li {
+        position: relative;
+        padding: 0px;
+        border-bottom: 1px solid $color-border;
+        cursor: pointer;
+        list-style: none;
+
+        a {
+            color: black;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+        }
+
+        &.active {
+            > a {
+                color: #007bff;
+                // background-color: $active-bg-color;
+            }
+        }
+
+        .active-block {
+            display: block;
+        }
+    }
+
+    li.cur {
+        background-color:lightcyan;
+    }
+
+    li:last-child {
+        border-bottom: none;
+    }
+    /*> li > span:after, */ li[data-childs="1"] > span:after {
+        content: '+';
+        width: 20px;
+        height: 30px;
+        font-size: 1.2rem;
+        position: absolute;
+        top: 6px;
+        right: 4px;
+        z-index: $zindex-modal;
+        display: inline-block;
+        color: $color-border;
+    }
+    /*> li.active > span:after, */ li[data-childs="1"].active > span:after {
+        content: '-';
+        font-size: 2rem;
+        top: -5px;
+        color: #007bff;
+    }
+}
+
+
+.compoundTable {
+    position: relative;
+    font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    // border: 1px solid #DDD;
+    border-radius: 0.25rem;
+    box-shadow: 0 15px 10px -10px rgba(31, 31, 31, 0.5);
+    z-index: 10;
+    margin-bottom: 1em;
+    border-spacing:2px;
+
+    td.cell {
+        vertical-align: middle;
+        padding: 3px 5px;
+    }
+
+    th.cell {
+        text-align: center;
+        vertical-align: middle;
+        padding: 3px 5px;
+    }
+
+    .drag-handler {
+        width: 1.5em;
+        position: relative;
+        background-color: #E4E6EB;
+        background-image: linear-gradient(45deg, #E4E6EB, #E4E6EB 2px, #fff 2px, #fff 4px, #E4E6EB 4px, #E4E6EB 9px, #fff 9px, #fff 11px, #E4E6EB 11px, #E4E6EB 16px, #fff 16px, #fff 18px, #E4E6EB 18px, #E4E6EB 22px);
+        background-size: 10px 20px;
+        cursor: move;
+        border-top: 2px solid #FFF !important;
+        border-bottom: 2px solid #FFF !important;
+    }
+
+    .drag-handler:active {
+        background-image: linear-gradient(45deg, #bab86c, #bab86c 2px, #fff 2px, #fff 4px, #bab86c 4px, #bab86c 9px, #fff 9px, #fff 11px, #bab86c 11px, #bab86c 16px, #fff 16px, #fff 18px, #bab86c 18px, #bab86c 22px);
+        background-size: 10px 20px;
+    }
+
+    tr[data-element=''] {
+        display: none;
+    }
+}

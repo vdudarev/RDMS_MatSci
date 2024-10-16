@@ -1,0 +1,17 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@model ObjectInfo
+<p class="text-danger text-center">@Model.GetType() - generic form start</p>
+@foreach (PropertyInfo propertyInfo in Model.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+{
+    DisplayAttribute attr = propertyInfo.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
+    if (attr == null || attr.GroupName=="HIDDEN")
+    {
+        <p><small>@propertyInfo.Name: @Html.Raw(propertyInfo.GetValue(Model))</small></p>
+    }
+    else
+    {
+        <p><b>@Html.Raw(string.IsNullOrEmpty(attr?.Name) ? propertyInfo.Name : attr?.Name)</b>: @Html.Raw(propertyInfo.GetValue(Model))</p>
+    }
+}
+<p class="text-danger text-center">@Model.GetType() - generic form end</p>

@@ -1,0 +1,141 @@
+﻿@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@using WebUtilsLib;
+@using InfProject.Utils;
+@model (ObjectInfo obj, InfProject.Models.TypeInfo dbType, ControllerContext controllerContext, ICompositeViewEngine viewEngine)
+@inject InfProject.DBContext.DataContext dataContext
+@inject IConfiguration config
+@{
+    (ObjectInfo obj, TypeInfo type, ControllerContext controllerContext, ICompositeViewEngine viewEngine) = Model;
+    ViewData["object"] = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+    ViewData["type"] = Newtonsoft.Json.JsonConvert.SerializeObject(type);
+    UserContext userCtx = UserUtils.GetUserContext(Context);
+    AccessControlFilter accessControlFilter = new AccessControlFilter(userCtx.access, userCtx.userId);
+    var objWithAccess = (obj, accessControlFilter);
+    bool showLinksEdit = userCtx.userCanAdd;
+    var objFor_ObjectLinkObject = (obj, accessControlFilter, userCtx, showLinksEdit);
+
+    RubricInfo rubric = obj.RubricId.HasValue ? await dataContext.GetRubricById((int)obj.RubricId) : new RubricInfo();
+    Layout = "_LayoutLeftRubric";
+    ViewData["Title"] = $"{type.TypeName} {obj.ObjectName}";
+    ViewData["RubricId"] = rubric.RubricId;
+    (RubricInfo rubric, ObjectInfo obj) item = (rubric, obj);
+    string objectPartialView = TypeInfo.GetObjectPartialView(type.TableName);
+    var rawUrl = System.Net.WebUtility.UrlEncode(Context.Request.Path);
+    var userCanAdd = Context.User.IsInRole(UserGroups.PowerUser) || Context.User.IsInRole(UserGroups.Administrator);
+
+    List<TypeInfo> types=null;
+    string jsontypes = null;
+    if (userCanAdd)
+    {
+        types = (await dataContext.GetTypes()).Where(x => !x.IsHierarchical).ToList();
+        jsontypes = Newtonsoft.Json.JsonConvert.SerializeObject(types);
+    }
+}
+
+<partial name="RubricBreadCrumbs" model=@item />
+
+<input type="hidden" id="TypeId" name="TypeId" value="@obj.TypeId" />
+<input type="hidden" id="ExternalId" name="ExternalId" value="@obj.ExternalId" />
+<input type="hidden" id="ObjectId" name="ObjectId" value="@obj.ObjectId" />
+
+@if (!Context.IsWriteDenied(obj.AccessControl, (int)obj._createdBy))
+{
+    <h1 class="display-4 float-start">@Html.Raw(obj.ObjectName)</h1>
+    <a href="/adminobject/edititem/@obj.ObjectId/?returl=@rawUrl" class="btn btn-primary btnedit" title="Edit" style="float:right"><i class="bi bi-pencil"></i></a>
+    <div class="clearfix"></div>
+}
+else
+{
+    <h1 class="display-4">@Html.Raw(obj.ObjectName)</h1>
+}
+
+
+
+<p id="TypeP"><b>Type</b>: <span id="TypeSpan">@type.TypeName</span></p>
+<p><b>ObjectId</b>: @obj.ObjectId   @Html.Raw(obj.ExternalId.HasValue ? $"<small style='display:block; float:right;'>[ExternalId: {obj.ExternalId}]</small>" : string.Empty)</p>
+<p><b>Created</b>: @obj._created by @dataContext.GetUser((int)obj._createdBy!).Result</p>
+<p><b>Access</b>: @obj.AccessControl</p>
+@if (obj._created != obj._updated)
+{
+    <p><b>Updated</b>: @obj._updated by @dataContext.GetUser((int)obj._updatedBy!).Result</p>
+}
+
+<p><b>Name</b>: @Html.Raw(obj.ObjectName)</p>
+<p><b>Description</b>: @Html.Raw(obj.ObjectDescription)</p>
+@if (!string.IsNullOrEmpty(obj.ObjectFilePath) && File.Exists(config.MapStorageFile(obj.ObjectFilePath)))
+{
+    <div class="objectInfo">
+        <p>
+            <b>File attached</b>: <a class="filetype @FileUtils.GetFileTypeClass(obj.ObjectFile)" href="/file/download/@obj.ObjectId">@obj.ObjectFile</a>
+            @await Html.PartialAsync("../Shared/pShowFile", new FileItem(obj.ObjectId, obj.TypeId, obj.ObjectFilePath, enableAnalysis: true))
+        </p>
+    </div>
+}
+else if (!string.IsNullOrEmpty(obj.ObjectFilePath))
+{
+    <p>
+        <b>File attached</b>: <span class="text-danger">file not found</span> [@obj.ObjectFile]
+    </p>
+}
+<!-- objectPartialView: @objectPartialView -->
+@if (type.TableName != "ObjectInfo")
+{  // for Objects, that have additional fields:
+    // https://stackoverflow.com/questions/31905624/where-are-the-controllercontext-and-viewengines-properties-in-mvc-6-controller
+    ViewEngineResult result = viewEngine.FindView(controllerContext, objectPartialView, false);
+    if (result.Success /*System.IO.File.Exists($@"Views\Object\{objectPartialView}.cshtml")*/)    // custom View exists => Use it
+    {
+        <partial name=@objectPartialView model=@obj />
+    }
+    else // use common generic View
+    {
+        <partial name="_Object" model=@obj />
+    }
+}
+
+<partial name="_Handover" model=@objWithAccess />
+
+<partial name="_ObjectLinkObject" model=@objFor_ObjectLinkObject />
+<partial name="_ObjectLinkObject_Reverse" model=@objWithAccess />
+@* <partial name="_PropertyAll" model=@obj /> *@
+<partial name="_PropertyAllUnion" model=@obj />
+<partial name="_PropertyAllTable" model=@obj />
+<partial name="_VisualExtension" model=@Model />
+
+
+@if (userCanAdd)
+{
+    if (obj.TypeId == InfProject.DBContext.DataContext.SampleTypeId)
+    {
+        <partial name="pSampleAddProcessingStep" model=@obj.ObjectId />
+        <div class="mt-4">
+            <partial name="pSampleSplitIntoPieces" model=@obj.ObjectId />
+        </div>
+    }
+
+    (string title, string btnText, int idr, int ido, string returl) uploadSettings = ("Upload Linked Files (by creating objects)", "Upload and Preview", rubric.RubricId, obj.ObjectId, rawUrl);
+    <partial name="Upload" model=@uploadSettings />
+}
+
+
+@section Scripts {
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+@* Upload scripts - BEGIN *@
+    <script type="text/javascript" src="~/js/dragdropFile.js"></script>
+@* Upload scripts - END *@
+    @if (userCanAdd) {
+        <script type="text/javascript">app.objectId = @obj.ObjectId;</script>
+        <script type="text/javascript">app.types = @Html.Raw(jsontypes);</script>
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            initDataTable();
+            OpenClose("#tableAllUnion ", "span.sepName", "bg-primary");
+
+
+            // _Handover component
+
+
+        });
+</script>
+}

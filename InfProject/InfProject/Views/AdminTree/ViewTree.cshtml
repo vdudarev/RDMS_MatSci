@@ -1,0 +1,80 @@
+﻿@model (dynamic type, string empty)
+@{
+    ViewData["Title"] = $"Editing type {Model.type.TypeName}";
+    if (!Context.User.IsInRole(WebUtilsLib.UserGroups.PowerUser.ToString()) && !Context.User.IsInRole(WebUtilsLib.UserGroups.Administrator.ToString()))
+        throw new UnauthorizedAccessException("User is not PowerUser or Administrator");
+}
+<style>
+    .gj-grid-management-column div { width:280px; }
+    .gj-grid-management-column div .gj-button-md:first-child { padding-left:0; }
+
+</style>
+<h1 class="display-4">@Model.type.TypeName</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <table id="grid"></table>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <link href="~/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+@*Test with gijgo Grid Edit - rejected (too complex to maintain)
+*@    
+<script src="~/js/gijgo.min.js" type="text/javascript"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script type="text/javascript">
+        function select2editor($editorContainer, value, record) {
+            var select = $('<select><option value="0">public</option><option value="1">protected</option><option value="2">protectedNDA</option><option value="3">private</option></select>');
+            $editorContainer.append(select);
+            select.select2();
+        }
+        $(document).ready(function () {
+            var acList = [{ id: 0, text: "public" }, { id: 1, text: "protected" }, { id: 2, text: "protectedNDA" }, { id: 3, text: "private" }];
+            var grid, countries;
+            grid = $('#grid').grid({
+                dataSource: '/AdminTree/GetTreeData/@Model.type.TypeId',    //  /AdminTree/GetTreeData/1/
+                uiLibrary: 'bootstrap4',
+                primaryKey: 'RubricId',
+                inlineEditing: { mode: 'command' }, // 'dblclick'
+                columns: [
+                    { field: 'RubricId', title: 'Id', width: 40 },
+                    { field: 'ParentId', title: 'Parent Id', editor: true },
+                    { field: 'Level' },
+                    { field: 'RubricPath', title: 'Path' },
+                    { field: 'SortType', title: 'Sort', editor: true },
+                    { field: 'RubricName', title: 'Name', editor: true },
+                    { field: 'AccessControl', title: 'Access', type: 'dropdown', editField: 'AccessControl', editor: select2editor },
+                    { field: 'IsPublished', title: 'Published?', type: 'checkbox', editor: true, width: 90, align: 'center' }
+                ]
+            });
+            grid.on('rowDataChanged', function (e, id, record) {
+                // Clone the record in new object where you can format the data to format that is supported by the backend.
+                var data = $.extend(true, {}, record);
+                // Format the date to format that is supported by the backend.
+                // data.DateOfBirth = gj.core.parseDate(record.DateOfBirth, 'mm/dd/yyyy').toISOString();
+                // Post the data to the server
+console.log("rowDataChanged = " + JSON.stringify(data));
+                $.ajax({ url: '/Players/Save', data: { record: data }, method: 'POST' })
+                    .fail(function () {
+                        alert('Failed to save.');
+                    });
+            });
+            grid.on('rowRemoving', function (e, $row, id, record) {
+                if (confirm('Are you sure?')) {
+                    $.ajax({ url: '/Players/Delete', data: { id: id }, method: 'POST' })
+                        .done(function () {
+                            grid.reload();
+                        })
+                        .fail(function () {
+                            alert('Failed to delete.');
+                        });
+                }
+            });
+        });
+    </script>
+
+}

@@ -1,0 +1,1 @@
+curl -X POST "https://validation.matinf.pro/edx/data/databasevaluesbody" -H "accept: text/plain" -H "Content-Type: application/octet-stream" --data-binary "@0008088_EDX_ZGH_Ho L default_V-Mn-Co-Ni-Ho.csv"

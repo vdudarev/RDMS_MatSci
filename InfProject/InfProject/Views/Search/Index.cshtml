@@ -1,0 +1,202 @@
+﻿@using static WebUtilsLib.DBUtils;
+@model (List<string> availableElements, List<InfProject.Utils.WebAppUser> persons)
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    (List<string> availableElements, List<InfProject.Utils.WebAppUser> persons) = Model;
+    var types = (await dataContext.GetTypes()).Where(x => !x.IsHierarchical);
+    var jsontypes = Newtonsoft.Json.JsonConvert.SerializeObject(types);
+
+    ViewData["Title"] = "Search";
+    var system = Context.Request.Query["system"];
+    int prcnt;
+    int.TryParse(Context.Request.Query["prcnt"], out prcnt);
+    var propTypes = Enum.GetValues(typeof(PropertyType)).Cast<PropertyType>().ToList();
+}
+<h1 class="display-4">Search</h1>
+
+@await Html.PartialAsync("../Shared/pMendeleevWide", true)
+<script src="~/js/filterScripts.js" asp-append-version="true"></script>
+<p>
+    <a class="btn btn-primary btn-sm" id="btnCollapseFilterAdditionalGroup" data-bs-toggle="collapse" href="#collapseFilterAdditionalGroup,#collapseFilterSpecial" role="button" aria-expanded="false" aria-controls="collapseFilterAdditionalGroup">
+        Additional filters
+    </a>
+    <span class="collapse collapseFilterSpecial" id="collapseFilterSpecial">
+        <a class="btn btn-light btn-sm ms-3" id="btnCollapseFilterSpecial" data-bs-toggle="collapse" href="#collapseFilterSpecialForm" role="button" aria-expanded="false" aria-controls="collapseFilterSpecialForm">Specific search</a>
+    </span>
+</p>
+<div class="collapse collapseFilterAdditionalGroup" id="collapseFilterAdditionalGroup">
+    <div class="collapse collapseFilterSpecialForm" id="collapseFilterSpecialForm">
+        <div id="FilterIds" class="FilterIds">
+            <div class="input-group mb-3">
+                <span class="input-group-text border-0 bg-transparent">Object Id:</span>
+                <input type="text" id="ObjectId" name="ObjectId" value="" class="form-control fieldSearch" placeholder="Object Id" aria-label="ObjectId" aria-describedby="buttonFilterText">
+                <span class="input-group-text border-0 bg-transparent">External Id:</span>
+                <input type="text" id="ExternalId" name="ExternalId" value="" class="form-control fieldSearch" placeholder="External Id" aria-label="ExternalId" aria-describedby="buttonFilterText">
+            </div>
+        </div>
+    </div>
+
+    <div id="FilterText" class="FilterText">
+        <div class="input-group" style="margin-bottom:0.5rem">
+            <span class="input-group-text border-0 bg-transparent">Object type:</span>
+            <select class="form-select" id="TypeId" name="TypeId" aria-label="TypeId" asp-items="@(new SelectList(types, nameof(TypeInfo.TypeId), nameof(TypeInfo.TypeName)))">
+                <option></option>
+            </select>
+            <span class="input-group-text border-0 bg-transparent">Search phrase:</span>
+            <input type="text" id="SearchPhrase" name="SearchPhrase" value="" class="form-control fieldSearch" placeholder="text in Name or Description" aria-label="Name or Description" aria-describedby="buttonFilterText">
+        </div>
+    </div>
+
+@*    <!-- Important - lazy filled in runtime - contain names of properties for 4 types of properties: PropNamesInt, PropNamesFloat, PropNamesString, PropNamesBigString -->*@
+    <div class="d-none" id="datalist">
+@*        <datalist id="PropNamesInt">
+            <option>name_1</option>
+        </datalist>*@
+        <div class="err"></div>
+    </div>
+
+    <div id="FilterProperties" class="FilterProperties border border-light" style="border-radius:0.25rem; border-color:#ced4da !important">
+        @if (prcnt == 0) {  // template
+            <div class="rowitem input-group" style="margin-bottom:0.5rem; margin-top:0.5rem">
+                <span class="input-group-text border-0 bg-transparent">Property type:</span>
+                <select class="form-select" name="PropertyType" aria-label="PropertyType" asp-items="@(new SelectList(propTypes))" onchange="PropTypeChange(this)">
+                    <option style="color:gray" value="">select type</option>
+                </select>
+                <span class="input-group-text border-0 bg-transparent">Name:</span>
+                <input type="text" name="PropertyName" value="" class="form-control fieldSearch" placeholder="Name" aria-label="Name" aria-describedby="buttonFilterProperties" list="">
+
+                <span class="input-group-text border-0 bg-transparent propChangeable always" style="display:none">Property Value:</span>
+
+                <select class="form-select fieldSearch propChangeable string" name="StringCompare" aria-label="StringCompare" style="display:none">
+                    <option value="0">equal</option>
+                    <option value="1">starts with</option>
+                    <option value="2">ends with</option>
+                    <option value="3">contains</option>
+                </select>
+                <input type="text" name="ValueString" value="" class="form-control fieldSearch propChangeable string" placeholder="text to match" aria-label="Text to search" aria-describedby="buttonFilterProperties" style="display:none">
+
+                <input type="number" name="ValueMin" value="" class="form-control fieldSearch propChangeable number" placeholder="min" aria-label="Min value" aria-describedby="buttonFilterProperties" style="display:none">
+                <span class="input-group-text border-0 bg-transparent propChangeable number" style="display:none">&leq; value &leq;</span>
+                <input type="number" name="ValueMax" value="" class="form-control fieldSearch propChangeable number" placeholder="max" aria-label="Max value" aria-describedby="buttonFilterProperties" style="display:none">
+                <span class="input-group-text border-0 bg-transparent"></span>
+                <button type="button" class="btn btn-success btndelete" title="Clone" style="width:40px" onclick="CloneProperty(this)"><i class="bi bi bi-folder-plus"></i></button>
+                <button type="button" class="btn btn-danger btndelete" title="Delete" style="width:40px; margin-right:0.5rem" onclick="DeleteProperty(this)"><i class="bi bi-trash"></i></button>
+            </div>
+        } else
+        {
+            for (int i = 0; i < prcnt; i++)
+            {
+                string name = Context.Request.Query[$"pr{i}name"];
+                string type = Context.Request.Query[$"pr{i}type"];
+                string min = Context.Request.Query[$"pr{i}min"];
+                string max = Context.Request.Query[$"pr{i}max"];
+                string str = Context.Request.Query[$"pr{i}str"];
+
+                <div class="rowitem input-group" style="margin-bottom:0.5rem; margin-top:0.5rem">
+                    <span class="input-group-text border-0 bg-transparent">Property type:</span>
+                    <select class="form-select" name="PropertyType" aria-label="PropertyType" onchange="PropTypeChange(this)">
+                        <option style="color:gray" value="">select type</option>
+                        @for (int j = 0; j < propTypes.Count(); j++)
+                        {
+                            <option value="@propTypes[j]" selected="@(propTypes[j].ToString()!=type ? null : "selected")">@propTypes[j]</option>
+                        }
+                    </select>
+                    <span class="input-group-text border-0 bg-transparent">Name:</span>
+@*                    <script>app.propertyNames.push({ type: "@type", nameShort: "@WebUtilsLib.StringUtils.DeleteHtmlTags(name)", name: "@name" });</script>
+*@                    <input type="text" name="PropertyName" value="@WebUtilsLib.StringUtils.DeleteHtmlTags(name)" class="form-control fieldSearch" placeholder="Name" aria-label="Name" aria-describedby="buttonFilterProperties" list="@($"PropNames{type}")">
+@*                    <input type="text" name="PropertyName" value="@name" class="form-control fieldSearch" placeholder="Name" aria-label="Name" aria-describedby="buttonFilterProperties" list="@($"PropNames{type}")">
+*@
+                    <span class="input-group-text border-0 bg-transparent propChangeable always">Property Value:</span>
+
+                    <select class="form-select fieldSearch propChangeable string" name="StringCompare" aria-label="StringCompare" style="@(type=="String" || type=="BigString" ? null : "display:none")">
+                        <option value="0" selected="@(max!="0" ? null : "selected")">equal</option>
+                        <option value="1" selected="@(max!="1" ? null : "selected")">starts with</option>
+                        <option value="2" selected="@(max!="2" ? null : "selected")">ends with</option>
+                        <option value="3" selected="@(max!="3" ? null : "selected")">contains</option>
+                    </select>
+                    <input type="text" name="ValueString" value="@str" class="form-control fieldSearch propChangeable string" placeholder="text to match" aria-label="Text to search" aria-describedby="buttonFilterProperties" style="@(type=="String" || type=="BigString" ? null : "display:none")">
+
+                    <input type="number" name="ValueMin" value="@min" class="form-control fieldSearch propChangeable number" placeholder="min" aria-label="Min value" aria-describedby="buttonFilterProperties" style="@(type=="Int" || type=="Float" ? null : "display:none")">
+                    <span class="input-group-text border-0 bg-transparent propChangeable number" style="@(type=="Int" || type=="Float" ? null : "display:none")">&leq; value &leq;</span>
+                    <input type="number" name="ValueMax" value="@max" class="form-control fieldSearch propChangeable number" placeholder="max" aria-label="Max value" aria-describedby="buttonFilterProperties" style="@(type=="Int" || type=="Float" ? null : "display:none")">
+                    <span class="input-group-text border-0 bg-transparent"></span>
+                    <button type="button" class="btn btn-success btndelete" title="Clone" style="width:40px" onclick="CloneProperty(this)"><i class="bi bi bi-folder-plus"></i></button>
+                    <button type="button" class="btn btn-danger btndelete" title="Delete" style="width:40px" onclick="DeleteProperty(this)"><i class="bi bi-trash"></i></button>
+                </div>
+            }    
+        }
+    </div>
+    <script type="text/javascript">
+        function CloneProperty(obj) {
+            var html = $(obj).parent().prop('outerHTML');
+            $("#FilterProperties").append(html);
+        }
+        function DeleteProperty(obj) {
+            $(obj).parent().remove();
+        }
+        // change of drop-down select with types (Float, Int, String, BigString)
+        function PropTypeChange(obj){
+            var propType = $(obj).val();
+            if (propType == 'Float' || propType == 'Int') {
+                $(obj).parent().find(".propChangeable.number").show();
+                $(obj).parent().find(".propChangeable.string").hide();
+            } else if (propType == 'String' || propType == 'BigString') {
+                $(obj).parent().find(".propChangeable.number").hide();
+                $(obj).parent().find(".propChangeable.string").show();
+            }
+            else {
+                $(obj).parent().find(".propChangeable").hide();
+            }
+            if (propType == 'Float' || propType == 'Int' || propType == 'String' || propType == 'BigString') {
+                $(obj).parent().find(".propChangeable.always").show();  // common
+                FillDataList(propType);
+                $(obj).parent().find("input[name='PropertyName']").attr("list", "PropNames" + propType);
+            }
+        }
+
+    </script>
+
+    <div id="FilterCreatedDate" class="FilterCreatedDate" style="margin-top:0.5rem">
+        <div class="input-group mb-3">
+            <span class="input-group-text border-0 bg-transparent">Created by:</span>
+            <select class="form-select" id="CreatedByUser" name="CreatedByUser" aria-label="Person" asp-items="@(new SelectList(persons, nameof(InfProject.Utils.WebAppUser.Id), nameof(InfProject.Utils.WebAppUser.Name)))">
+                <option></option>
+            </select>
+            <span class="input-group-text border-0 bg-transparent">from:</span>
+            <input id="CreatedMin" name="CreatedMin" class="form-control fieldSearch" type="date" value="" />
+            <span id="startCreatedDate"></span>
+            <span class="input-group-text border-0 bg-transparent">till:</span>
+            <input id="CreatedMax" name="CreatedMax" class="form-control fieldSearch" type="date" value="" />
+            <span class="input-group-text border-0 bg-transparent"> </span>
+            <button class="btn btn-outline-secondary buttonSearch" type="button">Search</button>
+        </div>
+    </div>
+
+</div>
+
+<div id="listContainer" class="selectedElementsResult">
+    <p class="inactive">Please select some substrates or elements...</p>
+</div>
+
+@section Scripts {
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/sortablejs-make/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script type="text/javascript">
+        app.types = @Html.Raw(jsontypes);
+
+        app.initElementsArr = [@Html.Raw(string.Join(',', availableElements.ConvertAll(x => $"\"{x}\"")))];  // Available Elements
+        app.initPersonsArr = [@Html.Raw(string.Join(',', persons.ConvertAll(x => x.ToJson)))];  // Available Persons
+
+        $(document).ready(function () {
+            const params = new Proxy(new URLSearchParams(window.location.search), {
+                get: (searchParams, prop) => searchParams.get(prop),
+            });
+            let filter = GetFilterByRequest();
+            Mendeleev_doInit(filter);
+            MakeSearchSortableTable();
+        });
+    </script>
+}
+

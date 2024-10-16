@@ -1,0 +1,64 @@
+﻿@inject IConfiguration config
+@{
+    ViewData["Title"] = "Terms of Service";
+    string contacts = config.GetSection("ContactInfo:Html").Value;
+    if (string.IsNullOrEmpty(contacts))
+    {
+        contacts = "[please specify your contact data in the configuration key <b>ContactInfo:Html</b>]";
+    }
+}
+<h1>@ViewData["Title"]</h1>
+
+<h2>1. Introduction</h2>
+<p>Welcome to MatInf RDMS. These Terms of Service ("Terms") govern your access to and use of our web application and services ("Services"). 
+    By using our Services, you agree to comply with these Terms. If you do not agree with these Terms, you may not use our Services.</p>
+
+<h2>2. About Us</h2>
+<p><a href="https://matinf.pro/">MatInf RDMS Team</a> is committed to providing high-quality services while adhering to sustainable data management practices. We are based in Germany and operate in compliance with applicable German, EU, and international laws.</p>
+
+<h2>3. Eligibility</h2>
+<p>By using our Services, you confirm that you are at least 18 years old or have the legal capacity to enter into a binding agreement with us. If you are using our Services on behalf of a company or organization, you represent that you have the authority to bind that entity to these Terms.</p>
+
+<h2>4. Account Registration</h2>
+<p>To access certain features of our Services, you may need to create an account. You agree to provide accurate and complete information during registration and to keep your account information up-to-date. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+
+<h2>5. Use of Services</h2>
+<p>You agree to use our Services only for lawful purposes and in accordance with these Terms.</p> 
+<p>You are prohibited from:
+<ul>
+    <li>Engaging in any activity that violates applicable laws or regulations.</li>
+    <li>Interfering with or disrupting the integrity or performance of our Services.</li>
+    <li>Attempting to gain unauthorized access to our systems or other users' accounts.</li>
+    <li>Using our Services to distribute malicious software or engage in phishing or other fraudulent activities.</li>
+</ul>
+</p>
+
+<h2>6. Data Management and Storage</h2>
+<p>We are committed to sustainable data management practices. As part of our commitment, we retain your data for at least 10 years, in accordance with legal requirements and best practices. We perform regular backups to ensure the security and integrity of your data. However, we are not responsible for data loss due to unforeseen events or circumstances beyond our control.</p>
+
+<h2>7. Data Privacy</h2>
+<p>Your privacy is important to us. Our use of your personal data is governed by our Privacy Policy, which is incorporated into these Terms by reference. By using our Services, you consent to the collection, use, and storage of your data as described in our Privacy Policy.</p>
+
+<h2>8. Intellectual Property</h2>
+<p>All content, features, and functionality available through our Services, including but not limited to software, text, graphics, logos, and images, are the intellectual property of [Your Company Name] or our licensors. You are granted a limited, non-exclusive, non-transferable license to access and use the Services for your personal or business use. You may not copy, modify, distribute, or create derivative works based on our content without our prior written consent.</p>
+
+<h2>9. Fees and Payments</h2>
+<p>Some of our Services may be offered for a fee. By selecting a paid service, you agree to pay all applicable fees and charges. Payments will be processed through a secure third-party payment processor. We reserve the right to change our fees at any time, with reasonable notice to you.</p>
+
+<h2>10. Termination</h2>
+<p>We may terminate or suspend your access to our Services at any time, with or without cause, and without prior notice. Upon termination, your right to use the Services will immediately cease. If you wish to terminate your account, you may do so by contacting us. Termination does not relieve you of any obligations to pay fees or charges accrued prior to termination.</p>
+
+<h2>11. Warranties and Disclaimers</h2>
+<p>Our Services are provided "as is" and "as available," without warranties of any kind, either express or implied. We do not warrant that the Services will be uninterrupted, error-free, or free of viruses or other harmful components. To the fullest extent permitted by law, we disclaim all warranties, express or implied, including but not limited to implied warranties of merchantability and fitness for a particular purpose.</p>
+
+<h2>12. Limitation of Liability</h2>
+<p>To the extent permitted by law, MatInf RDMS Team shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or goodwill, arising out of or in connection with your use of the Services, even if we have been advised of the possibility of such damages.</p>
+
+<h2>13. Governing Law and Dispute Resolution</h2>
+<p>These Terms shall be governed by and construed in accordance with the laws of Germany, without regard to its conflict of law principles. Any disputes arising out of or relating to these Terms or the Services shall be resolved exclusively in the courts of [Your City], Germany.</p>
+
+<h2>14. Changes to These Terms</h2>
+<p>We may update these Terms from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will notify you of significant changes by posting the updated Terms on our web application and, where appropriate, by email. Your continued use of the Services after such changes constitutes your acceptance of the new Terms.</p>
+
+<h2>15. Contact Us</h2>
+<p>If you have any questions or concerns about these Terms, please contact us at:<br />@Html.Raw(contacts)</p>

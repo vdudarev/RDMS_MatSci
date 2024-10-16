@@ -1,0 +1,13 @@
+﻿@using WebUtilsLib
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    Layout = "_LayoutLeftRubric";
+    ViewData["Title"] = $"{dataContext.Tenant.TenantName} Database Home Page";
+    UserContext userCtx = UserUtils.GetUserContext(Context);
+}
+<h1 class="display-4">@dataContext.Tenant.TenantName</h1>
+
+<partial name="UserStatus" />
+<partial name="pLastUserActivity" model=@userCtx />
+<partial name="pIncludeStaticFileContent" model=@("index.html", "<p>Home page to describe information resource and explain the necessity of authorization to get full access to the information...</p>") />
+<partial name="pLastAdditions" model=@(userCtx, 0) />

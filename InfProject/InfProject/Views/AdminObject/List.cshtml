@@ -1,0 +1,334 @@
+﻿@using WebUtilsLib;
+@model (TypeInfo type, List<ObjectInfo> list)
+@{
+    ViewData["Title"] = $"Editing type {Model.type.TypeName}";
+    // https://icons.getbootstrap.com/
+    // <i class="bi bi-bag-check"></i>
+    // <i class="bi bi-bag-x">System.Exception column 6: dfg (unknown column name)</i>
+    if (!Context.User.IsInRole(UserGroups.PowerUser) && !Context.User.IsInRole(UserGroups.Administrator))
+        throw new UnauthorizedAccessException("User is not PowerUser or Administrator");
+}
+<partial name="pDataModel" model="false" />
+
+<!-- Modal https://getbootstrap.com/docs/5.0/components/modal/ -->
+<div class="modal fade" id="myModalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-controller="AdminObject" asp-action="Delete">
+            <input type="hidden" name="TypeId" value="@Model.type.TypeId" />
+            <input type="hidden" name="objectid" value="0" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger btndelete" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<h1 class="display-4">@Model.type.TypeName List</h1>
+@if (!Context.User.IsInRole(UserGroups.Administrator) && !Context.User.HasClaim(InfProject.Controllers.AdminObjectController.ClaimNameToShowAllObjects, "1"))
+{
+    <p class="text-primary">filtered by the user created objects: @Model.list.Count object(s)</p>
+}
+<table class="table" id="grid">
+    <thead><tr>
+        <th>Name / Description</th>
+        <th><i class="bi bi-sort-numeric-down"></i></th>
+        <th>Date</th>
+        <th>Access</th>
+        <th>Ext</th>
+        <th>File Name</th>
+        <th style="width:160px"><a href="@Url.Action("NewItem", "AdminObject", new { id = Model.type.TypeId })" title="Add" class="btn btn-success btnadd" role="button"><i class="bi bi bi-folder-plus"></i></a> Actions</th>
+    </tr></thead>
+    <tbody>
+    @foreach (var row in Model.list)
+    {
+            <tr class="datarow" data-ObjectId="@row.ObjectId" data-ObjectName="@row.ObjectName">
+            <td>
+                <span id="@("objValidator" + row.ObjectId)" class="title validator d-none"><i class="bi bi-hourglass-split"></i></span>
+                <a href="javascript:void(0);" title="Data to upload" id="@("objData" + row.ObjectId)" class="title objData d-none" onclick="ShowDatabaseDataForObject(@row.ObjectId)"><i class="bi bi-database-add bi-bag-check"></i></a>
+                <span id="@("objReload" + row.ObjectId)" class="title reload d-none"><i class="bi bi-hourglass-split"></i></span>
+                @{
+                // <a href="@("/rubric/" + listRubrics.First(x => x.RubricId==obj.RubricId).RubricNameUrl + "#o" + row.ObjectId)">@Html.Raw(row.ObjectName)</a>
+                }
+                @Html.Raw(row.ObjectName)
+                <div><small class="text-secondary">@Html.Raw(row.ObjectDescription)</small></div>
+            </td>
+            <td data-edit-name="SortCode">@row.SortCode</td>
+            <td data-edit-name="created">@row._created?.ToString("yyyy-MM-dd")</td>
+            <td data-edit-name="AccessControl" class="@("acl"+row.AccessControl)">@((AccessControl)row.AccessControl)</td>
+            <td>@StringUtils.GetExtensionNoDot(row.ObjectFile)</td>
+            <td>@row.ObjectFile</td>
+            <th class="cntBtns">
+                <a href="@Url.Action("EditItem", "AdminObject", new { id = row.ObjectId })" class="btn btn-primary btnedit" title="Edit"><i class="bi bi-pencil"></i></a>
+                <button type="button" class="btn btn-danger btndelete" title="Delete"><i class="bi bi-trash"></i></button>
+            </th>
+        </tr>
+    }
+    </tbody>
+</table>
+<h3>Data Verification</h3>
+<div>
+    <a href="javascript:void(0)" class="btn btn-primary btnCheckType" onclick="ValidateAllBatch()"><i class="bi bi-check2-all"></i> Recheck files for all objects of the type (single batch)</a>
+    <div id="ValidateAllBatchWaiter" class="spinner-border text-primary ms-2 d-none" role="status">
+        <span class="visually-hidden">processing...</span>
+    </div>
+</div>
+<div class="mt-3">
+    <a href="javascript:void(0)" class="btn btn-primary btnCheckType" onclick="ValidateAllOneByOne()"><i class="bi bi-check2-all"></i> Recheck files for all objects of the type (one by one)</a>
+    <div id="ValidateAllOneByOneWaiter" class="spinner-border text-primary ms-2 d-none" role="status">
+        <span class="visually-hidden">processing...</span>
+    </div>
+    <div class="progress mt-2 d-none" id="ValidateAllOneByOneProgress">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+    </div>
+</div>
+<div class="text-danger mt-3" id="msgValidation"></div>
+
+<h3 class="mt-3">Data Upload from files</h3>
+<div class="mt-3">
+    <a href="javascript:void(0)" class="btn btn-primary btnCheckType" onclick="ReloadAllBatch()"><i class="bi bi-database-up"></i> Reload data from all files for valid objects of the type (single batch)</a>
+    <div id="ReloadAllBatchWaiter" class="spinner-border text-primary ms-2 d-none" role="status">
+        <span class="visually-hidden">processing...</span>
+    </div>
+</div>
+<div class="mt-3">
+    <a href="javascript:void(0)" class="btn btn-primary btnCheckType" onclick="ReloadAllOneByOne()"><i class="bi bi-database-up"></i> Reload data from all files for valid objects of the type (one by one)</a>
+    <div id="ReloadAllOneByOneWaiter" class="spinner-border text-primary ms-2 d-none" role="status">
+        <span class="visually-hidden">processing...</span>
+    </div>
+    <div class="progress mt-2 d-none" id="ReloadAllOneByOneProgress">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+    </div>
+</div>
+
+<div class="text-danger mt-3" id="msgReload"></div>
+
+@section Scripts {
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/sortablejs-make/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script type="text/javascript">
+        // получаем все данные по товару в виде объекта
+        function GetCurrentObjectData(obj) {
+            var row = $(obj).closest("tr.datarow");
+            var ObjectId = row.attr("data-objectid");
+            console.log("GetCurrentObjectData ObjectId = " + ObjectId);
+            var obj = row.data();
+            console.log("obj = " + JSON.stringify(obj));
+            return obj;
+        }
+
+        //$("#grid tbody tr td").click(function () {
+        //    document.location = $(this).parent().find(".btnedit").attr("href");
+        //});
+
+        // reset Form to Initial state (no validation, no data load)
+        function initWaitFormIcons(settings) {
+            if (app.allObjects.active){
+                alert("Another process is active, please wait...");
+                return false;
+            }
+            app.allObjects = { ids: [], curIndex: 0, ok: 0, fail: 0, reloadok: 0, reloadfail: 0, active: true };
+            settings = settings || { showValidator: true, showReload: false };
+            $("#msgValidation").html("");
+            $("#msgReload").html("");
+            // init icons
+            $(".datarow span.title.validator .bi").removeClass("bi-bag-check").removeClass("bi-bag-x").addClass("bi-hourglass-split").html("");
+            $(".datarow a.objData").addClass("d-none");
+            if (settings.showValidator) {
+                $(".datarow span.title.validator").attr("title", "").removeClass("d-none");
+            }
+            else {
+                $(".datarow span.title.validator").attr("title", "").addClass("d-none");
+            }
+            $(".datarow span.title.reload .bi").removeClass("bi-database-check").removeClass("bi-database-exclamation").addClass("bi-hourglass-split").html("");
+            if (settings.showReload) {
+                $(".datarow span.title.reload").attr("title", "").removeClass("d-none");
+            } else {
+                $(".datarow span.title.reload").attr("title", "").addClass("d-none");
+            }
+            $("#ValidateAllOneByOneProgress, #ReloadAllOneByOneProgress").addClass("d-none");
+            $("#ValidateAllOneByOneProgress div, #ReloadAllOneByOneProgress div").html("").attr("style", "width:0%").attr("aria-valuenow", "0");
+            // add all objects
+            $("tr.datarow[data-ObjectId]").each(function () {
+                const objectId = $(this).attr("data-ObjectId");
+                app.allObjects.ids.push(parseInt(objectId));
+            });
+            return true;
+            // console.log(app.allObjects);
+        }
+
+        // button validate all pressed (in a single batch)
+        async function ValidateAllBatch() {
+            if (!initWaitFormIcons())
+                return;
+            let timeStart = (new Date()).getTime();
+            $("#ValidateAllBatchWaiter").removeClass("d-none");
+            let data = null;
+            try {
+                data = await $.ajax({
+                    async: true,
+                    type: "POST",
+                    url: "/typevalidation/validatebatch",
+                    data: app.allObjects.ids.join(','),
+                    dataType: "json",
+                });
+                // get the result
+                if (data.batch) {
+                    for (i = 0; i < data.batch.length; i++) {
+                        $("#objValidator" + data.batch[i].objectId + " .bi").removeClass("bi-bag-check").removeClass("bi-bag-x").removeClass("bi-hourglass-split").html("");
+                        if (data.batch[i].result.code == 0) {
+                            $("#objValidator" + data.batch[i].objectId + " .bi").addClass("bi-bag-check").html(addPrefixIfNotEmpty("Warning: ", data.batch[i].result.warning));
+                            $("#objData" + data.batch[i].objectId).removeClass("d-none");  // show Data icon on object
+                            app.allObjects.ok++;
+                        } else {
+                            $("#objValidator" + data.batch[i].objectId + " .bi").addClass("bi-bag-x").html(addPrefixIfNotEmpty("Fail: ", data.batch[i].result.message));
+                            app.allObjects.fail++;
+                        }
+                    }
+                    let timeFinish = (new Date()).getTime();
+                    const timeSec = ((timeFinish - timeStart) / 1000);
+                    $("#msgValidation").html("Validation completed: ok: " + app.allObjects.ok + ", fail: " + app.allObjects.fail + " [time taken: " + timeSec + " s]");
+                }
+            } catch (error) {
+                console.error(error);
+                /*let msg = XMLHttpRequest.responseText;
+                if (msg.indexOf('\n') > 0) {
+                    msg = msg.substr(0, msg.indexOf('\n'))
+                }*/
+                $("#msgValidation").html(error);
+            }
+            $("#ValidateAllBatchWaiter").addClass("d-none");
+            app.allObjects.active = false;
+            return data;
+        }
+
+
+        // button validate all pressed (one by one)
+        async function ValidateAllOneByOne() {
+            if (!initWaitFormIcons())
+                return;
+            let timeStart = (new Date()).getTime();
+            $("#ValidateAllOneByOneWaiter").removeClass("d-none");
+            $("#ValidateAllOneByOneProgress").removeClass("d-none");
+            let progress=0;
+            // run the sequence - loop
+            for (let i = 0; i < app.allObjects.ids.length; i++) {
+                progress = Math.round(i * 100 / app.allObjects.ids.length);
+                $("#ValidateAllOneByOneProgress div").html(i + " of " + app.allObjects.ids.length).attr("style", "width:" + progress + "%").attr("aria-valuenow", progress);
+                // console.log("ValidateAllOneByOne " + i + " => " + app.allObjects.ids[i]);
+                await ValidateFileType(app.allObjects.ids[i]);
+            }
+            let timeFinish = (new Date()).getTime();
+            const timeSec = ((timeFinish - timeStart) / 1000);
+            $("#msgValidation").html("Validation completed: ok: " + app.allObjects.ok + ", fail: " + app.allObjects.fail + " [time taken: " + timeSec + " s]");
+            $("#ValidateAllOneByOneWaiter").addClass("d-none");
+            $("#ValidateAllOneByOneProgress").addClass("d-none");
+            app.allObjects.active = false;
+        }
+
+
+
+        // button reload all pressed (one by one)
+        async function ReloadAllOneByOne() {
+            if (!initWaitFormIcons({ showValidator: true, showReload: true }))
+                return;
+            let timeStart = (new Date()).getTime();
+            $("#ReloadAllOneByOneWaiter").removeClass("d-none");
+            $("#ReloadAllOneByOneProgress").removeClass("d-none");
+            let progress = 0;
+            // run the sequence - loop
+            for (let i = 0; i < app.allObjects.ids.length/* && i<10*/; i++) {
+                progress = Math.round(i * 100 / app.allObjects.ids.length);
+                $("#ReloadAllOneByOneProgress div").html(i + " of " + app.allObjects.ids.length).attr("style", "width:" + progress + "%").attr("aria-valuenow", progress);
+                // console.log("ReloadAllOneByOne " + i + " => " + app.allObjects.ids[i]);
+                await ReloadFileType(app.allObjects.ids[i]);
+            }
+            let timeFinish = (new Date()).getTime();
+            const timeSec = ((timeFinish - timeStart) / 1000);
+            $("#msgReload").html("Validation completed: ok: " + app.allObjects.ok + ", fail: " + app.allObjects.fail + "<br/>Reload completed: ok: " + app.allObjects.reloadok + ", fail: " + app.allObjects.reloadfail + " [time taken: " + timeSec + " s]");
+            $("#ReloadAllOneByOneWaiter").addClass("d-none");
+            $("#ReloadAllOneByOneProgress").addClass("d-none");
+            app.allObjects.active = false;
+        }
+
+
+        // button Reload all pressed (in batch)
+        async function ReloadAllBatch() {
+            if (!initWaitFormIcons({ showValidator: true, showReload: true }))
+                return;
+            let timeStart = (new Date()).getTime();
+            $("#ReloadAllBatchWaiter").removeClass("d-none");
+            // console.log(allObjects);
+
+            let data = null;
+            try {
+                data = await $.ajax({
+                    async: true,
+                    type: "POST",
+                    url: "/typevalidation/reloadbatch",
+                    data: app.allObjects.ids.join(','),
+                    dataType: "json",
+                });
+                // get the result
+                if (data.batch) {
+                    let ok = 0;
+                    let fail = 0;
+                    let reloadok = 0;
+                    let reloadfail = 0;
+                    for (i = 0; i < data.batch.length; i++) {
+                        $("#objValidator" + data.batch[i].objectId + " .bi").removeClass("bi-bag-check").removeClass("bi-bag-x").removeClass("bi-hourglass-split").html("");
+                        $("#objReload" + data.batch[i].objectId + " .bi").removeClass("bi-database-check").removeClass("bi-database-exclamation").removeClass("bi-hourglass-split");
+                        if (data.batch[i].result.code == 0) {
+                            $("#objValidator" + data.batch[i].objectId + " .bi").addClass("bi-bag-check").html(addPrefixIfNotEmpty("Warning: ", data.batch[i].result.warning));
+                            $("#objData" + data.batch[i].objectId).removeClass("d-none");  // show Data icon on object
+                            ok++;
+                        } else {
+                            $("#objValidator" + data.batch[i].objectId + " .bi").addClass("bi-bag-x").html(addPrefixIfNotEmpty("Fail: ", data.batch[i].result.message));
+                            fail++;
+                        }
+                        if (data.batch[i].reloadResult.code == 0) {
+                            $("#objReload" + data.batch[i].objectId + " .bi").addClass("bi-database-check").html(addPrefixIfNotEmpty("Warning: ", data.batch[i].reloadResult.warning));
+                            reloadok++;
+                        } else {
+                            $("#objReload" + data.batch[i].objectId + " .bi").addClass("bi-database-exclamation").html(addPrefixIfNotEmpty("Fail: ", data.batch[i].reloadResult.message));
+                            reloadfail++;
+                        }
+                    }
+                    let timeFinish = (new Date()).getTime();
+                    const timeSec = ((timeFinish - timeStart) / 1000);
+                    $("#msgReload").html("Validation completed: ok: " + ok + ", fail: " + fail + "<br/>Reload completed: ok: " + reloadok + ", fail: " + reloadfail + " [time taken: " + timeSec + " s]");
+                }
+            } catch (error) {
+                console.error(error);
+                /*let msg = XMLHttpRequest.responseText;
+                if (msg.indexOf('\n') > 0) {
+                    msg = msg.substr(0, msg.indexOf('\n'))
+                }*/
+                $("#msgReload").html(error);
+            }
+            $("#ReloadAllBatchWaiter").addClass("d-none");
+            app.allObjects.active = false;
+            return data;
+        }
+
+
+        $(document).ready(function(){
+            initDataTable("#grid");
+            $(".btndelete").click(function () {   // delete (+ children)
+                var data = GetCurrentObjectData(this);
+                $("#myModalDelete input[name='objectid']").val(data.objectid);
+                $("#myModalDelete .modal-body").html("You are going to delete <u>" + data.objectname + "</u>. Are you sure? <span>[ObjectId=" + $("#myModalDelete input[name='objectid']").val() + "]</span>");
+                ShowModal("myModalDelete");
+            });
+        });
+    </script>
+}

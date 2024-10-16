@@ -1,0 +1,77 @@
+﻿@using InfProject.Models;
+@using System.Linq;
+@using InfProject.Utils;
+@model ObjectInfo
+@inject InfProject.DBContext.DataContext dataContext
+@{
+	ObjectInfo obj = Model;
+    var type = await dataContext.GetType(obj.TypeId);
+    string externalVisualizer = type.GetSettingsUrlPostVisualizer();
+    ViewData["Title"] = $"Post External: preparing and sending request to {externalVisualizer} please wait...";
+}
+<h1 class="display-4">@ViewData["Title"]</h1>
+<div id="ReloadAllBatchWaiter" class="spinner-border text-primary" role="status">
+	<span class="visually-hidden">processing...</span>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+        function fetchAndSendData() {
+            // Replace 'YOUR_SERVER_URL' with the URL that returns the binary data from the server
+            const url = '/file/download/' + @obj.ObjectId;
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    // Now you can use the Blob directly in your web page as needed
+                    // For example, you can send it to another server using fetch()
+console.log('sendBlobToServer(' + url + '):', blob);
+                    sendBlobToServer(blob);
+                })
+                .catch(error => {
+                    console.error('Error fetchAndSendData: ', error);
+                });
+        }
+
+        // Helper function to send the base64 string to another server
+        function sendBlobToServer(blob) {
+            fetch('@externalVisualizer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/octet-stream'
+                },
+                body: blob
+            })
+                .then(response => response.text()) // Get the result page
+                .then(htmlContent => {
+                    console.log('htmlContent= ' + htmlContent);
+                    console.log('htmlContent.length = ' + htmlContent.length);
+
+                    // Replace the current HTML with the new HTML content
+                    // document.documentElement.innerHTML = '';
+                    //document.body.innerHTML = '';
+
+                    //const newElement = document.createElement('div');
+                    //newElement.innerHTML = htmlContent;
+
+                    //// Append the new element to the body to execute JavaScript
+                    //document.body.appendChild(newElement);
+
+                    // Open a new window with the new HTML content
+                    const newWindow = window.open();
+                    newWindow.document.write(htmlContent);
+                    newWindow.document.close();
+
+                    //if (typeof ActionsOnLoad == 'function') {
+                    //    ActionsOnLoad();    // init;
+                    //}
+                    window.history.back();  // to return to a page with link
+                })
+                .catch(error => {
+                    // Handle errors
+                    console.error('Error sendBlobToServer: ', error);
+                });
+        }
+
+        fetchAndSendData();
+    </script>
+}
+

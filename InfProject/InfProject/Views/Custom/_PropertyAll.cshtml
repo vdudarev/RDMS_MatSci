@@ -1,0 +1,324 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@using Newtonsoft.Json;
+@model ObjectInfo
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    var listFloat = await dataContext.Property_GetPropertyFloat(Model.ObjectId);
+    var listInt = await dataContext.Property_GetPropertyInt(Model.ObjectId);
+    var listString = await dataContext.Property_GetPropertyString(Model.ObjectId);
+    var listBigString = await dataContext.Property_GetPropertyBigString(Model.ObjectId);
+    var propertyNames = await dataContext.Property_GetPropertyNameByType(Model.TypeId);
+}
+<script type="text/javascript">
+    function FillNamesList(mode){
+        var propertyNames = @Html.Raw(JsonConvert.SerializeObject(propertyNames));
+        var st = "";
+        for (i = 0; i < propertyNames.length; i++){
+            // <option>PropertyName</option>
+            console.log(propertyNames[i].PropertyType + " " + propertyNames[i].PropertyName);
+            if (propertyNames[i].PropertyType == mode)
+                st += "<option>" + propertyNames[i].PropertyName + "</option>";
+        }
+        console.log("FillNamesList("+mode+") = " + st);
+        $("#mynames").html(st);
+    }
+</script>
+<!-- Modal https://getbootstrap.com/docs/5.0/components/modal/ -->
+<div class="modal fade" id="myModalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-controller="AdminProperty" asp-action="Delete">
+            <input type="hidden" name="mode" value="" />
+            <input type="hidden" name="ObjectId" value="@Model.ObjectId" readonly />
+            <input type="hidden" name="PropertyId" value="" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger btndelete" title="Delete"><i class="bi bi-trash"></i> Delete</button></td>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal https://getbootstrap.com/docs/5.0/components/modal/ -->
+<div class="modal fade" id="myModalUpdateInsert" tabindex="-1" aria-labelledby="ModalUpdateInsertLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-controller="AdminProperty" asp-action="UpdateInsert" onsubmit="return CheckForm();">
+            <input type="hidden" name="mode" id="mode" value="" />
+            <input type="hidden" name="ObjectId" value="@Model.ObjectId" readonly />
+            <input type="hidden" name="PropertyId" value="" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalUpdateInsertLabel">Editing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-2">
+                        <label for="PropertyName"><b>Name</b></label>
+                        <input list="mynames" type="text" class="form-control" id="PropertyName" name="PropertyName" value="" aria-describedby="PropertyNameHelp" placeholder="Input property name">
+                        <datalist id="mynames">
+@*                        @foreach (var item in propertyNames)
+                        {
+                            <option>@item.PropertyName</option>
+                        }*@
+                        </datalist>
+
+                        <small id="PropertyNameHelp" class="form-text text-muted">name of the property</small>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="Value"><b>Value</b></label>
+                        <input type="text" class="form-control" id="Value" name="Value" aria-describedby="ValueHelp" placeholder="Input the value of the property for object">
+                        <textarea name="Value" class="form-control" id="ValueT" aria-describedby="ValueHelp" placeholder="Input the value of the property for object" style="display:none;" disabled></textarea>
+                        <small id="ValueHelp" class="form-text text-muted">specify the value of the property</small><a href="javascript:void(0)" id="change" onclick="InputTextarea()" style="float:right">Extend</a>
+                    </div>
+                    <div class="form-group mb-2 epsilon">
+                        <label for="ValueEpsilon">Value Epsilon</label>
+                        <input type="text" class="form-control" id="ValueEpsilon" name="ValueEpsilon" value="" aria-describedby="ValueEpsilonHelp" placeholder="Input measurement error">
+                        <small id="ValueEpsilonHelp" class="form-text text-muted">specify the measurement error of the property</small>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="SortCode"><i class="bi bi-sort-numeric-down"></i> (Sort Code)</label>
+                        <input type="number" class="form-control" id="SortCode" name="SortCode" value="" aria-describedby="SortCodeHelp" placeholder="Input integer for sort">
+                        <small id="SortCodeHelp" class="form-text text-muted">within a list all properties are sorted by this number (ascending)</small>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="Row">Row</label>
+                        <input type="number" class="form-control" id="Row" name="Row" value="" aria-describedby="RowHelp" placeholder="Input integer row number to form a virtual table">
+                        <small id="RowHelp" class="form-text text-muted">row number to display a value in a virtual table (1+)</small>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="Comment">Comment</label>
+                        <input type="text" class="form-control" id="Comment" name="Comment" value="" aria-describedby="CommentHelp" placeholder="Input any comments">
+                        <small id="CommentHelp" class="form-text text-muted">any comments in a free form</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="err"></div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" title="Save"><i class="bi bi-save2-fill"></i> Save</button></td>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="props">
+    <h3>Property values</h3>
+
+    <table class="table table-striped caption-top">
+        <caption>Floating-point properties</caption>
+        <thead>
+            <tr><th>Row</th><th><i class="bi bi-sort-numeric-down"></i></th><th>Name</th><th>Value</th><th>Epsilon</th><th>Comment</th><th style="width:110px"><button type="button" class="btn btn-success btnaddchild" title="Add floating-point value" onclick="AddValue('Float')"><i class="bi bi-folder-plus"></i></button></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var item in listFloat)
+        {
+            <tr class="datarow" data-id="@item.PropertyFloatId" data-sortcode="@item.SortCode" data-row="@item.Row" data-created="@item._created" data-updated="@item._updated" data-mode="Float">
+                    <td>@item.Row</td>
+                    <td>@item.SortCode</td>
+                    <td class="name">@Html.Raw(item.PropertyName)</td>
+                    <td class="value">@item.Value</td>
+                    <td class="valueEpsilon">@item.ValueEpsilon</td>
+                    <td class="comment">@item.Comment</td>
+                    <td>
+                <button type="button" class="btn btn-primary btnedit" title="Edit" onclick="EditValue('Float', @item.PropertyFloatId)"><i class="bi bi-pencil"></i></button>
+                <button type="button" class="btn btn-danger btndelete" title="Delete" onclick="DeleteValue('Float', @item.PropertyFloatId)"><i class="bi bi-trash"></i></button>
+            </td></tr>
+        }
+        </tbody>
+    </table>
+
+    <table class="table table-striped caption-top">
+        <caption>Integer properties</caption>
+        <thead>
+            <tr><th>Row</th><th><i class="bi bi-sort-numeric-down"></i></th><th>Name</th><th>Value</th><th>Comment</th><th style="width:110px"><button type="button" class="btn btn-success btnaddchild" title="Add integer value" onclick="AddValue('Int')"><i class="bi bi-folder-plus"></i></button></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var item in listInt)
+        {
+            <tr class="datarow" data-id="@item.PropertyIntId" data-sortcode="@item.SortCode" data-row="@item.Row" data-created="@item._created" data-updated="@item._updated" data-mode="Int">
+                <td>@item.Row</td><td>@item.SortCode</td><td class="name">@Html.Raw(item.PropertyName)</td><td class="value">@item.Value</td><td class="comment">@item.Comment</td><td>
+                <button type="button" class="btn btn-primary btnedit" title="Edit" onclick="EditValue('Int', @item.PropertyIntId)"><i class="bi bi-pencil"></i></button>
+                <button type="button" class="btn btn-danger btndelete" title="Delete" onclick="DeleteValue('Int', @item.PropertyIntId)"><i class="bi bi-trash"></i></button>
+            </td></tr>
+        }
+        </tbody>
+    </table>
+
+    <table class="table table-striped caption-top">
+        <caption>String properties</caption>
+        <thead>
+            <tr><th>Row</th><th><i class="bi bi-sort-numeric-down"></i></th><th>Name</th><th>Value</th><th>Comment</th><th style="width:110px"><button type="button" class="btn btn-success btnaddchild" title="Add string value" onclick="AddValue('String')"><i class="bi bi-folder-plus"></i></button></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var item in listString)
+        {
+                <tr class="datarow" data-id="@item.PropertyStringId" data-sortcode="@item.SortCode" data-row="@item.Row" data-created="@item._created" data-updated="@item._updated" data-mode="String">
+                <td>@item.Row</td><td>@item.SortCode</td><td class="name">@Html.Raw(item.PropertyName)</td><td class="value">@item.Value</td><td class="comment">@item.Comment</td><td>
+                <button type="button" class="btn btn-primary btnedit" title="Edit" onclick="EditValue('String', @item.PropertyStringId)"><i class="bi bi-pencil"></i></button>
+                <button type="button" class="btn btn-danger btndelete" title="Delete" onclick="DeleteValue('String', @item.PropertyStringId)"><i class="bi bi-trash"></i></button>
+            </td></tr>
+        }
+        </tbody>
+    </table>
+
+
+    <div>
+        <b>Add big string value</b>: <button type="button" class="btn btn-success btnaddchild" title="Add big string value" onclick="AddValue('BigString')"><i class="bi bi-folder-plus"></i></button>
+        @foreach (var item in listBigString)
+        {
+            <div class="card datarow mb-2" data-id="@item.PropertyBigStringId" data-sortcode="@item.SortCode" data-row="@item.Row" data-created="@item._created" data-updated="@item._updated" data-mode="BigString">
+                <div class="card-body">
+                <h5 class="name">@Html.Raw(item.PropertyName)</h5>
+                <div class="value">@item.Value</div>
+                    <div class="comment">@item.Comment @Html.Raw(item.Row > 0 ? $" <small>[Row={item.Row}]</small>": string.Empty)</div>
+                <div>
+                    <button type="button" class="btn btn-primary btnedit" title="Edit" onclick="EditValue('BigString', @item.PropertyBigStringId)"><i class="bi bi-pencil"></i></button>
+                    <button type="button" class="btn btn-danger btndelete" title="Delete"><i class="bi bi-trash" onclick="DeleteValue('BigString', @item.PropertyBigStringId)"></i></button>
+                </div>
+            </div></div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    function CheckForm(){
+        var mode = $("#mode").val();
+        var name = $("#PropertyName").val();
+        var value = $("#Value").prop("disabled") ? $("#ValueT").val() : $("#Value").val();
+        if (name.length<1){
+            SetError("Name should be specified");
+            return false;
+        }
+        if (value.length < 1) {
+            SetError("Value should be specified");
+            return false;
+        }
+        if (mode == "Int" && Number.isNaN(parseInt(value))) {
+            SetError("Value should be an integer number");
+            return false;
+        }
+        if (mode == "Float") {
+            // console.log(value + "; Number.isNaN(parseFloat(value) = " + Number.isNaN(parseFloat(value)));
+            if (Number.isNaN(parseFloat(value))){
+                SetError("Value should be a floating point number");
+                return false;
+            }
+            value = $("#ValueEpsilon").val();
+            // console.log(value + "; Number.isNaN(parseFloat(value) = " + Number.isNaN(parseFloat(value)));
+            if (value.length>1 && Number.isNaN(parseFloat(value))) {
+                SetError("Value Epsilon should be a number");
+                return false;
+            }
+        }
+        SetError("");
+        return true;
+    }
+
+    // replaces textarea (#ValueT) with input (#Value) and vice versa
+    function InputTextarea() {
+        if ($("#Value").prop("disabled")) {
+            $("#Value").val($("#ValueT").val());
+            $("#ValueT").prop("disabled", true).attr("style", "display:none");
+            $("#Value").prop("disabled", false).attr("style", "");
+            $("#change").html("Extend");
+        } else {
+            $("#ValueT").val($("#Value").val());
+            $("#Value").prop("disabled", true).attr("style", "display:none");
+            $("#ValueT").prop("disabled", false).attr("style", "");
+            $("#change").html("Collapse");
+        }
+    }
+
+
+    // получаем все данные по товару в виде объекта
+    function GetCurrentPropertyData(mode, id) {
+        var row = $(".datarow[data-id='" + id + "'][data-mode='" + mode + "']");
+        // console.log("GetCurrentPropertyData(" + mode + ") id = " + id + "; row = " + JSON.stringify(row) + "; data-sortcode = " + row.attr("data-sortcode") + "; row.length=" + row.length);
+        var obj = {
+            PropertyId: id, 
+            mode: mode,
+            SortCode: row.attr("data-sortcode"),
+            Row: row.attr("data-row"),
+            PropertyName: row.find(".name").html(),
+            Value: row.find(".value").html(),
+            ValueEpsilon: row.find(".valueEpsilon").html(),
+            Comment: row.find(".comment").html()
+        };
+        // console.log("obj = " + JSON.stringify(obj));
+        return obj;
+    }
+
+    function SetError(msg){
+        $("#myModalUpdateInsert .err").html(msg);
+    }
+    function AdjustFormByMode(mode) {
+        SetError("");
+        $("#mode").val(mode);
+        if (mode == "Float") {
+            $("#myModalUpdateInsert .epsilon").show();
+        } else {
+            $("#myModalUpdateInsert .epsilon").hide();
+        }
+        if (mode == "BigString") {
+            $("#Value").prop("disabled", true).attr("style", "display:none");
+            $("#ValueT").prop("disabled", false).attr("style", "");
+            $("#change").html("Collapse");
+        } else {
+            $("#ValueT").prop("disabled", true).attr("style", "display:none");
+            $("#Value").prop("disabled", false).attr("style", "");
+            $("#change").html("Extend");
+        }
+        if (typeof FillNamesList === "function"){
+            FillNamesList(mode);
+        }
+    }
+    function ResetEditForm(mode) {
+        $("#myModalUpdateInsert input[type!=checkbox][name!=ObjectId]").val("");
+        AdjustFormByMode(mode);
+        $("#ModalUpdateInsertLabel").html("Adding a new property [<u>" + mode + "</u>]");
+    }
+
+
+
+    function TransferDataToForm(mode, id, ModalFormId) {
+        var data = GetCurrentPropertyData(mode, id);
+        AdjustFormByMode(mode);
+        // console.log("TransferDataToForm begin: data transfer " + JSON.stringify(data) + " to from with id " + ModalFormId);
+        Object.keys(data).forEach(key => {
+            $("#" + ModalFormId + " input[name='" + key + "']").val(data[key]);
+            $("#" + ModalFormId + " textarea[name='" + key + "']").val(data[key]);
+            //$("#" + ModalFormId + " select[name='" + key + "']").val(data[key]);
+            // console.log(key, data[key]);
+        });
+        $("#" + ModalFormId + "Label").html("Editing property <u>" + data.PropertyName + "</u>");
+        // console.log("TransferDataToForm end!");
+    }
+
+
+
+    // mode: 'BigString', 'String', 'Int', 'Float'
+    function AddValue(mode) {   // add child
+        ResetEditForm(mode);
+        ShowModal("myModalUpdateInsert");
+    }
+    function EditValue(mode, id) {   // edit
+        TransferDataToForm(mode, id, "myModalUpdateInsert");
+        ShowModal("myModalUpdateInsert");
+    }
+
+    function DeleteValue(mode, id) {   // delete
+        var data = GetCurrentPropertyData(mode, id);
+        $("#myModalDelete input[name='PropertyId']").val(data.PropertyId);
+        $("#myModalDelete input[name='mode']").val(mode);
+        $("#myModalDelete .modal-body").html("You are going to delete <u>" + data.PropertyName + "</u> property. Are you sure? [Id=" + $("#myModalDelete input[name='PropertyId']").val() + "]");
+        ShowModal("myModalDelete");
+    }
+
+</script>

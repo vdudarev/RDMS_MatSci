@@ -1,0 +1,45 @@
+﻿@using InfProject.Utils;
+@model FileItem
+@inject IConfiguration config
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    var type = await dataContext.GetType(Model.TypeId);
+    string externalVisualizer = type.GetSettingsUrlPostVisualizer();
+}
+@if (!string.IsNullOrEmpty(externalVisualizer))
+{
+    <div class="pShowFile">
+        <a href="~/file/postexternal/@Model.ObjectId"><i class="bi bi-display" style="margin-right:9px"></i>external visualization</a>
+    </div>
+}
+else if (Model.IsImage && Model.EnableAnalysis) // picture
+{
+    <div class="pShowFile">
+        <img src="~/file/download/@Model.ObjectId" class="preview" alt="" />
+    </div>
+}
+else if (Model.MimeType == "text/csv")  // table data (including 342 measurement grid)
+{
+    <div class="pShowFile">
+        <a href="~/file/csv/@Model.ObjectId"><i class="bi bi-table" style="margin-right:9px"></i>show table</a>
+    </div>
+}
+else // last chance - see whether we have ITableGetter to get a table to visualize
+{
+    if (Model.EnableAnalysis)
+    {
+        string absFilePath = config.MapStorageFile(Model.RelativeFilePath);
+        var validator = type.GetValidator(null);    // TODO: probable embed the context (but will reduce performance)
+        validator.File = new FileInfo(absFilePath);
+        if (validator.Validate()) // valid file & we can get CSV-data out
+        {
+            var tableGetter = type.GetTableGetter(validator);
+            if (tableGetter != null)    // can get table
+            {
+                <div class="pShowFile">
+                    <a href="~/file/tocsv/@Model.ObjectId"><i class="bi bi-arrow-repeat"></i><i class="bi bi-table" style="margin-right:9px"></i>show table</a>
+                </div>
+            }
+        }
+    }
+}

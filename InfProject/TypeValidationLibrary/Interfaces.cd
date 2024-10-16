@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="TypeValidationLibrary.Context">
+    <Position X="9.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAABAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Context.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TypeValidationLibrary.TypeValidatorResult">
+    <Position X="12" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAgABAAAAAAQAAAAAAAIAAAAAA=</HashCode>
+      <FileName>TypeValidatorResult.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="TypeValidationLibrary.IDatabaseValuesGetter">
+    <Position X="5.25" Y="5" Width="1.5" />
+    <InheritanceLine Type="TypeValidationLibrary.IResource" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.875" Y="5.117" />
+        <Point X="7.875" Y="5.375" />
+        <Point X="6.75" Y="5.375" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IDatabaseValuesGetter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="TypeValidationLibrary.IFileValidator">
+    <Position X="9.75" Y="5" Width="1.5" />
+    <InheritanceLine Type="TypeValidationLibrary.IResource" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.625" Y="5.117" />
+        <Point X="8.625" Y="5.375" />
+        <Point X="9.75" Y="5.375" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAJAAAAAA=</HashCode>
+      <FileName>IFileValidator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="TypeValidationLibrary.IResource">
+    <Position X="7.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAMAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IResource.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="TypeValidationLibrary.ITableGetter">
+    <Position X="7.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ITableGetter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="TypeValidationLibrary.IContext">
+    <Position X="7.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IContext.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Context" />
+    </ShowAsAssociation>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

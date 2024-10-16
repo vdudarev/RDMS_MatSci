@@ -1,0 +1,36 @@
+﻿@model List<dynamic>
+@using System.Data
+@using Dapper
+@using System.Data.SqlClient
+@using IdentityManagerUI.Models
+@using Microsoft.AspNetCore.Identity.UI.Services
+@using InfProject.Utils
+@using Microsoft.AspNetCore.Identity
+@using WebUtilsLib
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    ViewData["Title"] = "MarInf - Integration resolver";
+    // TenantId, TenantUrl, TenantName, TypeId, ObjectId, ObjectName, ObjectNameUrl, _created, ExternalID
+    List<dynamic> list = Model;
+}
+<h1 class="display-4">Integration resolver</h1>
+<p>You see this page because requested entity could be accessed in various tenants. Please select a desired one:</p>
+<table class="table">
+    <thead><tr>
+        <th>Tenant</th>
+        <th>Object Name</th>
+        <th>SampleID</th>
+        <th>Created</th>
+    </tr></thead>
+    <tbody>
+        @foreach (var item in list)
+        {
+            <tr>
+                <td>@Html.Raw($"<a href=\"https://{item.TenantUrl}\">{item.TenantName}</a>")</td>
+                <td>@Html.Raw($"<a href=\"https://{item.TenantUrl}/object/{item.ObjectNameUrl}\">{item.ObjectName}</a>")</td>
+                <td>@item.ExternalID</td>
+                <td>@item._created</td>
+            </tr>
+        }
+    </tbody>
+</table>

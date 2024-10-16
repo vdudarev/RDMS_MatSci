@@ -1,0 +1,46 @@
+﻿@using System.Data;
+@model TableView
+@{
+    DataTable dt = Model.Table;
+    string emptyMessage = Model.EmptyMessage;
+}
+@if (!string.IsNullOrEmpty(Model.Title))
+{
+    <h1 class="display-4">@Model.Title</h1>
+}
+@if (dt.Rows.Count > 0)
+{
+    <table class="table table-striped caption-top" id="searchList">
+        <thead>
+            <tr>
+                @for (int j = 0; j < dt.Columns.Count; j++)
+                {
+                    <th>@Html.Raw(dt.Columns[j].ColumnName)</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (var row = 0; row < dt.Rows.Count; row++)
+            {
+                <tr class="datarow">
+                    @for (int j = 0; j < dt.Columns.Count; j++)
+                    {
+                        if (Model.RenderHtmlString == null)
+                        {
+                            <td>@Html.Raw(dt.Rows[row][j])</td>
+                        }
+                        else
+                        {
+                            (string value, string attr) = Model.RenderHtmlString(row, j, dt.Rows[row][j]);
+                            @Html.Raw($"<td{attr}>{value}</td>")
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>@emptyMessage</p>
+}

@@ -1,0 +1,63 @@
+﻿@using InfProject.Models;
+@using System.Linq;
+@using InfProject.Utils;
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    ViewData["Title"] = $"Post External: preparing and sending request, please wait...";
+}
+<h1 class="display-4">@ViewData["Title"]</h1>
+<div id="ReloadAllBatchWaiter" class="spinner-border text-primary" role="status">
+	<span class="visually-hidden">processing...</span>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+        // Replace 'YOUR_SERVER_URL' with the URL that returns the binary data from the server
+        const dataUrl = 'https://inf.mdi.ruhr-uni-bochum.de/file/download/25415';
+        const externalVisualizerUrl = "https://localhost/bla-bla/"
+
+
+        function fetchAndSendData() {
+            fetch(dataUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    // Now you can use the Blob directly in your web page as needed
+                    // For example, you can send it to another server using fetch()
+                    console.log('sendBlobToServer(' + dataUrl + '):', blob);
+                    sendBlobToServer(blob);
+                })
+                .catch(error => {
+                    console.error('Error fetchAndSendData: ', error);
+                });
+        }
+
+        // Helper function to send the base64 string to another server
+        function sendBlobToServer(blob) {
+            fetch(externalVisualizer, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/octet-stream'
+                },
+                body: blob
+            })
+                .then(response => response.text()) // Get the result page
+                .then(htmlContent => {
+                    console.log('htmlContent= ' + htmlContent);
+                    console.log('htmlContent.length = ' + htmlContent.length);
+
+                    // Open a new window with the new HTML content
+                    const newWindow = window.open();
+                    newWindow.document.write(htmlContent);
+                    newWindow.document.close();
+
+                    window.history.back();  // to return to a page with link
+                })
+                .catch(error => {
+                    // Handle errors
+                    console.error('Error sendBlobToServer: ', error);
+                });
+        }
+
+        fetchAndSendData();
+    </script>
+}
+

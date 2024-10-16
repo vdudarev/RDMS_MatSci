@@ -1,0 +1,228 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TypeValidationLibrary</name>
+    </assembly>
+    <members>
+        <member name="T:TypeValidationLibrary.IFileValidator">
+            <summary>
+            base class
+            </summary>
+        </member>
+        <member name="E:TypeValidationLibrary.IFileValidator.BeforeValidation">
+            <summary>
+            event to extend functionality BEFORE validation
+            </summary>
+        </member>
+        <member name="E:TypeValidationLibrary.IFileValidator.AfterValidation">
+            <summary>
+            event to extend functionality AFTER validation
+            </summary>
+        </member>
+        <member name="M:TypeValidationLibrary.IFileValidator.ValidateFile(System.String)">
+            <summary>
+            Main validation method for file
+            </summary>
+            <param name="filePath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TypeValidationLibrary.IFileValidator.ValidateStream(System.IO.Stream)">
+            <summary>
+            Main validation method for stream
+            </summary>
+            <param name="inputStream"></param>
+            <returns></returns>
+        </member>
+        <member name="P:TypeValidationLibrary.ITableGetter.DataTable">
+            <summary>
+            Get DataTable from the data
+            </summary>
+            <returns>DataTable</returns>
+        </member>
+        <member name="P:TypeValidationLibrary.ITableGetter.ContainsCoordinates">
+            <summary>
+            Is there any coordinates ("X (mm)", "Y (mm)", "x", "y")
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TypeValidationLibrary.ITableGetter.GetCSV(System.String)">
+            <summary>
+            Get CSV from DataTable
+            </summary>
+            <returns>CSV string</returns>
+        </member>
+        <member name="T:TypeValidationLibrary.TypeValidatorBase">
+            <summary>
+            base class
+            </summary>
+        </member>
+        <member name="P:TypeValidationLibrary.TypeValidatorBase.AllowedExtensions">
+            <summary>
+            List of allowed extension
+            </summary>
+        </member>
+        <member name="P:TypeValidationLibrary.TypeValidatorBase.DisallowedExtensions">
+            <summary>
+            List of disallowed extension
+            </summary>
+        </member>
+        <member name="E:TypeValidationLibrary.TypeValidatorBase.BeforeValidation">
+            <summary>
+            event to extend functionality BEFORE validation
+            </summary>
+        </member>
+        <member name="E:TypeValidationLibrary.TypeValidatorBase.AfterValidation">
+            <summary>
+            event to extend functionality AFTER validation
+            </summary>
+        </member>
+        <member name="M:TypeValidationLibrary.TypeValidatorBase.Validate">
+            <summary>
+            method to redefine for inherited class
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TypeValidationLibrary.TypeValidatorBase.ValidateFile(System.String)">
+            <summary>
+            Main validation method for files
+            </summary>
+            <param name="filePath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TypeValidationLibrary.TypeValidatorBase.ValidateStream(System.IO.Stream)">
+            <summary>
+            Main validation method for files
+            </summary>
+            <param name="filePath"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TypeValidationLibrary.TypeValidatorResult">
+            <summary>
+            validation operation result
+            </summary>
+        </member>
+        <member name="P:TypeValidationLibrary.TypeValidatorResult.Code">
+            <summary>
+            0 - validation successful; !=0 - fail
+            </summary>
+        </member>
+        <member name="P:TypeValidationLibrary.TypeValidatorResult.Message">
+            <summary>
+            if code!=0 then Message must contain text message describing error
+            </summary>
+        </member>
+        <member name="P:TypeValidationLibrary.TypeValidatorResult.Warning">
+            <summary>
+            if code==0 then Warning could contain warning message (hacks to make work as good as possible)
+            </summary>
+        </member>
+        <member name="T:TypeValidationLibrary.TypeValidator_EDX_CSV">
+            <summary>
+            base class
+            </summary>
+        </member>
+        <member name="M:TypeValidationLibrary.TypeValidator_EDX_CSV.InitValidation">
+            <summary>
+            HANGS:  === TOTAL: ok=583, fail=12; failExtension=668 === ContainsCoordinatesCount: 331. Completed in 273681,5985 ms
+            without code        === TOTAL: ok=583, fail=12; failExtension=668 === ContainsCoordinatesCount: 796. Completed in 2082,1102 ms
+            </summary>
+        </member>
+        <member name="M:TypeValidationLibrary.TypeValidator_EDX_CSV.Validate">
+            <summary>
+            Type-specific logic
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TypeValidationLibrary.TypeValidator_EDX_CSV.ValidateCSV(System.String,TypeValidationLibrary.TypeValidatorResult)">
+            <summary>
+            validate CSV
+            </summary>
+            <param name="csv"></param>
+            <returns></returns>
+        </member>
+        <member name="P:TypeValidationLibrary.TypeValidator_EDX_CSV.DataTable">
+            <summary>
+            DataTable
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:TypeValidationLibrary.TypeValidator_EDX_CSV.ContainsCoordinates">
+            <summary>
+            Is there any coordinates ("X (mm)", "Y (mm)", "x", "y")
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TypeValidationLibrary.TypeValidator_EDX_CSV.GetDatabaseValues">
+            <summary>
+            get all boundaries values for writing to DB
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:TypeValidationLibrary.TypeValidator_Fail">
+            <summary>
+            Test Validator for FAIL
+            </summary>
+        </member>
+        <member name="M:TypeValidationLibrary.TypeValidator_Fail.Validate">
+            <summary>
+            Type-specific logic
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:TypeValidationLibrary.TypeValidator_Ok">
+            <summary>
+            Test Validator for Ok
+            </summary>
+        </member>
+        <member name="M:TypeValidationLibrary.TypeValidator_Ok.Validate">
+            <summary>
+            Type-specific logic
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:TypeValidationLibrary.ValidatorTypeHelper">
+            <summary>
+            base class
+            </summary>
+        </member>
+        <member name="M:TypeValidationLibrary.ValidatorTypeHelper.CreateObject``1(System.String)">
+            <summary>
+            Use reflection to create arbitrary type that supports IFileValidator
+            </summary>
+            <param name="typeName">name of a class or structure that supports IFileValidator</param>
+            <returns>IFileValidator instance</returns>
+        </member>
+        <member name="M:TypeValidationLibrary.ValidatorTypeHelper.ValidateFile(System.String,System.String)">
+            <summary>
+            Validates a file against validationSchema
+            </summary>
+            <param name="validationSchema"></param>
+            <param name="filePath">full file path</param>
+            <returns>TypeValidatorResult</returns>
+        </member>
+        <member name="M:TypeValidationLibrary.ValidatorTypeHelper.ValidateFileAndGetDataValues(System.String,System.String,System.String)">
+            <summary>
+            Validates a file against validationSchema AndGetDataValues
+            </summary>
+            <param name="validationSchema"></param>
+            <param name="filePath">full file path</param>
+            <returns>TypeValidatorResult</returns>
+        </member>
+        <member name="M:TypeValidationLibrary.ValidatorTypeHelper.ValidateStream(System.String,System.IO.Stream)">
+            <summary>
+            Validates a file against validationSchema
+            </summary>
+            <param name="validationSchema"></param>
+            <param name="filePath">full file path</param>
+            <returns>TypeValidatorResult</returns>
+        </member>
+        <member name="M:TypeValidationLibrary.ValidatorTypeHelper.ValidateStreamAndGetDataValues(System.String,System.String,System.IO.Stream)">
+            <summary>
+            Validates a file against validationSchema AndGetDataValues
+            </summary>
+            <param name="validationSchema"></param>
+            <param name="filePath">full file path</param>
+            <returns>TypeValidatorResult</returns>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,85 @@
+{
+  "ProcessingStep": [
+    {
+      // "SortCode": 0,  // this is to store in DB only (not for JSON)
+      "TabName": [
+        {
+          "index": 0,
+          "name": "General"
+        },
+        {
+          "index": 1,
+          "name": "Ignition"
+        },
+        {
+          "index": 2,
+          "name": "Preclean"
+        },
+        {
+          "index": 3,
+          "name": "Plasma Emmition Monitor Setup"
+        },
+        {
+          "index": 4,
+          "name": "Deposition"
+        }
+      ],
+      "Parameters": [
+        {
+          "name": "general process parameters => start vacuum",
+          "value": "value"
+        },
+        {
+          "name": "general process parameters => reactive gas 1",
+          "value": "Ar"
+        }
+      ]
+    },
+
+    {
+      // "SortCode": 1,  // this is to store in DB only (not for JSON)
+      "TabName": [
+        {
+          "index": 5,
+          "name": "Preclean"
+        },
+        {
+          "index": 6,
+          "name": "Deposition"
+        }
+      ],
+      "Parameters": [
+        {
+          "name": "general process parameters => start vacuum",
+          "value": "value"
+        },
+        {
+          "name": "general process parameters => reactive gas 1",
+          "value": "Ar"
+        }
+      ]
+    },
+
+    {
+      // "SortCode": 2,  // this is to store in DB only (not for JSON)
+      "TabName": [
+        {
+          "index": 7,
+          "name": "Deposition"
+        }
+      ],
+      "ObjectId": 49701,
+      "Parameters": [
+        {
+          "name": "general process parameters => start vacuum",
+          "value": "value"
+        },
+        {
+          "name": "general process parameters => reactive gas 1",
+          "value": "Ar"
+        }
+      ]
+    }
+
+  ]
+}

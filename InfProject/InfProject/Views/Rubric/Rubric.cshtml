@@ -1,0 +1,192 @@
+﻿@using InfProject.Utils;
+@using WebUtilsLib;
+@model RubricInfo
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    RubricInfo rubric = Model;
+    Layout = "_LayoutLeftRubric";
+    UserContext userCtx = UserUtils.GetUserContext(Context);
+    AccessControlFilter accessControlFilter = new AccessControlFilter(userCtx.access, userCtx.userId);
+    ViewData["Title"] = $"Project {rubric.RubricName}";
+    ViewData["RubricId"] = rubric.RubricId;
+    (RubricInfo rubric, ObjectInfo obj) item = (rubric, null);
+    List<ObjectInfo> list = await dataContext.ObjectInfo_GetByRubricId(rubric.RubricId, accessControlFilter);
+    var children = await dataContext.GetRubricChildren(rubric.RubricId, accessControlFilter);
+    var rawUrl = System.Net.WebUtility.UrlEncode(Context.Request.Path);
+    var userCanAdd = Context.User.IsInRole(UserGroups.PowerUser) || Context.User.IsInRole(UserGroups.Administrator);
+
+    string rubricText = await dataContext.GetRubricText(rubric.RubricId);   // RubricInfoAdds.RubricText
+}
+<!-- Modal https://getbootstrap.com/docs/5.0/components/modal/ -->
+<div class="modal fade" id="myModalAddLinks" tabindex="-1" aria-labelledby="exampleModalAddLinks" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-controller="AdminObjectLinkRubric" asp-action="AddLinksCSV">
+            <input type="hidden" name="rubricId" value="@rubric.RubricId" />
+            <input type="hidden" name="returl" value="@rawUrl" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalAddLinks">Add Object Links</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        Object ID list (comma-separated) <input type="text" class="form-control" placeholder="Input comma-separated Object ID list" data-val="true" data-val-required="At least single Object ID is required to add link" id="objectIdCSV" name="objectIdCSV">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary btnsave" title="Add Link(s)"><i class="bi bi-link-45deg"></i> Add Link(s)</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="myModalAdjustLink" tabindex="-1" aria-labelledby="exampleModalAdjustLink" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-controller="AdminObjectLinkRubric" asp-action="Adjust">
+            <input type="hidden" name="objectid" value="0" />
+            <input type="hidden" name="rubricid" value="@rubric.RubricId" />
+            <input type="hidden" name="objectlinkrubricid" value="0" />
+            <input type="hidden" name="mode" value="0" />
+            <input type="hidden" name="returl" value="@rawUrl" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalAdjustLink">Adjust Link</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="updErr">
+                        <span class="text-danger"></span>
+                    </div>
+                    <div id="update">
+                        Sort Code (asc) <input type="number" class="form-control" placeholder="Input integer for sort" data-val="true" data-val-required="The Sort Code (asc) field is required." id="sortcode" name="sortcode" value="0" onclick="$('#myModalAdjustLink input[name=mode]').val(1)">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger btndelete" title="Delete Link" onclick="$('#myModalAdjustLink input[name=mode]').val(2)"><i class="bi bi-trash"></i> Delete Link</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary btnsave" title="Save Link" onclick="$('#myModalAdjustLink input[name=mode]').val(1)"><i class="bi bi-save2-fill"></i> Save Link</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="myModalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-controller="AdminObject" asp-action="Delete">
+            <input type="hidden" name="typeid" value="0" />
+            <input type="hidden" name="objectid" value="0" />
+            <input type="hidden" name="idd" value="@rubric.RubricId" />
+            <input type="hidden" name="returl" value="@rawUrl" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger btndelete" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<partial name="RubricBreadCrumbs" model=@item />
+
+<!--
+Created: @rubric._created by @dataContext.GetUser((int)rubric._createdBy!).Result
+Updated: @rubric._updated by @dataContext.GetUser((int)rubric._updatedBy!).Result
+-->
+@if (!Context.IsWriteDenied(rubric.AccessControl, (int)rubric._createdBy))
+{
+    <h1 class="display-4" style="float:left;">@Html.Raw(rubric.RubricName)</h1>
+    <a href="/admintree/manualedit/2/?idd=@rubric.RubricId&returl=@rawUrl" class="btn btn-danger btndelete" title="Delete" style="float:right; margin-left:1rem"><i class="bi bi-trash"></i></a>
+    <a href="/admintree/manualedit/2/?ide=@rubric.RubricId&returl=@rawUrl" class="btn btn-primary btnedit" title="Edit" style="float:right"><i class="bi bi-pencil"></i></a>
+    <div class="clearfix"></div>
+} else
+{
+    <h1 class="display-4">@rubric.RubricName</h1>
+}
+
+@if (!string.IsNullOrEmpty(rubricText))
+{
+    <div class="rubricText mb-3">
+        @Html.Raw(rubricText)
+    </div>    
+}
+
+@if (dataContext.Projects.Contains(rubric.RubricName))  // show page for project
+{
+    <partial name="ProjectRubric" model=@rubric />
+}
+
+@if (children.Count > 0)
+{
+    <div><b>Take a look at subprojects</b>: <br>
+        <ul>
+        @foreach(var row in children)
+        {
+            <li data-id="@row.RubricId"><a href="/rubric/@row.RubricNameUrl">@Html.Raw(row.RubricName)</a></li>
+        }
+        </ul>
+    </div>
+}
+@* @if (userCanAdd) { *@
+    <div id="upperbuttons" class="mb-3">
+        @if (userCanAdd) {
+            <a href="/admintree/manualedit/2/?idr=@rubric.RubricId&returl=@rawUrl" class="btn btn-success btnedit me-3" role="button" title="Add"><i class="bi bi-folder-plus"></i> Add Subproject</a>
+        }
+@*         <a id="ShiftNonSamplesBtn" href="javascript:ShiftNonSamples('#list');" class="btn btn-secondary btnedit me-3" role="button" title="Shift"><i class="bi bi-arrow-bar-right"></i> Shift Non-samples</a>
+ *@        <a id="HideNonSamplesBtn" href="javascript:HideNonSamples('#list');" class="btn btn-secondary btnedit me-3" role="button" title="Shift"><i class="bi bi-eye-slash"></i> Hide Non-samples</a>
+    </div>
+@*}*@
+
+
+@if (userCanAdd)
+{
+    <div id="lowerbuttons">
+        <a id="addSample" href="/custom/editsample/0/?idr=@rubric.RubricId&returl=@rawUrl" class="btn btn-success btnedit ms-3 d-none" role="button" title="Add Sample" style="float:right">
+            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512" style="fill:#ffffff"><path d="M288 0H160 128C110.3 0 96 14.3 96 32s14.3 32 32 32V196.8c0 11.8-3.3 23.5-9.5 33.5L10.3 406.2C3.6 417.2 0 429.7 0 442.6C0 480.9 31.1 512 69.4 512H378.6c38.3 0 69.4-31.1 69.4-69.4c0-12.8-3.6-25.4-10.3-36.4L329.5 230.4c-6.2-10.1-9.5-21.7-9.5-33.5V64c17.7 0 32-14.3 32-32s-14.3-32-32-32H288zM192 196.8V64h64V196.8c0 23.7 6.6 46.9 19 67.1L309.5 320h-171L173 263.9c12.4-20.2 19-43.4 19-67.1z" /></svg>
+            Add Sample
+        </a>
+        <a id="addGeneral" href="/adminobject/?idr=@rubric.RubricId&returl=@rawUrl" class="btn btn-success btnedit ms-3" role="button" title="Add" style="float:right"><i class="bi bi-file-plus"></i></a>
+        <a id="addUpload" href="javascript:void(0)" onclick="$('#addUpload, #lowerbuttonsClearfix').addClass('d-none'); $('#wrapperContainerUpload').removeClass('d-none');" class="btn btn-primary btnedit ms-3" role="button" title="Upload" style="float:right"><i class="bi bi-cloud-upload"></i></a>
+        <a id="addLinks" href="javascript:void(0)" onclick="AddSortCodeToItems(); ShowModal('myModalAddLinks');" class="btn btn-secondary ms-3" role="button" title="Add Object Links" style="float:right"><i class="bi bi-link-45deg"></i></a>
+        <div id="lowerbuttonsClearfix" class="clearfix"></div>
+    </div>
+    (string title, string btnText, int idr, int ido, string returl) uploadSettings = ("Upload Files (by creating objects)", "Upload and Preview", rubric.RubricId, 0, rawUrl);
+    <div id="wrapperContainerUpload" class="d-none">
+        <partial name="Upload" model=@uploadSettings />
+    </div>
+}
+
+<div id="list" class="list-group rubric">
+    @foreach (ObjectInfo row in list)
+    {
+        (ObjectInfo obj, string rawUrl, UserContext userCtx, bool showDate, int? RubricId) listItemModel = (row, rawUrl, userCtx, false, rubric.RubricId);
+        if (listItemModel.obj.TypeId != 0)
+        {
+            <partial name="pListItem" model=@listItemModel />
+        }
+    }
+</div>
+
+@section Scripts {
+@* Upload scripts - BEGIN *@
+    <script type="text/javascript" src="~/js/dragdropFile.js"></script>
+@* Upload scripts - END *@
+    <script type="text/javascript">
+        function DeleteModal(objectId, typeId, name) {
+            $("#myModalDelete input[name='objectid']").val(objectId);
+            $("#myModalDelete input[name='typeid']").val(typeId);
+            $("#myModalDelete .modal-body").html("You are going to delete <u>" + name + "</u>. Are you sure? <span>[ObjectId=" + objectId + "]</span>");
+            var myModalEl = document.querySelector('#myModalDelete');
+            var myModal = bootstrap.Modal.getOrCreateInstance(myModalEl) // Returns a Bootstrap modal instance
+            myModal.show();
+        }
+    </script>
+}

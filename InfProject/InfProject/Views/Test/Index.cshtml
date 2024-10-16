@@ -1,0 +1,85 @@
+﻿@using System.Data
+@using Dapper
+@using System.Data.SqlClient
+@using IdentityManagerUI.Models
+@using Microsoft.AspNetCore.Identity.UI.Services
+@using InfProject.Utils
+@using Microsoft.AspNetCore.Identity
+@using WebUtilsLib
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    ViewData["Title"] = "Test";
+}
+<h1 class="display-4">Test</h1>
+
+<h2>Synthesis document</h2>
+<form>
+
+    <table class="table" id="values">
+        <tbody>
+            <tr id="trObjectIdExternalId">
+                <th>
+                    <label class="control-label" for="ObjectId">Object ID / External ID</label>
+                </th>
+                <td>
+                    <div class="input-group">
+                        <input type="number" class="form-control" placeholder="Input Object ID (Sample)" id="ObjectId" name="ObjectId" value="0">
+                        <input type="number" class="form-control" placeholder="Input Sample ID" id="ExternalId" name="ExternalId" value="4450">
+                        <a id="eyeLinkRubric" class="btn btn-outline-secondary collapsed" onclick="LoadJson()"><i class="bi bi-eye me-1"></i>Download Synthesis JSON</a>
+                    </div>
+                </td>
+            </tr>
+            <tr id="trJson">
+                <th>
+                    <label class="control-label" for="JSON">JSON</label>
+                </th>
+                <td>
+                    <textarea id="json" name="json" style="width:100%; height:200px"></textarea>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div id="msg"></div>
+    <button type="button" class="btn btn-primary" onclick="SaveJson(); return false;">Save Synthesis JSON (ObjectId OR ExternalId + JSON)</button>
+</form>
+
+<script>
+    async function LoadJson() { 
+        const objectId = $("#ObjectId").val();
+        const externalId = $("#ExternalId").val();
+        const reqdata = { "objectid": objectId, "externalid": externalId };
+        console.log("LoadJson REQUEST (/custom/getsynthesisjsonforsample): " + JSON.stringify(reqdata));
+        let json = await $.ajax({
+            async: true,
+            type: "GET",
+            url: "/custom/getsynthesisjsonforsample",
+            data: reqdata,
+            dataType: "json"
+        })
+        console.log("LoadJson RESPONSE:");
+        console.log(json);
+        $("#json").val(JSON.stringify(json));
+    }
+    async function SaveJson() {
+        const objectId = $("#ObjectId").val();
+        const externalId = $("#ExternalId").val();
+        const jsonObj = $("#json").val();
+        const reqdata = { "objectid": objectId, "externalid": externalId, "jsonobj": jsonObj };
+        console.log("SaveJson REQUEST (/custom/getsynthesisjsonforsample): " + JSON.stringify(reqdata));
+        let json = await $.ajax({
+            async: true,
+            type: "POST",
+            url: "/custom/updatesynthesisjsonforsample",
+            data: reqdata,
+            dataType: "json"
+        })
+        console.log("SaveJson RESPONSE:");
+        console.log(json);
+        if (json.code == 0) {
+            $("#msg").html(`<h2 style='color:green'>SUCCESS</h2><pre>${json.warning}</pre>`);
+        } else { 
+            $("#msg").html(`<h2 style='color:red'>ERROR ${json.code}: ${json.message}</h2><pre>${json.warning}</pre>`);
+        }
+    }
+
+</script>

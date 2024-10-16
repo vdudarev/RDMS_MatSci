@@ -1,0 +1,12 @@
+﻿@using Microsoft.AspNetCore.WebUtilities
+@model (int Code, string ReasonPhrase)
+@{
+    ViewData["Title"] = $"Error {Model.Code}: {Model.ReasonPhrase}";
+}
+
+<h1>Error @Model.Code - @Model.ReasonPhrase</h1>
+<div>
+    <p>
+        We apologize for the inconvenience caused...
+    </p>
+</div>

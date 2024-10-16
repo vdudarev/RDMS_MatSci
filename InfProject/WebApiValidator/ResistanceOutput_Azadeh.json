@@ -1,0 +1,52 @@
+{
+  "CompositionsForSampleUpdate": [
+    {
+      "Predicate": {
+        "Properties": [
+          {
+            "Type": 2,
+            "Name": "Measurement Area",
+            "Value": 1
+          }
+        ]
+      },
+      "DeletePreviousProperties": false,
+      "Properties": [
+        {
+          "PropertyId": 0,
+          "Type": 1,
+          "Name": "R",
+          "Value": 34143346,
+          "ValueEpsilon": null,
+          "SortCode": 10,
+          "Row": null,
+          "Comment": "Resistance (Room Temperature) for Measurement Area 1"
+        }
+      ]
+    },
+    ...
+  ],
+  "DeletePreviousProperties": true,
+  "Properties": [
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "R",
+      "Value": 97692.43229,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 1,
+      "Comment": "Minimal Resistance (Room Temperature) of Materials Library (of all 342 MAs)"
+    },
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "R",
+      "Value": 34143346,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 2,
+      "Comment": "Maximal Resistance (Room Temperature) of Materials Library (of all 342 MAs)"
+    }
+  ]
+}

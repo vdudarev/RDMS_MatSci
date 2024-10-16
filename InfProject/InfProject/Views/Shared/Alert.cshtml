@@ -1,0 +1,16 @@
+﻿<div id="alerts">
+@if (!string.IsNullOrEmpty(@TempData["Err"]?.ToString()))
+{
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        @TempData["Err"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (!string.IsNullOrEmpty(@TempData["Suc"]?.ToString()))
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        @TempData["Suc"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+</div>

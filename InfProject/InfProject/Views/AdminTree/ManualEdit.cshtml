@@ -1,0 +1,282 @@
+﻿@using InfProject.DBContext;
+@using WebUtilsLib;
+@inject DataContext dataContext
+@model (TypeInfo type, List<RubricInfo> tree)
+@{
+    (TypeInfo type, List<RubricInfo> tree) = Model;
+    ViewData["Title"] = $"Editing type {Model.type.TypeName}";
+    if (!Context.User.IsInRole(WebUtilsLib.UserGroups.PowerUser.ToString()) && !Context.User.IsInRole(WebUtilsLib.UserGroups.Administrator.ToString()))
+        throw new UnauthorizedAccessException("User is not PowerUser or Administrator");
+    // https://icons.getbootstrap.com/
+    string idrSt = string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["idr"] : Context.Request.Query["idr"];
+    int.TryParse(idrSt, out int idr);
+    int.TryParse(string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["ide"] : Context.Request.Query["ide"], out int ide);
+    int.TryParse(string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["idd"] : Context.Request.Query["idd"], out int idd);
+    string returl = string.Compare(Context.Request.Method, "POST") == 0 ? Context.Request.Form["returl"] : Context.Request.Query["returl"];
+    int accessControl = (int)dataContext.Tenant.AccessControl;
+    List<InfProject.Utils.WebAppUser> users = await dataContext.GetUserListAll();
+}
+@*<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModalDelete">
+    Launch demo modal
+</button>*@
+
+<!-- Modal https://getbootstrap.com/docs/5.0/components/modal/ -->
+<div class="modal fade" id="myModalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-controller="AdminTree" asp-action="Delete" onsubmit="return DisableButton('btnDelete')">
+            <input type="hidden" name="TypeId" value="@Model.type.TypeId" />
+            <input type="hidden" name="rubricid" value="0" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="btnDelete" type="submit" class="btn btn-danger btndelete" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal https://getbootstrap.com/docs/5.0/components/modal/ -->
+<div class="modal fade" id="myModalUpdateInsert" tabindex="-1" aria-labelledby="ModalUpdateInsertLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-controller="AdminTree" asp-action="UpdateInsert" onsubmit="return DisableButton('btnSave')">
+            <input type="hidden" name="returl" value="@returl" />
+            <input type="hidden" name="TypeId" value="@Model.type.TypeId" />
+            <input type="hidden" name="rubricid" value="0" />
+            <input type="hidden" name="level" value="0" />
+            <input type="hidden" name="leafflag" value="0" />
+            <input type="hidden" name="flags" value="0" />
+            <input type="hidden" name="ispublished" value="1" />
+            <input type="hidden" name="rubricnameurl" value="" />
+            <input type="hidden" name="rubricpath" value="" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalUpdateInsertLabel">Editing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-2">
+                        <label for="RubricName" class="required"><b>Name</b></label>
+                        <input type="text" class="form-control" id="RubricName" name="rubricname" value="" aria-describedby="nameHelp" placeholder="Input name" required>
+                        <div style="position:relative;">
+                            <small id="nameHelp" class="form-text text-muted">name of the node</small>
+                            <a id="eyeRubricDetails" class="d-block" data-bs-toggle="collapse" href="#collapseRubricProps" role="button" aria-expanded="false" aria-controls="collapseRubricProps" style="width:185px; position:absolute; right:0; top:0">
+                                <i class="bi bi-eye me-1"></i>show more parameters
+                            </a>
+                        </div>
+                    </div>
+                    <div class="collapse" id="collapseRubricProps">
+                        <div class="form-group mb-2">
+                            <label for="ParentId">Parent Id</label>
+                            <!--input type="text" class="form-control" id="ParentId_" name="parentid_" value="@(idr != 0 ? idr.ToString() : string.Empty)" aria-describedby="ParentIdHelp" placeholder="Input Id of the parent node (empty - root)"-->
+                            <select class="form-select form-control" id="ParentId" name="parentid">
+                                <option value="0">=- root -=</option>
+                                @for (int i = 0; i < tree.Count; i++)
+                                {
+                                    <option value="@tree[i].RubricId">@(new string('_', tree[i].Level) + tree[i].RubricName)</option>
+                                }
+                            </select>
+                            <small id="ParentIdHelp" class="form-text text-muted">Don't change it if you are not sure what you are doing</small>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="SortCode">Sort Code</label>
+                            <input type="text" class="form-control" id="SortCode" name="sortcode" value="" aria-describedby="SortCodeHelp" placeholder="Input integer for sort">
+                            <small id="SortCodeHelp" class="form-text text-muted">within a parent all children are sorted by this number (ascending)</small>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="AccessControl">Access Control (accessibility)</label>
+                            <div>
+                                <select id="AccessControl" name="accesscontrol" aria-describedby="AccessControlHelp">
+                                    <option value="0">public</option>
+                                    <option value="1">protected</option>
+                                    <option value="2">protectedNDA</option>
+                                    <option value="3">private</option>
+                                </select><!--span id="creator" class="ms-2"></span-->
+                            </div>
+                            <small id="AccessControlHelp" class="form-text text-muted"><i>public</i> - to all; <i>protected</i> - to authorized users (<u>User</u> role); <i>protectedNDA</i> - to authorized users with <u>NDA</u> claim; <i>private</i> - to you only</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="Text">Text</label>
+                            <div>
+                                <textarea id="Text" name="text" class="form-control" aria-describedby="TextHelp"></textarea>
+                            </div>
+                            <small id="TextHelp" class="form-text text-muted">description to show (HTML is allowed)</small>
+                        </div>
+                        <div class="form-group form-text text-muted">
+                            <div id="divCreated"><small>Created: </small><small id="created"></small><small> by </small><small id="creator"></small></div>
+                            <div id="divUpdated"><small>Updated: </small><small id="updated"></small><small> by </small><small id="updator"></small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="btnSave" type="submit" class="btn btn-primary" title="Save"><i class="bi bi-save2-fill"></i> Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<h1 class="display-4">@Model.type.TypeName</h1>
+<table class="table" id="grid">
+    <thead>
+        <th>Name</th>
+        <th>Id</th>
+        <th><i class="bi bi-sort-numeric-down"></i></th>
+        <th>Access</th>
+        <th style="width:160px"><button type="button" class="btn btn-success btnaddtop" title="Add to Top"><i class="bi bi-house-add"></i></button> Actions</th>
+    </thead>
+    <tbody>
+    @foreach (var row in Model.tree)
+    {
+            <tr class="datarow" data-RubricId="@row.RubricId" data-ParentId="@row.ParentId" data-SortCode="@row.SortCode" data-IsPublished="@row.IsPublished" data-AccessControl="@((int)row.AccessControl)" data-Level="@row.Level" data-LeafFlag="@row.LeafFlag" data-Flags="@row.Flags" data-isEnd="@((row.LeafFlag & 4) != 0 ? 1 : 0)" data-RubricName="@row.RubricName" data-RubricNameUrl="@row.RubricNameUrl" data-RubricPath="@row.RubricPath" data-created="@row._created" data-createdBy="@row._createdBy" data-creator="@(users.First(x => x.Id == row._createdBy).ToString())" data-updated="@row._created" data-updatedBy="@row._createdBy" data-updator="@(users.First(x => x.Id == row._updatedBy).ToString())">
+            <td class="RubricName @("level"+row.Level)"><span class="name @((row.LeafFlag&4)!=0 ? string.Empty : "bi bi-caret-down-fill")" title="@row.RubricPath.Replace("}", " / ")">@row.RubricName</span></td>
+            <td>@row.RubricId</td>
+            <td data-edit-name="SortCode">@row.SortCode</td>
+            <td data-edit-name="AccessControl" class="@("acl"+row.AccessControl)">@((AccessControl)row.AccessControl)</td>
+            <td><button type="button" class="btn btn-success btnaddchild" title="Add Child"><i class="bi bi-folder-plus"></i></button>
+            <button type="button" class="btn btn-primary btnedit" title="Edit"><i class="bi bi-pencil"></i></button>
+            <button type="button" class="btn btn-danger btndelete" title="Delete"><i class="bi bi-trash"></i></button></td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script type="text/javascript">
+        // получаем все данные по товару в виде объекта
+        function GetCurrentRubricData(obj) {
+            let row = $(obj).closest("tr.datarow");
+            let RubricId = row.attr("data-rubricid");
+            // console.log("GetCurrentRubricID RubricId = " + RubricId);
+            let objData = row.data();
+            // console.log("obj = " + JSON.stringify(obj));
+            return objData;
+        }
+
+        function ResetEditForm(){
+            $("#myModalUpdateInsert input[type!=checkbox][name!=TypeId][name!=returl], #myModalUpdateInsert textarea").val("");
+            $("#myModalUpdateInsert select").each(function(){
+                let value = $(this).children('option:first').val();
+                $(this).val(value);
+            });
+            $("#myModalUpdateInsert #AccessControl").val(@accessControl);    // consider Tenant Settings
+            $("#divUpdated").removeClass("d-none");
+        }
+
+        function TransferDataToForm(data, ModalFormId) {
+            // console.log("TransferDataToForm begin: data transfer " + JSON.stringify(data) + " to from with id " + ModalFormId);
+            Object.keys(data).forEach(key => {
+                $("#" + ModalFormId + " input[name='" + key + "']").val(data[key]);
+                $("#" + ModalFormId + " select[name='" + key + "']").val(data[key]);
+                $("#" + ModalFormId + " #" + key).html(data[key]);
+                // console.log(key, data[key]);
+            });
+            if ($("#created").html() == $("#updated").html() && $("#creator").html() == $("#updator").html()) {
+                $("#divUpdated").addClass("d-none");
+            } else {
+                $("#divUpdated").removeClass("d-none");
+            }
+            // $("#creator").html(" created by <u>" + data["creator"] + "</u>");
+            // console.log("TransferDataToForm end!");
+        }
+
+        // gets RubricText
+        async function GetRubricText(rubricId) {
+            let obj = await $.ajax({
+                async: true,
+                type: "GET",
+                url: "/ajax/getrubrictext",
+                data: { "rubricId": rubricId },
+                dataType: "json"
+            })
+            return obj.text;
+        }
+
+        $(document).ready(function(){
+            $('#collapseRubricProps').on('hidden.bs.collapse', function () {    // This event is fired when a collapse element has been hidden from the user(will wait for CSS transitions to complete).
+                $("#eyeRubricDetails").html('<i class="bi bi-eye me-1"></i>show more parameters');
+                // console.log("hidden");
+            });
+            $('#collapseRubricProps').on('shown.bs.collapse', function () {    // This event is fired when a collapse element has been made visible to the user(will wait for CSS transitions to complete).
+                $("#eyeRubricDetails").html('<i class="bi bi-eye-slash me-1"></i>hide more parameters');
+                // console.log("shown");
+            });
+            $('#myModalUpdateInsert').on('shown.bs.modal', function () {    // make focus on RubricName
+                $('#RubricName').focus();
+            });
+            $(".btnaddtop").click(function () {   // add to the top
+                ResetEditForm();
+                $("#ModalUpdateInsertLabel").html("Creating a top element");
+                ShowModal("myModalUpdateInsert");
+            });
+            $(".btnaddchild").click(function () {   // add child
+                let data = GetCurrentRubricData(this);
+                ResetEditForm();
+                //$("#myModalUpdateInsert input[name=parentid]").val(data.rubricid);
+                $("#myModalUpdateInsert select[name=parentid]").val(data.rubricid);
+                $("#ModalUpdateInsertLabel").html("Creating a child for <u>" + data.rubricname + "</u> <span>[Id=" + data.rubricid + "]</span>");
+                ShowModal("myModalUpdateInsert");
+            });
+            $(".btnedit").click(async function () {   // edit
+                let data = GetCurrentRubricData(this);
+                TransferDataToForm(data, "myModalUpdateInsert");
+                $("#ModalUpdateInsertLabel").html("Editing <u>" + data.rubricname + "</u> <span>[Id=" + data.rubricid + "]</span>");
+                let text = await GetRubricText(data.rubricid);
+                $("#myModalUpdateInsert #Text").val(text);
+                ShowModal("myModalUpdateInsert");
+            });
+
+
+            $(".btndelete").click(function () {   // delete (+ children)
+                let data = GetCurrentRubricData(this);
+                $("#myModalDelete input[name='rubricid']").val(data.rubricid);
+                $("#myModalDelete .modal-body").html("You are going to delete <u>" + data.rubricpath + "</u> (and all its children). Are you sure? <span>[Id=" + $("#myModalDelete input[name='rubricid']").val() + "]</span>");
+                ShowModal("myModalDelete");
+            });
+
+            $("#grid span.name").click(function () {   // name click! => hide / show
+                let data = GetCurrentRubricData(this);
+                if (data.isend == 1)
+                    return;
+                let id = data.rubricid;
+                //var pid = data.parentid;
+                let path = data.rubricpath+"}";
+                console.log(JSON.stringify(data));
+                if ($("#grid tr.datarow[data-RubricId=" + id + "]").hasClass("bg-light")) {  // has class - show rows
+                    $("#grid tr.datarow[data-rubricpath^='" + path + "'][data-rubricid!=" + id + "]").attr("style", "").removeClass("bg-light");
+                    $("#grid tr.datarow[data-rubricpath^='" + path + "'][data-rubricid!=" + id + "] span.name.bi-caret-right-fill").addClass("bi-caret-down-fill").removeClass("bi-caret-right-fill");
+                    $("#grid tr.datarow[data-rubricid=" + id + "] span.name").addClass("bi-caret-down-fill").removeClass("bi-caret-right-fill");
+                    $("#grid tr.datarow[data-rubricid=" + id + "]").removeClass("bg-light");
+                } else {    // hide rows
+                    $("#grid tr.datarow[data-rubricpath^='" + path + "'][data-rubricid!=" + id + "]").attr("style", "display:none").addClass("bg-light");
+                    $("#grid tr.datarow[data-rubricpath^='" + path + "'][data-rubricid!=" + id + "] span.name.bi-caret-down-fill").removeClass("bi-caret-down-fill").addClass("bi-caret-right-fill");
+                    $("#grid tr.datarow[data-rubricid=" + id + "] span.name").removeClass("bi-caret-down-fill").addClass("bi-caret-right-fill");
+                    $("#grid tr.datarow[data-rubricid=" + id + "]").addClass("bg-light");
+                }
+            });
+            @if (idr != 0)
+            {
+                @Html.Raw($"$('#grid tr.datarow[data-rubricid=\"{idr}\"] .btnaddchild').click();")
+            }
+            else if (idrSt=="0")
+            {
+                @Html.Raw("$('#grid .btnaddtop').click();")
+            }
+            else if (ide != 0)
+            {
+                @Html.Raw($"$('#grid tr.datarow[data-rubricid=\"{ide}\"] .btnedit').click();")
+            }
+            else if (idd != 0)
+            {
+                @Html.Raw($"$('#grid tr.datarow[data-rubricid=\"{idd}\"] .btndelete').click();")
+            }
+        });
+    </script>
+}

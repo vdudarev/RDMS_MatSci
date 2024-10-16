@@ -1,0 +1,48 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@using Newtonsoft.Json;
+@model ObjectInfo
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    var list = await dataContext.ObjectLinkObject_GetLinkedObjects(Model.ObjectId);
+    var types = (await dataContext.GetTypes()).Where(x => !x.IsHierarchical);
+}
+<link rel="stylesheet" href="~/css/dragdrop.css" />
+<div class="dragdrop">
+    <h3>Associated Objects</h3>
+
+    <div class="dropzoneContainer">
+        <ul class="associated-content">
+        @foreach (var item in list)
+        {
+            <li class="alert alert-success alert-dismissible" role="alert" data-id="@item.ObjectId">@Html.Raw(item.ObjectName) [@types.FirstOrDefault(x => x.TypeId==item.TypeId)?.TypeName]<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="Delete(this)"></button></li>
+        }
+        </ul>
+        <button type="submit" class="btn btn-primary mb-3" title="Save" disabled onclick="AssocSave()"><i class="bi bi-save2-fill"></i> Save</button>
+
+        <div class="err"></div>
+        <div class="dropzone bi bi-cloud-upload"></div>
+    </div>
+
+    <div class="fordrag">
+        <div class="input-group mb-3">
+            <span class="input-group-text border-0 bg-transparent">Search </span>
+            <select class="form-select" id="otypeId" name="otypeId" aria-label="otypeId" oninput="DoObjectSearch();">
+                <option value="0">all</option>
+                @foreach (var item in types)
+                {
+                    <option value="@item.TypeId">@item.TypeName</option>
+                }
+            </select>
+            <span class="input-group-text border-0 bg-transparent">objects:</span>
+            <input id="oname" name="oname" class="form-control fieldSearch" type="text" onkeyup="DoObjectSearch();">
+            <button class="btn btn-outline-secondary buttonSearch" type="button" onclick="DoObjectSearch();">Search</button>
+        </div>
+        <ul class="list-group" id="listContainer"></ul>
+    </div>
+</div>
+<script type="text/javascript" src="~/js/dragdrop.js"></script>
+
+
+
+

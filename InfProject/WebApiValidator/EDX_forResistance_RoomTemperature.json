@@ -1,0 +1,174 @@
+{
+
+  "CompositionsForSampleUpdate": [
+    // the case with two (min, max) values for MA
+    {
+      "Predicate": {
+        "Properties": [
+          {
+            "Type": 2,
+            "Name": "Measurement Area",
+            "Value": 1
+          }
+        ]
+      },
+      "DeletePreviousProperties": false,
+      "Properties": [
+        {
+          "PropertyId": 0,
+          "Type": 1,
+          "Name": "R",
+          "Value": 111.111,
+          "ValueEpsilon": null,
+          "SortCode": 10,
+          "Row": 1,
+          "Comment": "Minimal Resistance (room temperature) for Measurement Area 1"
+        },
+        {
+          "PropertyId": 0,
+          "Type": 1,
+          "Name": "R",
+          "Value": 123.333,
+          "ValueEpsilon": null,
+          "SortCode": 11,
+          "Row": 2,
+          "Comment": "Maximal Resistance (room temperature) for Measurement Area 1"
+        }
+      ]
+    },
+
+
+    // the case with ONE only value for MA
+    {
+      "Predicate": {
+        "Properties": [
+          {
+            "Type": 2,
+            "Name": "Measurement Area",
+            "Value": 2
+          }
+        ]
+      },
+      "DeletePreviousProperties": false,
+      "Properties": [
+        {
+          "PropertyId": 0,
+          "Type": 1,
+          "Name": "R",
+          "Value": 111.111,
+          "ValueEpsilon": null,
+          "SortCode": 10,
+          "Row": 1,
+          "Comment": "Resistance (room temperature) for Measurement Area 2"
+        }
+      ]
+    }
+
+
+  ],
+
+
+
+
+  // the case with ONE only value for MA
+  {
+    "Predicate": {
+      "Properties": [
+        {
+          "Type": 2,
+          "Name": "Measurement Area",
+          "Value": 2
+        }
+      ]
+    },
+    "DeletePreviousProperties": false,
+    "Properties": [
+      {
+        "PropertyId": 0,
+        "Type": 1,
+        "Name": "Thickness",
+        "Value": 111.111,
+        "ValueEpsilon": null,
+        "SortCode": 10,
+        "Row": 1,
+        "Comment": "Thickness in nm"
+      },
+      {
+        "PropertyId": 0,
+        "Type": 2,
+        "Name": "Thickness_MeasurementsCount",
+        "Value": 10,
+        "ValueEpsilon": null,
+        "SortCode": 10,
+        "Row": 1,
+        "Comment": "Thickness in nm"
+      },
+      {
+        "PropertyId": 0,
+        "Type": 1,
+        "Name": "Time",
+        "Value": 10.5,
+        "ValueEpsilon": null,
+        "SortCode": 10,
+        "Row": 1,
+        "Comment": "Time in seconds (04:56 - skip)"
+      },
+      {
+        "PropertyId": 0,
+        "Type": 1,
+        "Name": "Power",
+        "Value": 50.5,
+        "ValueEpsilon": null,
+        "SortCode": 10,
+        "Row": 1,
+        "Comment": "Power in Watts"
+      },
+      {
+        "PropertyId": 0,
+        "Type": 3,
+        "Name": "PowerSupply",
+        "Value": "DC",
+        "ValueEpsilon": null,
+        "SortCode": 10,
+        "Row": 1,
+        "Comment": "Power Supply Type"
+      }
+
+
+    ]
+  },
+
+
+  ],
+
+
+
+
+
+
+  // last section - overall
+
+  "DeletePreviousProperties": true,
+  "Properties": [
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "R",
+      "Value": 0,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 1,
+      "Comment": "Minimal Resistance of Materials Library (of all 342 MAs)"
+    },
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "R",
+      "Value": 36.400,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 2,
+      "Comment": "Maximal Resistance of Materials Library (of all 342 MAs)"
+    }
+  ]
+}

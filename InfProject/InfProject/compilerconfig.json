@@ -1,0 +1,6 @@
+﻿[
+  {
+    "inputFile": "lib/style-all.scss",
+    "outputFile": "wwwroot/css/style-all.css"
+  }
+]

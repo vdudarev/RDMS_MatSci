@@ -1,0 +1,132 @@
+{
+
+  "CompositionsForSampleUpdate": [
+    // the case with two (min, max) values for MA
+    {
+      "Predicate": {
+        "Properties": [
+          {
+            "Type": 2,
+            "Name": "Measurement Area",
+            "Value": 1
+          }
+        ]
+      },
+      "DeletePreviousProperties": false,
+      "Properties": [
+        {
+          "PropertyId": 0,
+          "Type": 1,
+          "Name": "R_T",
+          "Value": 111.111,
+          "ValueEpsilon": null,
+          "SortCode": 10,
+          "Row": 1,
+          "Comment": "Minimal Resistance (temperature dependant) for Measurement Area 1 at T=35"
+        },
+        {
+          "PropertyId": 0,
+          "Type": 1,
+          "Name": "R_T",
+          "Value": 123.333,
+          "ValueEpsilon": null,
+          "SortCode": 11,
+          "Row": 2,
+          "Comment": "Maximal Resistance (temperature dependant) for Measurement Area 1 at T=135"
+        }
+      ]
+    },
+
+
+    // the case with two (min, max) values for MA
+    {
+      "Predicate": {
+        "Properties": [
+          {
+            "Type": 2,
+            "Name": "Measurement Area",
+            "Value": 2
+          }
+        ]
+      },
+      "DeletePreviousProperties": false,
+      "Properties": [
+        {
+          "PropertyId": 0,
+          "Type": 1,
+          "Name": "R_T",
+          "Value": 1110.111,
+          "ValueEpsilon": null,
+          "SortCode": 10,
+          "Row": 1,
+          "Comment": "Minimal Resistance (temperature dependant) for Measurement Area 2 at T=315"
+        },
+        {
+          "PropertyId": 0,
+          "Type": 1,
+          "Name": "R_T",
+          "Value": 1230.333,
+          "ValueEpsilon": null,
+          "SortCode": 11,
+          "Row": 2,
+          "Comment": "Maximal Resistance (temperature dependant) for Measurement Area 2 at T=135"
+        }
+      ]
+    }
+
+
+
+
+  ],
+
+
+
+// last section - overall
+
+  "DeletePreviousProperties": true,
+  "Properties": [
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "R_T",
+      "Value": 0,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 1,
+      "Comment": "Minimal Resistance of Materials Library (of all 342 MAs) at T=35"
+    },
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "R_T",
+      "Value": 36.400,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 2,
+      "Comment": "Maximal Resistance of Materials Library (of all 342 MAs) at T=135"
+    },
+
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "T",
+      "Value": -50,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 1,
+      "Comment": "Minimal Temperature (of all 342 MAs)"
+    },
+    {
+      "PropertyId": 0,
+      "Type": 1,
+      "Name": "T",
+      "Value": 250,
+      "ValueEpsilon": null,
+      "SortCode": 10,
+      "Row": 2,
+      "Comment": "Maximal Temperature (of all 342 MAs)"
+    }
+
+
+  ]
+}

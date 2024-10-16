@@ -1,0 +1,28 @@
+﻿@using InfProject.Utils;
+@using WebUtilsLib;
+@model (UserContext userCtx, int targetUserId)
+@inject IConfiguration config
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    (UserContext userCtx, int targetUserId) = Model;
+    WebAppUser targetUser = targetUserId != 0 ? await dataContext.GetUser(targetUserId) : null;
+    AccessControlFilter accessControlFilter = new AccessControlFilter(userCtx.access, userCtx.userId);
+    List<ObjectInfo> list = await dataContext.ObjectInfo_GetLastAdditions(targetUserId, accessControlFilter, maxCount: 10);
+    var rawUrl = System.Net.WebUtility.UrlEncode(Context.Request.Path);
+    var userCanAdd = Context.User.IsInRole(UserGroups.PowerUser) || Context.User.IsInRole(UserGroups.Administrator);
+}
+<h2>Last added objects@(targetUser != null ? " by " + targetUser.Name : string.Empty)</h2>
+<div id="lastList" class="list-group rubric">
+    @if (list.Count > 0)
+    {
+        @foreach (var row in list)
+        {
+            (ObjectInfo obj, string rawUrl, UserContext userCtx, bool showDate, int? RubricId) listItemModel = (row, rawUrl, userCtx, true, null);
+            <partial name="pListItem" model=@listItemModel />
+        }
+    }
+    else
+    {
+        <p>Nothing to observe...</p>
+    }
+</div>

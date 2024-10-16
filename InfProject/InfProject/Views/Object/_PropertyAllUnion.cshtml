@@ -1,0 +1,101 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@using Newtonsoft.Json;
+@using System.Linq;
+@using WebUtilsLib
+@using System.Linq;
+@model ObjectInfo
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    ObjectInfo obj = Model;
+    // InfProject.Models.TypeInfo type = await dataContext.GetType(obj.TypeId);
+    int templateObjectId = await dataContext.GetTypeTemplateObjectId(obj.TypeId);
+    List<dynamic> listAll;
+    string path;
+    int level;
+    if (templateObjectId != 0)
+    {
+        listAll = await dataContext.Property_GetPropertiesAllUnionForObject_Join_Template(obj.ObjectId, obj.TypeId);
+    }
+    else
+    {
+        listAll = await dataContext.Property_GetPropertiesAllUnionForObject(obj.ObjectId);
+    }
+    listAll = listAll.Where(x => (x.Row == null || x.Row == -1) && (x.Value != null || x.Comment=="SEPARATOR")).ToList();
+}
+<div id="AllProperties" class="props">
+    <h3>All properties (except table)@Html.Raw(obj.ObjectName=="_Template" ? $", <span class=\"text-danger\">that define a {InfProject.Models.Extension_ObjectInfo.GetTemplateIcon(obj, null)} template</span>" : string.Empty)</h3>
+    @if (obj.ObjectName != "_Template")
+    {
+        @if (!Context.IsWriteDenied(obj.AccessControl, (int)obj._createdBy))
+        {
+            <form class="ms-4" method="post" enctype="multipart/form-data" action="/properties/uploadpropertiesexcel/@obj.ObjectId" style="float:right">
+                <input class="form-control" type="file" name="fileupload" style="width:340px">
+                <button type="submit" class="btn btn-danger" style="width:340px"><i class="bi bi-upload"></i>&nbsp;&nbsp;&nbsp;Upload / Replace properties from Excel</button>
+            </form>
+        }
+        @if (!Context.IsReadDenied(obj.AccessControl, (int)obj._createdBy))
+        {
+            <form class="ms-4" method="get" enctype="multipart/form-data" action="/properties/downloadpropertiesexcel/@obj.ObjectId" style="float:right; width:300px; height: 76px">
+                @if (templateObjectId != 0)
+                {
+                    <input class="form-check-input" type="checkbox" value="true" data-val="true" id="includetemplate" name="includetemplate" checked="checked">
+                    @Html.Raw("Include all template properties<br>")
+                }
+                <button class="btn btn-primary" style="width:300px"><i class="bi bi-download"></i>&nbsp;&nbsp;&nbsp;Download properties in Excel</button>
+            </form>
+        }
+        @if (!Context.IsWriteDenied(obj.AccessControl, (int)obj._createdBy) && templateObjectId != 0)
+        {
+            <div style="float:right"><a href="/properties/edititem/@obj.ObjectId" class="btn btn-primary" style="width:200px"><i class="bi bi-pen"></i>&nbsp;&nbsp;&nbsp;Edit by template</a></div>
+        }
+
+        <div style="clear:both"></div>
+    }
+
+    @if (listAll.Count > 0)
+    {
+        InfProject.Utils.PropertiesUtils.PropertyForOutput[] desc = InfProject.Utils.PropertiesUtils.GetPropertiesDesctiptionForOutput(listAll);
+        <table class="table table-striped caption-top" id="tableAllUnion">
+@*             <caption>All properties</caption> *@
+            <thead style="position:sticky; top:0"><tr style="background: white">
+@*                <th>Row</th>
+*@                <th scope="header col">Type</th>
+                  <th scope="header col">Name</th>
+                  <th scope="header col">Value</th>
+                  @* <th scope="header col">Epsilon</th> *@
+                  <th scope="header col">Comment</th>
+                  <th><i class="bi bi-box-arrow-up-right"></i></th>
+            </tr></thead>
+            <tbody>
+            @for (var i=0; i<listAll.Count; i++)
+            {
+                var item = listAll[i];
+                @if (desc[i].isSeparapor)
+                {
+                    if (desc[i].countFilledChildren > 0)
+                    {
+                            <tr class="datarow table-primary" data-toggle="tooltip" data-html="true" title="Separator (used for fancy layout, SortCode=@item.SortCode)" data-sortcode="@item.SortCode" data-Level="@desc[i].level" data-id="@desc[i].PropertyId" data-path="@Html.Raw(desc[i].path)" data-countFilledChildren="@desc[i].countFilledChildren">
+                            <th scope="col" colspan="5" class="@($"level{desc[i].level}")"><span class="name sepName bi bi-caret-down-fill" title="@desc[i].path.Replace("}", " / ")">@desc[i].nameNormalized</span></th>
+                        </tr>
+                    }
+                }
+                else {
+                        <tr class="datarow" data-sortcode="@item.SortCode" data-mode="@item.PropertyType" title="@item.PropertyName = @item.Value" data-Level="@desc[i].level" data-id="@desc[i].PropertyId" data-sourceObjectId="@item.SourceObjectId" data-path="@Html.Raw(desc[i].path)">
+                        <td class="type @($"level{desc[i].level}") text-nowrap">@Html.Raw(InfProject.Models.Extension_ObjectInfo.GetTemplateIcon(obj, item.Row) + item.PropertyType)</td>
+                        <th class="name">@Html.Raw(desc[i].nameNormalized)</th>
+                        <td class="value">@Html.Raw(item.Value)</td>
+@*                         <td class="valueEpsilon">@item.ValueEpsilon</td> *@
+                        <td class="comment">@Html.Raw(item.Comment)</td>
+                        <td class="sourceObjectId">@Html.Raw($"<a href=\"/object/id/{item.SourceObjectId}\">{item.SourceObjectId}</a>")</td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No properties found</p>
+    }
+</div>

@@ -1,0 +1,54 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@using Newtonsoft.Json;
+@using InfProject.DBContext;
+@using WebUtilsLib
+@model ObjectInfo
+@inject DataContext dataContext
+@{
+    UserContext userCtx = UserUtils.GetUserContext(Context);
+    var list = await dataContext.ObjectLinkObject_GetLinkedObjects(Model.ObjectId);
+    IEnumerable<InfProject.Models.TypeInfo> types = (await dataContext.GetTypes()).Where(x => !x.IsHierarchical);
+    int prevTypeId = 0, curTypeId = 0, curTypeIdCount = 0;
+    var pDfDModel = (types, userCtx);
+}
+<link rel="stylesheet" href="~/css/dragdrop.css" />
+<div class="dragdrop">
+    <h3>Associated Objects</h3>
+
+    <div class="dropzoneContainer">
+        @if (list.Count > 0)
+        {
+            @foreach (ObjectInfoLinked row in list)
+            {
+                curTypeId = row.TypeId;
+                if (curTypeId != prevTypeId) {
+                    if (prevTypeId != 0)
+                    {
+                        @Html.Raw("</ul></div>")
+                    }
+                    prevTypeId = curTypeId;
+                    @Html.Raw($"<button class=\"me-3 mt-1 btn btn-secondary\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseType{curTypeId}\" aria-expanded=\"false\" aria-controls=\"collapseType{curTypeId}\">{dataContext.GetType(curTypeId).Result.TypeName} [{list.Where(x=>x.TypeId==curTypeId).Count()}]</button>")
+                    ;
+                    @Html.Raw($"<div class=\"collapse\" id=\"collapseType{curTypeId}\"><ul class=\"list-group associated-content ms-4\">");
+                }
+                <li class="alert alert-success alert-dismissible" role="alert" data-id="@row.ObjectId">@Html.Raw(row.ObjectName) [@types.FirstOrDefault(x => x.TypeId==row.TypeId)?.TypeName]
+                    @if (!string.IsNullOrEmpty(row.LinkTypeObjectName))
+                    {
+                        <small><a href="/object/@row.LinkTypeObjectNameUrl"><i class="bi bi-link ms-5 me-1"></i>@row.LinkTypeObjectName</a></small>
+                    }
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="Delete(this)"></button>
+                </li>
+            }
+            @Html.Raw("</ul></div>")
+        }
+        <partial name="pDropzoneContainer" />
+    </div>
+
+    <partial name="pDropzoneForDrag" model=@pDfDModel />
+</div>
+<script type="text/javascript" src="~/js/dragdrop.js"></script>
+
+
+
+

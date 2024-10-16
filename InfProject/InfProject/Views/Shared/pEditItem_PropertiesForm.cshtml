@@ -1,0 +1,159 @@
+﻿@model (ObjectInfo obj, string objectFormPrefix)
+@using InfProject.DBContext;
+@using System.Text
+@using WebUtilsLib;
+@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@inject DataContext dataContext
+@{
+    string errMessage = string.Empty;
+    List<dynamic> props = null;
+    ObjectInfo templateObject = null;
+    int templateRubricId = 0;
+    List<RubricInfo> childrenRubrics = null;
+    InfProject.Utils.PropertiesUtils.PropertyForOutput[] desc = null;    
+    
+    // return rubrics with template values or null
+    RubricInfo? GetRubricChildWithName(string rubricName)
+    {
+        RubricInfo[] arr = childrenRubrics.Where(x => x.RubricName == rubricName).ToArray();
+        return arr.Length > 0 ? arr[0] : null;
+    }
+
+    (ObjectInfo obj, string objectFormPrefix) = Model;
+    if (objectFormPrefix == null) { 
+        objectFormPrefix = string.Empty;
+    }
+    RubricInfo rubric = await dataContext.GetRubricById(obj.RubricId ?? 0);
+    (RubricInfo rubric, ObjectInfo obj) item = (rubric, obj);
+    ViewData["Title"] = $"Editing non-table properties for {obj.ObjectName}";
+    try
+    {
+        props = await dataContext.Property_GetPropertiesAllUnionForObject_Join_Template(obj.ObjectId, obj.TypeId);
+        // Find a template
+        templateObject = await dataContext.GetTypeTemplateObject(obj.TypeId);
+        // Find a template rubric
+        templateRubricId = templateObject.RubricId ?? 0;
+        childrenRubrics = await dataContext.GetRubricChildren(templateRubricId, AccessControlFilter.SuperAdmin);   // all rubrics (as admin)
+
+        desc = InfProject.Utils.PropertiesUtils.GetPropertiesDesctiptionForOutput(props);
+    }
+    catch (Exception ex)
+    {
+        errMessage = ex.Message;
+    }
+}
+@if (props != null)
+{
+    <table class="table" id="@($"tableAllUnion{objectFormPrefix}")">
+        <thead style="position:sticky; top:0">
+            <tr style="background: white">
+                <th scope="header col">Type</th>
+                <th scope="header col">Name</th>
+                <th scope="header col">Value</th>
+                @*                 <th scope="header col">Epsilon</th> *@
+                <th scope="header col">Comment</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < props.Count; i++)
+            {
+                string[] arrNames = (props[i].PropertyName ?? string.Empty).Split(" => ", StringSplitOptions.RemoveEmptyEntries);
+                string nameNormalized = arrNames[arrNames.Length - 1];
+                @if (props[i].TemplateComment == "SEPARATOR")
+                {
+                    <tr class="datarow table-primary" data-toggle="tooltip" data-html="true" title="Separator (used for fancy layout, SortCode=@props[i].SortCode)" data-Level="@desc[i].level" data-id="@($"{props[i].PropertyType}_{desc[i].PropertyId}")" data-path="@Html.Raw(desc[i].path)" data-countFilledChildren="@desc[i].countFilledChildren">
+                        <th scope="col" colspan="5" class="@($"level{desc[i].level}")"><span class="name sepName bi bi-caret-down-fill" title="@desc[i].path.Replace("}", " / ")">@desc[i].nameNormalized</span></th>
+                    </tr>
+                }
+                else
+                {
+                    var st = $" data-Level=\"{desc[i].level}\" data-id=\"{props[i].PropertyType}_{desc[i].PropertyId}\" data-path=\"{Html.Raw(desc[i].path)}\" data-countFilledChildren=\"{desc[i].countFilledChildren}\"";
+                    if (props[i].TemplatePropertyId == null)   // out of template
+                    {
+                        st += $" class=\"datarow table-warning\" data-toggle=\"tooltip\" data-html=\"true\" title=\"This property is out of the Template (SortCode={props[i].SortCode})\"";
+                    }
+                    else if (@props[i].Value != null)   // filled template property
+                    {
+                        st += $" class=\"datarow table-success\" data-toggle=\"tooltip\" data-html=\"true\" title=\"Filled template property (SortCode={props[i].SortCode})\"";
+                    }
+                    else // unfilled template property (empty)
+                    {
+                        st += $" class=\"datarow\" data-toggle=\"tooltip\" data-html=\"true\" title=\"Unfilled template property (SortCode={props[i].SortCode})\"";
+                    }
+                    <input type="hidden" name="@($"{objectFormPrefix}prop_templ")" value="@($"{props[i].PropertyId}_{props[i].TemplatePropertyId}")">
+                    <input type="hidden" name="@($"{objectFormPrefix}typ{props[i].PropertyId}_{props[i].TemplatePropertyId}")" value="@($"{props[i].PropertyType}")">
+                    <input type="hidden" name="@($"{objectFormPrefix}sor{props[i].PropertyId}_{props[i].TemplatePropertyId}")" value="@($"{props[i].SortCode}")">
+                    <input type="hidden" name="@($"{objectFormPrefix}nam{props[i].PropertyId}_{props[i].TemplatePropertyId}")" value="@($"{props[i].PropertyName}")">
+
+                    <tr @Html.Raw(st)>
+                        @{
+                            PropertyComment comment = new PropertyComment(props[i].Comment);
+                        }
+                        <td scope="col" class="@($"level{desc[i].level}")">@props[i].PropertyType</td>
+                        <th scope="col" @Html.Raw(comment.IsRequired ? "class=required" : string.Empty)>@Html.Raw(desc[i].nameNormalized)</th>
+                        <td scope="col">
+                            @{
+                                string htmlOptions = string.Empty;
+                                if (props[i].TemplatePropertyId != null && props[i].PropertyType == "Int")    // "_Template" is set && "Int" property
+                                {
+                                    // try to a find subrubric with <PropertyName>
+                                    RubricInfo? valuesRubric = GetRubricChildWithName(props[i].PropertyName);
+                                    if (valuesRubric != null)   // rubric with values exists!
+                                    {
+                                        List<dynamic> list = await dataContext.GetList_ExecDevelopment<dynamic>(@"SELECT OI.ObjectId, OI.ObjectName, P.[Value] FROM dbo.ObjectInfo as OI
+                INNER JOIN dbo.PropertyInt as P ON OI.ObjectId=P.ObjectId AND P.PropertyName='HtmlFormOptionValue' AND P.[Row] IS NULL
+                WHERE OI.TenantId=@TenantId and OI.RubricId=@RubricId
+                ORDER BY OI.SortCode, OI.ObjectName", new { dataContext.TenantId, valuesRubric.RubricId });
+                                        // build Html
+                                        StringBuilder sb = new StringBuilder();
+                                        list.ForEach(x => { sb.AppendLine($"<option value=\"{x.Value}\"{(x.Value.ToString() == props[i].Value ? " checked" : string.Empty)}>{x.ObjectName}</option>"); });
+                                        htmlOptions = sb.ToString();
+                                    }
+                                }
+                            }
+                            @if (string.IsNullOrEmpty(htmlOptions))
+                            {
+                                <input class="form-control" type="@(props[i].PropertyType == "Float" || props[i].PropertyType == "Int" ? "number" : "text")" step="@(props[i].PropertyType == "Float" ? "any" : "1")" name="@($"{objectFormPrefix}val{props[i].PropertyId}_{props[i].TemplatePropertyId}")" value="@props[i].Value" @Html.Raw(comment.IsRequired ? "required" : string.Empty)>
+                            }
+                            else
+                            {
+                                <select class="form-select" name="@($"{objectFormPrefix}val{props[i].PropertyId}_{props[i].TemplatePropertyId}")" @Html.Raw(comment.IsRequired ? "required" : string.Empty)>@Html.Raw(htmlOptions)</select>
+                            }
+                        </td>
+                        @if (props[i].PropertyType == "Float")  // ValueEpsilon
+                        {
+                            <input class="form-control" type="hidden" name="@($"{objectFormPrefix}eps{props[i].PropertyId}_{props[i].TemplatePropertyId}")" value="@props[i].ValueEpsilon">
+                        }
+                        @*                      <td scope="col">
+            @if (props[i].PropertyType == "Float")
+            {
+            <input class="form-control" type="number" name="@($"eps{props[i].PropertyId}_{props[i].TemplatePropertyId}")" value="@props[i].ValueEpsilon">
+            }
+            </td>
+            *@
+                        <td scope="col">
+                            @if (props[i].TemplatePropertyId == null)
+                            {
+                                <input class="form-control" type="text" name="@($"{objectFormPrefix}com{props[i].PropertyId}_{props[i].TemplatePropertyId}")" value="@props[i].Comment">
+                            }
+                            else
+                            {
+                                <input class="form-control" type="hidden" name="@($"{objectFormPrefix}com{props[i].PropertyId}_{props[i].TemplatePropertyId}")" value="@props[i].Comment">
+                                @Html.Raw(comment.UserComment)
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+@Html.Raw(errMessage)
+@* section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            MakePropertiesTableCollapsible();
+        });
+    </script>
+}
+ *@

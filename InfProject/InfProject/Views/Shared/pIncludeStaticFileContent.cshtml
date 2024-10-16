@@ -1,0 +1,17 @@
+﻿@model (string relaTiveFileName, string defaultContent)
+@inject InfProject.DBContext.DataContext dataContext
+@inject IConfiguration config
+@{
+    (string relativeFileName, string defaultContent) = Model;
+    string path = InfProject.Utils.ConfigUtils.MapStorageFile(config, $"/tenant{dataContext.TenantId}/{relativeFileName}");
+    string? contents = null;
+    if (System.IO.File.Exists(path))
+    {
+        contents = System.IO.File.ReadAllText(path, encoding: System.Text.Encoding.UTF8);
+    }
+    if (string.IsNullOrEmpty(contents))
+    {
+        contents = defaultContent ?? string.Empty;
+    }
+}
+@Html.Raw(contents)

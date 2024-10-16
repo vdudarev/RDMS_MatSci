@@ -1,0 +1,50 @@
+﻿@using WebUtilsLib;
+@inject InfProject.DBContext.DataContext dataContext
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"].ToString().DeleteHtmlTags() - @dataContext.Tenant.TenantName Database</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/style-all.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+@*    <script src="https://cdn.ckeditor.com/ckeditor5/35.4.0/classic/ckeditor.js"></script>
+*@
+
+</head>
+<body>
+    <partial name="Header" />
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            <partial name="Alert" />
+            @RenderBody()
+        </main>
+    </div>
+
+    <partial name="Footer" />
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        $(document).ready(function () {
+            app.path = "@Context.Request.Path";
+            app.queryString = "@Context.Request.QueryString.ToString()";
+            @if (!string.IsNullOrEmpty((ViewData["object"] ?? string.Empty) as string))
+            {
+                @Html.Raw($"app.object = {ViewData["object"]};{Environment.NewLine}")
+            }
+            @if (!string.IsNullOrEmpty((ViewData["type"] ?? string.Empty) as string))
+            {
+                @Html.Raw($"app.type = {ViewData["type"]};{Environment.NewLine}")
+            }
+            @if (Context.Request.Path == "/identitymanager/home/users")
+            {
+                @Html.Raw("$('h2').after(\"<a href='/report/users/'>Users report</a>\");")
+            }
+            AdjustCtrlButtons(); 
+        });
+    </script>
+    <partial name="pIncludeStaticFileContent" model=@("EndOfAllDocuments.html", "<!-- No EndOfAllDocuments.html found -->") />
+</body>
+</html>

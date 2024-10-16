@@ -1,0 +1,36 @@
+﻿@model ObjectInfo
+@using InfProject.DBContext;
+@using System.Text
+@using WebUtilsLib;
+@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@inject DataContext dataContext
+@{
+    ObjectInfo obj = Model;
+    RubricInfo rubric = await dataContext.GetRubricById(obj.RubricId ?? 0);
+    (RubricInfo rubric, ObjectInfo obj) item = (rubric, obj);
+    ViewData["Title"] = $"Editing non-table properties for {obj.ObjectName}";
+    (ObjectInfo obj, string objectFormPrefix) propFormModel = (obj, objectFormPrefix: string.Empty);
+}
+
+<partial name="RubricBreadCrumbs" model=@item />
+<h1 class="display-4">@Html.Raw(ViewData["Title"])</h1>
+<form asp-formhelper="true" asp-action="UpdateInsert" asp-controller="Properties" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+@*    <input type="hidden" name="returl" value="@returl" />
+    <input type="hidden" name="UrlPrefix" value="@type.UrlPrefix" />
+*@    
+    <input type="hidden" name="ObjectId" value="@obj.ObjectId" />
+    <input type="hidden" name="UpdateInsert_PropertiesFromForm" value="1" />
+
+    <partial name="pEditItem_PropertiesForm" model=@propFormModel />
+
+    <button type="submit" class="btn btn-primary" title="Save"><i class="bi bi-save2-fill"></i> Save</button>
+</form>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            MakePropertiesTableCollapsible();
+        });
+    </script>
+}

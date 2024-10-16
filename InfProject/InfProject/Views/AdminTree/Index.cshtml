@@ -1,0 +1,58 @@
+﻿@model List<TypeInfo>
+@{
+    var types = Model;
+    ViewData["Title"] = "Select hiererchical type to edit";
+    bool isAdmin = Context.User.IsInRole(WebUtilsLib.UserGroups.Administrator.ToString());
+    if (!isAdmin && !Context.User.IsInRole(WebUtilsLib.UserGroups.PowerUser.ToString()))
+        throw new UnauthorizedAccessException("User is not PowerUser or Administrator");
+}
+<h1 class="display-4">Tree Editor</h1>
+<div class="container-fluid">
+    Select hiererchical type to edit:
+@*    <ul>
+    @foreach (var item in types)
+    {
+        <li>
+                <a asp-controller="AdminTree" asp-action="ManualEdit" asp-route-id="@item.TypeId">@item.TypeName</a><sup>@item.Count</sup> <i>@item.TableName</i> <span class="small">[@item.TypeComment]</span>
+        </li>
+    }
+    </ul>
+ *@
+    <table class="table table-striped caption-top" id="typeList">
+        <thead>
+            <tr>
+                <th>Type name</th>
+                <th>Count</th>
+                <th nowrap>Table name</th>
+                <th>Comment</th>
+                @Html.Raw(isAdmin ? "<th>Id</th>" : string.Empty)
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in types)
+            {
+                <tr class="datarow">
+                    <td><a asp-controller="AdminTree" asp-action="ManualEdit" asp-route-id="@item.TypeId">@item.TypeName</a></td>
+                    <td>@item.Count</td>
+                    <td>@item.TableName</td>
+                    <td>@item.TypeComment</td>
+                    @Html.Raw(isAdmin ? $"<td>{item.TypeId}</td>" : string.Empty)
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    [<a href="/admintype/">Control types</a>]
+</div>
+
+@section Scripts {
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/sortablejs-make/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            initDataTable("#typeList");
+        });
+    </script>
+}

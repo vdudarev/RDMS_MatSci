@@ -1,0 +1,121 @@
+﻿@inject InfProject.DBContext.DataContext dataContext;
+@{
+    List<dynamic> tables, columns, views;
+
+    async Task<List<dynamic>> GetTables()
+    {
+        List<dynamic> tables = await dataContext.GetList_ExecDevelopment<dynamic>(
+        @"SELECT 
+    s.name AS SchemaName,
+    t.name AS ObjectName,
+    CONVERT(NVARCHAR(4000), ep.value) AS Description
+FROM 
+    sys.tables t
+    INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
+    LEFT JOIN sys.extended_properties ep ON ep.major_id = t.object_id 
+        AND ep.minor_id = 0
+        AND ep.name = 'MS_Description'
+WHERE LEFT(t.name, 1)<> '_' and t.name NOT IN('sysdiagrams') ORDER BY ObjectName");
+        return tables;
+    }
+
+    async Task<List<dynamic>> GetTableColumns(string tableName)
+    {
+        List<dynamic> columns = await dataContext.GetList_ExecDevelopment<dynamic>(
+                            @"SELECT c.column_id AS ColumnOrder, t.name AS TableName, c.name AS ColumnName,
+       CASE WHEN typ.name = 'varchar' OR typ.name = 'nvarchar' THEN typ.name + '(' + IIF(CAST(c.max_length AS VARCHAR)=-1, 'max', CAST(c.max_length AS VARCHAR)) + ')' ELSE typ.name END AS ColumnType,
+	   ep.[value] AS ColumnDescription,
+       CASE WHEN pk.is_primary_key IS NOT NULL THEN 'Yes' ELSE 'No' END AS IsPrimaryKey,
+       fk.[ForeignTable] AS ForeignTable, fk.[ForeignColumn] AS ForeignColumn
+FROM sys.tables t
+INNER JOIN sys.columns c ON t.object_id = c.object_id
+LEFT OUTER JOIN sys.extended_properties ep ON ep.major_id = c.object_id AND ep.minor_id = c.column_id AND ep.name = 'MS_Description'
+INNER JOIN sys.types typ ON c.system_type_id = typ.system_type_id AND c.user_type_id = typ.user_type_id
+LEFT OUTER JOIN (
+   SELECT ic.object_id, ic.column_id, 1 AS is_primary_key
+   FROM sys.indexes i
+   INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+   WHERE i.is_primary_key = 1
+) pk ON c.object_id = pk.object_id AND c.column_id = pk.column_id
+LEFT OUTER JOIN (
+   SELECT
+      OBJECT_NAME(fk.parent_object_id) AS [Table],
+      COL_NAME(fkc.parent_object_id, fkc.parent_column_id) AS [Column],
+      OBJECT_NAME(fk.referenced_object_id) AS [ForeignTable],
+      COL_NAME(fkc.referenced_object_id, fkc.referenced_column_id) AS [ForeignColumn]
+   FROM
+      sys.foreign_keys fk
+      INNER JOIN sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id
+) fk ON t.name = fk.[Table] AND c.name = fk.[Column]
+WHERE t.is_ms_shipped = 0 and t.[name]=@tableName
+	-- AND ep.value IS NOT NULL
+ORDER BY t.name, c.column_id", new { tableName = tableName });
+        return columns;
+    }
+
+    async Task<List<dynamic>> GetViews()
+    {
+        List<dynamic> tables = await dataContext.GetList_ExecDevelopment<dynamic>(
+        @"SELECT 
+    s.name AS SchemaName,
+    v.name AS ObjectName,
+    CONVERT(NVARCHAR(4000), ep.value) AS Description
+FROM 
+    sys.views v
+    INNER JOIN sys.schemas s ON v.schema_id = s.schema_id
+    LEFT JOIN sys.extended_properties ep ON ep.major_id = v.object_id 
+        AND ep.minor_id = 0
+        AND ep.name = 'MS_Description'
+ORDER BY SchemaName, ObjectName");
+        return tables;
+    }
+}
+
+<h2>Database structure description</h2>
+<p>Generated automatically from database according to attributes description.</p>
+<div><img src="/i/vroschema.png" alt="Database schema"></img></div>
+<hr />
+<h3 class="mt-4">Tables</h3>
+@{
+    tables = await GetTables();
+    for (int i = 0; i < tables.Count; i++)
+    {
+        <h4 class="mt-3">@tables[i].SchemaName.@tables[i].ObjectName</h4>
+        <p>@tables[i].Description</p>
+        <p>Columns description</p>
+        <table class="table table-striped">
+            
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Is Primary Key</th>
+                <th>Foreign Key (table.column)</th>
+            </tr>
+            @{
+                columns = await GetTableColumns(tables[i].ObjectName);
+                for (int j = 0; j < columns.Count; j++)
+                {
+                    <tr>
+                        <th>@columns[j].ColumnName</th>
+                        <td>@columns[j].ColumnType</td>
+                        <td>@columns[j].ColumnDescription</td>
+                        <td>@columns[j].IsPrimaryKey</td>
+                        <td>@(!string.IsNullOrEmpty(columns[j].ForeignTable) ? $"{columns[j].ForeignTable}.{columns[j].ForeignColumn}" : string.Empty)</td>
+                    </tr>
+                }
+            }
+        </table>
+    }
+}
+
+<hr />
+<h3 class="mt-4">Views</h3>
+@{
+    views = await GetViews();
+    for (int i = 0; i < views.Count; i++)
+    {
+        <h4 class="mt-3">@views[i].SchemaName.@views[i].ObjectName</h4>
+        <p>@views[i].Description</p>
+    }
+}

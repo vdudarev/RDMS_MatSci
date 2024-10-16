@@ -1,0 +1,22 @@
+﻿@model int
+<form asp-formhelper="true" asp-action="SampleAddProcessingStep" asp-controller="Custom" method="post" id="addProcessingStepForm" onsubmit="return sumbitProcessingStep();">
+    <input type="hidden" id="ObjectId" name="ObjectId" value="@Model" />
+    <h4>Create Processing Step for the Sample</h4>
+    <p>
+        <span class="required">Processing Description</span><br />
+        <textarea id="AddProcessingStepDescription" name="AddProcessingStepDescription" class="form-control" placeholder="for example: Annealing at 750&deg;C for 30 minutes"></textarea>
+    </p>
+    <div id="alertsAddProcessingStep"></div>
+    <button type="submit" class="btn btn-primary" title="Add"><i class="bi bi-thermometer-sun"></i> Add Processing Step</button>
+    <script>
+        function sumbitProcessingStep() {
+            if ($("#AddProcessingStepDescription").val() == "") {
+                SpawnError("Add <u>Processing Step Description</u>, please...", "#alertsAddProcessingStep");
+                SetFocus("AddProcessingStepDescription");
+                return false;
+            }
+            SpawnError(null, "#alertsAddProcessingStep");
+            return true;
+        }
+    </script>
+</form>

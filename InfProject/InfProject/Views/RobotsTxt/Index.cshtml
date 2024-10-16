@@ -1,0 +1,20 @@
+﻿@page
+@inject InfProject.DBContext.DataContext dataContext
+@inject IConfiguration config
+@{
+    // https://www.hanselman.com/blog/dynamically-generating-robotstxt-for-aspnet-core-sites-based-on-environment
+    Layout = null;
+    string path = InfProject.Utils.ConfigUtils.MapStorageFile(config, $"/tenant{dataContext.TenantId}/robots.txt");
+    string? contents = null;
+    if (System.IO.File.Exists(path))
+    {
+        contents = System.IO.File.ReadAllText(path, encoding: System.Text.Encoding.UTF8);
+    }
+    if (string.IsNullOrEmpty(contents))
+    {
+        contents = @"User-Agent: *
+Disallow: /
+";
+    }
+}
+@Html.Raw(contents)

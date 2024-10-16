@@ -1,0 +1,80 @@
+﻿@model (string sql, string connectionString, DataTable dt, string error, List<string> views)
+@using System.Data
+@using Dapper
+@using System.Data.SqlClient
+@using IdentityManagerUI.Models
+@using Microsoft.AspNetCore.Identity.UI.Services
+@using InfProject.Utils
+@using Microsoft.AspNetCore.Identity
+@using WebUtilsLib
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    ViewData["Title"] = "SQL queries over read-only views";
+    (string sql, string connectionString, DataTable dt, string error, List<string> views) = Model;
+}
+
+<h1 class="display-4 float-start">SQL execution tool</h1>
+<a id="eyeVroDetails" class="d-block float-end" data-bs-toggle="collapse" href="#collapseVroDetails" role="button" aria-expanded="false" aria-controls="collapseVroDetails">
+    <i class="bi bi-eye me-1"></i>show schema
+</a>
+<div class="clearfix"></div>
+
+<div>
+
+    <div class="collapse border p-3" id="collapseVroDetails">
+        <h2>Read-only views</h2>
+            List of available views (see also the <a href="/i/vroschema.png" target="_blank">database schema</a>):
+            <ul>
+                @foreach (var view in views)
+                {
+                    <li>@view</li>
+                }
+            </ul>
+@*         <p><small><b>Connention String</b>: @connectionString</small></p> *@  
+    </div>
+
+@*     <p>Specify arbitrary SQL to retrieve the data you need</p> *@
+    <form method="post" asp-controller="vroui" asp-action="Execute">
+        <div class="form-group">
+            <label for="htmlMessage">SQL Query</label>
+            <textarea class="form-control" id="sql" name="sql" placeholder="Place your Select statement here">@Html.Raw(sql)</textarea>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary" onclick="form.action='/vroui/execute'">Execute</button>
+            <button type="submit" class="btn btn-primary" onclick="form.action='/vroui/executecsv'">Save CSV data</button>
+        </div>
+    </form>
+</div>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <p class="text-danger">@error</p>
+}
+
+@if (dt != null)
+{
+    @Html.Raw("<hr />")
+    TableView tv = new TableView(dt) { EmptyMessage = "No records", Title = null };
+    <p><b>Query Execution result</b></p>
+    <partial name="pShowTable" model=@tv />
+}
+
+@section Scripts {
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/sortablejs-make/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#collapseVroDetails').on('hidden.bs.collapse', function () {    // This event is fired when a collapse element has been hidden from the user(will wait for CSS transitions to complete).
+                $("#eyeVroDetails").html('<i class="bi bi-eye me-1"></i>show schema');
+                // console.log("hidden");
+            });
+            $('#collapseVroDetails').on('shown.bs.collapse', function () {    // This event is fired when a collapse element has been made visible to the user(will wait for CSS transitions to complete).
+                $("#eyeVroDetails").html('<i class="bi bi-eye-slash me-1"></i>hide schema');
+                // console.log("shown");
+            });
+            initDataTable();
+        });
+    </script>
+}

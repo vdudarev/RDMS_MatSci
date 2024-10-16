@@ -1,0 +1,48 @@
+﻿@model List<WCSampleShort>
+@{
+    int count = @Model.Count;
+}
+<div class="container-fluid" id="SampleList">
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button class="nav-link active" id="nav-table-tab" data-bs-toggle="tab" data-bs-target="#nav-table" type="button" role="tab" aria-controls="nav-table" aria-selected="false">Table (@count)</button>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-table" role="tabpanel" aria-labelledby="nav-table-tab">
+            <table class="table table-striped mt-0" id="searchList">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Created</th>
+                        <th>Project Name</th>
+                        <th>Person</th>
+                        <th>N</th>
+                        <th>Sample Material</th>
+                        <th>Substrate Material</th>
+                        <th>Chamber</th>
+                        <th>Depositions</th>
+                        <th>Characterizations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><a href="@Url.Action("Id", "Object", new { id = item.ProjectId })">@item.ExternalId <small>[@item.ProjectId]@(item.WCAccessControl > 0 ? " NDA" : string.Empty)</small></a></td>
+                            <td>@item.Created.ToString("yyyy-MM-dd")</td>
+                            <td>@item.ProjectName</td>
+                            <td>@item.CreatedByPerson</td>
+                            <td>@item.ElemNumber</td>
+                            <td>@item.Elements <span class="smallSample">(@item.SampleMaterial)</span></td>
+                            <td>@item.SubstrateMaterial</td>
+                            <td>@item.Chamber</td>
+                            <td>@item.DepositionCount</td>
+                            <td>@item.CharacterizationCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

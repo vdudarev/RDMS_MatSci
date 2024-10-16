@@ -1,0 +1,467 @@
+﻿@using System.IO
+@model FileInfo[]
+@using Dapper
+@using System.Data.SqlClient
+@using IdentityManagerUI.Models
+@using Microsoft.AspNetCore.Identity.UI.Services
+@using InfProject.Utils
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Cryptography;
+@using WebUtilsLib
+@using InfProject.DBContext
+@inject DataContext dataContext
+@{
+    ViewData["Title"] = "Files Staged => Create objects";
+    UserContext userCtx = UserUtils.GetUserContext(Context);
+    AccessControlFilter accessControlFilter = new AccessControlFilter(userCtx.access, userCtx.userId);
+
+    var files = Model;
+    var typesListAll = (await dataContext.GetTypes()).Where(x => !x.IsHierarchical);
+    var types = typesListAll.Where(x => x.TableName == "ObjectInfo");
+    //var jsontypes = Newtonsoft.Json.JsonConvert.SerializeObject(types);
+    var jsontypesAll = Newtonsoft.Json.JsonConvert.SerializeObject(typesListAll);
+
+    ObjectInfo obj = new ObjectInfo() { TenantId = dataContext.TenantId, TypeId = 7 /*Raw Document*/, AccessControl = dataContext.Tenant.AccessControl,
+        RubricId = Context.Session.GetInt32("idr") };
+    int objectId = Context.Session.GetInt32("ido") ?? 0;
+    if (objectId != 0)
+    {
+        obj = await dataContext.ObjectInfo_Get(objectId);
+    }
+    List<RubricInfo> listRubrics = await dataContext.GetList_RubricTree_AccessControl(2, accessControlFilter);
+    // Link type objects
+    var linkTypeObjects = await dataContext.ObjectInfo_GetList_AccessControl(DataContext.LinkTypeTypeId, accessControl: (int)userCtx.access, userId: userCtx.userId);
+}
+
+<partial name="pDataModel" model="false" />
+
+<div class="clearfix">
+    <h1 class="display-4 float-start">Objects to create</h1>
+    @if (files.Length > 0)
+    {
+        <form method="post" id="deleteAllForm" asp-controller="UploadFiles" asp-action="DeleteAllStagedFiles" class="float-end">
+            <button type="submit" class="btn btn-danger btndelete" onclick="return confirm('Deleting all the files. Are you sure?')"><i class="bi bi-trash"></i> Delete All Files</button>
+        </form>
+    }
+</div>
+<h2 class="">Files to process</h2>
+
+
+@if (files.Length > 0) {
+    <form method="post" id="deleteForm" asp-controller="UploadFiles" asp-action="DeleteStagedFile">
+        <input type="hidden" id="fileName" name="fileName" value="" />
+    </form>
+    <form method="post" asp-controller="UploadFiles" asp-action="CreateObjectsFromStagedFiles" onsubmit="return MySubmitFiles()">
+        <input type="hidden" name="count" value="@files.Length" />
+        <input type="hidden" name="UpdateInsert_PropertiesFromForm" value="1" />
+        @using (SHA256 sha256 = SHA256.Create()) {
+            @for (int i = 0; i < files.Length; i++)
+            {
+                <div class="mb-3" data-file="@i">
+                    <input type="hidden" name="i" value="@i" />
+                    <input type="hidden" name="@($"file{i}")" value="@files[i].Name" />
+                    <div class="input-group">
+                        <span id="@($"title{i}")" class="title input-group-text bg-transparent"><i class="bi bi-hourglass-split"></i><a href="javascript:void(0);" class="d-none" onclick="ShowDatabaseDataFromFile(@i)"><i class="bi bi-database-add"></i></a> @files[i].Name</span>
+                        <a class="btn btn-danger btndelete" title="Delete" onclick="DeleteFile(@i)"><i class="bi bi-trash"></i></a>
+                        @{
+                            string hash = WebUtilsLib.HashUtils.CalculateHash(sha256, files[i].FullName);
+                            ObjectInfo? copyObj = await dataContext.GetObjectByFileHash(hash);
+                            if (copyObj != null && copyObj.ObjectId != 0)
+                            {
+                                                        <span class="text-danger filecopy input-group-text bg-transparent">!!! File copy already exists, see <a href="/object/@copyObj.ObjectNameUrl">@copyObj.ObjectName</a></span>
+                            }
+                        }
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text">Type:</span>
+                        <select class="form-select" id="TypeId@(i)" name="@($"TypeId{i}")" aria-label="TypeId" asp-items="@(new SelectList(types, nameof(TypeInfo.TypeId), nameof(TypeInfo.TypeName)))" onchange="FileTypeChanged(@i)">
+                        </select>
+                        <span class="input-group-text">Name:</span>
+                        <input type="text" name="name@(i)" value="@System.IO.Path.GetFileNameWithoutExtension(files[i].Name)" data-name="@files[i].Name" class="form-control myname" placeholder="Enter Object Name" aria-label="Enter Object Name">
+                        <span class="input-group-text ">Sort Code:</span>
+                        <input type="text" name="sortcode@(i)" value="@((i+1)*10)" class="form-control" style="flex: 0 1 55px;" placeholder="Enter Sort Code">
+                    </div>
+                    <div id="@($"iprop{i}")" class="properties">
+@* TODO: Ajax to upload forms according to types => SettingsJson.IncludePropertiesForm==1. *@
+                    </div>
+                </div>
+            }
+        }
+
+        @if (obj.ObjectId != 0)
+        {
+            <p class="text-primary">Default settings from @Html.Raw($"{obj.ObjectName} [{(await dataContext.GetType(obj.TypeId)).TypeName}]")</p>
+        }
+        <b>Common properties:</b>
+        <div class="input-group mb-3">
+            <span class="input-group-text">Access Control (accessibility):</span>
+            @if (obj.ObjectId != 0)
+            {
+                <select class="form-select" asp-for="@obj.AccessControl">
+                    <option value="@((int)obj.AccessControl)">@obj.AccessControl</option>
+                </select>
+            } else
+            {
+                <select class="form-select" asp-for="@obj.AccessControl">
+                    <option value="0">public</option>
+                    <option value="1">protected</option>
+                    <option value="2">protectedNDA</option>
+                    <option value="3">private</option>
+                </select>
+            }
+            <span class="input-group-text">Rubric:</span>
+            <select class="form-select" asp-for="@obj.RubricId">
+                @for (int i = 0; i < listRubrics.Count; i++)
+                {
+                    <option value="@listRubrics[i].RubricId">@(new string('_', listRubrics[i].Level) + listRubrics[i].RubricName)</option>
+                }
+            </select>
+@*             @if (obj.ObjectId != 0)
+            {
+                <input type="hidden" name="obj.RubricId" value="@obj.RubricId" />
+                <span style="padding:6px 12px; height:24px;">
+                    @Html.Raw(await dataContext.GetRubricPathString(obj.RubricId ?? 0))
+                </span>
+            }
+            else
+            {
+                <select class="form-select" asp-for="@obj.RubricId">
+                    <option value="0">=- select the section -=</option>
+                    @for (int i = 0; i < listRubrics.Count; i++)
+                    {
+                        <option value="@listRubrics[i].RubricId">@(new string('_', listRubrics[i].Level) + listRubrics[i].RubricName)</option>
+                    }
+                </select>
+            }
+ *@        </div>
+
+        <b>Link as Associated Objects with:</b>
+        <div>
+            @if (obj.ObjectId != 0)
+            {
+                <input type="hidden" name="assoc" value="@obj.ObjectId" />
+                <p>
+                    @Html.Raw($"{obj.ObjectName} [{(await dataContext.GetType(obj.TypeId)).TypeName}]")
+                </p>
+            }
+            else
+            {
+                <ul class="list-group" id="listContainer"></ul>
+                <div class="input-group mb-3">
+                    <span class="input-group-text border-0 bg-transparent">Search </span>
+                    <select class="form-select" id="otypeId" name="otypeId" aria-label="otypeId" oninput="DoObjectSearch();">
+                        <option value="0">all</option>
+                        @foreach (var item in typesListAll)
+                        {
+                            <option value="@item.TypeId">@item.TypeName</option>
+                        }
+                    </select>
+                    <span class="input-group-text border-0 bg-transparent">objects:</span>
+                    <input id="oname" name="oname" class="form-control fieldSearch" type="text" onkeyup="DoObjectSearch();">
+                    <button class="btn btn-outline-secondary buttonSearch" type="button" onclick="DoObjectSearch();">Search</button>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text border-0 bg-transparent"><b>Link type</b> </span>
+                    <select class="form-select" id="linkTypeObjectId" name="linkTypeObjectId" aria-label="linkTypeObjectId">
+                        <option value="0">=- not specified -=</option>
+                        @foreach (var item in linkTypeObjects)
+                        {
+                            <option value="@item.ObjectId">@item.ObjectName</option>
+                        }
+                    </select>
+                </div>
+            }
+        </div>
+
+        <div id="msg" class="text-danger"></div>
+        <div class="form-group">
+            <button id="btnUpload" type="submit" class="btn btn-primary">Create Objects from Files</button>
+            <div id="UploadWaiter" class="spinner-border text-primary ms-2 d-none" role="status">
+                <span class="visually-hidden">processing...</span>
+            </div>
+        </div>
+    </form>
+} else
+{
+    <p class="text-primary">No staged files found.</p>
+    <p class="text-primary">You can upload files in any rubric according to your access rights</p>
+}
+
+@section Scripts {
+    <script type="text/javascript">app.types = @Html.Raw(jsontypesAll);</script>
+    <script type="text/javascript">
+        let selectedObjects = [];
+        let resData = [];
+
+        // Gets data values from file
+        function ShowDatabaseDataFromFile(i) {
+            console.log("ShowDatabaseData" + i);
+            const name = $("input[type='hidden'][name='file" + i + "']").val();
+            const typeId = $(`#TypeId${i}`).val();
+            ShowDatabaseDataFromStagedFile(typeId, name, "#title" + i + " a");
+        }
+
+        // Gets data values from file (of specified typeId)
+        function ShowDatabaseDataFromStagedFile(typeId, name, errSelector) {
+            $.ajax({
+                type: "POST",
+                url: "/uploadfiles/getdatavalues",
+                data: { typeId: typeId, fileName: name },
+                dataType: "json",
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    let msg = XMLHttpRequest.responseText;
+                    if (msg.indexOf('\n') > 0) {
+                        msg = msg.substr(0, msg.indexOf('\n'))
+                    }
+                    $(errSelector).html(msg);
+                },
+                success: function (data, status) {
+                    console.log(data);
+                    $("#dataModalCenteredScrollable pre").text(JSON.stringify(data, null, 2));
+                    ShowModal("dataModalCenteredScrollable");
+                }
+            });
+        }
+
+
+
+        // Performs delete action for file
+        function DeleteFile(i){
+            console.log("DeleteFile" + i);
+            const fileName = $("input[type='hidden'][name='file"+i+"']").val();
+            $("#fileName").val(fileName);
+            document.getElementById("deleteForm").submit();
+        }
+
+        // All Submit checks => before Objects Creation
+        function MySubmitFiles() {
+            let msg = "";
+            if ($('.title .bi-bag-x').length > 0) {
+                $('#msg').html('Successful validation of all files required');
+                return false;
+            }
+            if ($('.filecopy').length > 0) {
+                $('#msg').html('Please eliminate file copies');
+                return false;
+            }
+
+            $('input.myname').each(function(){
+                let v = $(this).val();
+                if (v==""){
+                    msg = "Please, set name for object " + $(this).attr("data-name");
+                }
+            });
+
+            if ($('#obj_RubricId').val() == "0") {
+                $('#msg').html('Please select the rubric to create objects');
+                return false;
+            }
+            $('#msg').html(msg);
+            let success = msg == "";
+            if (success) { 
+                DisableButton('btnUpload');
+                $("#UploadWaiter").removeClass("d-none");
+            }
+            return success;
+        }
+
+        // Assotiations checkbox change
+        function Change(objCheckBox, objectId) {
+            if (objCheckBox.checked){
+                if (selectedObjects.filter(x => x.objectId == objectId).length == 0) {
+                    const obj = resData.filter(x => x.objectId == objectId)[0];
+                    selectedObjects.push(obj);
+                }
+            } else
+            {
+                selectedObjects = selectedObjects.filter(x => x.objectId != objectId);
+            }
+        }
+        // Render item in list of possible associations
+        function RenderItem(obj, checked){
+            return "<li class=\"list-group-item\"><input type=checkbox name=\"assoc\" value=\"" + obj.objectId + "\"" + (checked ? " checked " : "") + " onchange=\"Change(this, " + obj.objectId + ")\"> <a href=\"#" + obj.objectId + "\" data-id=\"" + obj.objectId + "\">" + obj.objectName + " [" + GetTypeName(obj.typeId) + "]</a></li>";
+        }
+        // search objects for association
+        function DoObjectSearch() {
+            $('#listContainer').html("<p><img src='/i/loaderLight.gif' alt='wait, please' align='center' /></p>");
+            var query = document.getElementById('oname').value;
+            var typeId = $('#otypeId').val();
+            var queryData = { "query": query, "typeId": parseInt(typeId), "objectId": app.objectId };
+            $.ajax({
+                type: "POST",
+                url: "/ajax/searchobjectlist",
+                data: queryData,
+                dataType: "json",
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    $('#listContainer').html(html);
+                    $('#list').html("<li class=\"list-group-item disabled\" aria-disabled=\"true\">ajax error (textStatus" + textStatus + "errorThrown: " + errorThrown + ")</li>");
+                },
+                success: function (data, status) {
+                    resData = data;
+                    //console.log(JSON.stringify(queryData) + "\r\n: " + JSON.stringify(resData));
+                    var html = "";
+                    selectedObjects.forEach(x => {
+                        html += RenderItem(x, true);
+                    });
+                    if (data.length > 0) {
+                        for (i = 0; i < data.length; i++) {
+                            html += RenderItem(data[i], false);
+                        }
+                    } else {
+                        html += "<li class=\"list-group-item disabled\" aria-disabled=\"true\">Nothing found (query: " + query + "; type: " + $("#otypeId option:selected").text() + ")</li>";
+                    }
+                    $('#listContainer').html(html);
+                }
+            });
+
+        }
+
+
+
+
+        const TypeId_Raw = app.types.filter(x => x.TypeName == "Raw Document")[0].TypeId;   // predefined type for unrecognized documents
+        let objectInfoTypes = app.types.filter(x => x.TableName == "ObjectInfo");   // Types based on ObjectInfo
+        objectInfoTypes.forEach((val, idx) => {
+            val["Words"] = val.TypeName.split(/!|,|;|\.|\?| |-|_|\d/).filter(x => x != "");
+            // console.log(val.TypeName + " =" + idx + "= " + val.Words);
+        });
+
+        // File type Recognition (guess attempt on name basis)
+        function RecogniseFileType(i) { // i == index of File
+            const name = $("input[name='name" + i + "']").attr("data-name");
+            // console.log("name = " + name);
+            let nameSplit = name.split(/!|,|;|\.|\?| |-|_|\d/).filter(x => x != "");
+            const ext = nameSplit[nameSplit.length - 1].toLowerCase();
+            if (["png", "gif", "jpg", "jpeg", "bmp", "tif", "tiff"].includes(ext)) {    // add image to detect
+                nameSplit.push("Image");
+                nameSplit.push("Photo");
+            }
+            if ("txt" == ext) {    // add image to detect
+                nameSplit.push("Text");
+            }
+            // console.log("========= " + i + ", name = " + JSON.stringify(nameSplit) + " [" + name + "]");
+
+            // find appropriate type
+            const maxType = { weight:0, index: -1, typeWordsCount: 0 };
+            objectInfoTypes.forEach((typeObj, typeIdx) => {   // typeObj - type object
+                let sum=0;
+                typeObj.Words.forEach(word => { // word from type
+                    nameSplit.forEach(wordFile => { // word from File
+                        const wordU = word.toUpperCase();
+                        const wordFileU = wordFile.toUpperCase();
+                        if (wordU==wordFileU){  // exact word found => +10
+                            sum += 10;
+                            //console.log("  +10: " + wordU + "==" + wordFileU);
+                        }
+                        else if (wordU.indexOf(wordFileU) > -1 || wordFileU.indexOf(wordU) > -1){  // subword found => +1
+                            sum++;
+                            //console.log("  +1: " + wordU + "==" + wordFileU);
+                        }
+                    });
+                });
+                if (sum > maxType.weight || // update max
+                    (sum == maxType.weight && maxType.typeWordsCount > typeObj.Words.length)) { // update equal if in type Words.length is shorter then typeWordsCount
+                        maxType.weight = sum;
+                        maxType.index = typeIdx;
+                        maxType.typeWordsCount = typeObj.Words.length;
+                }
+                // console.log(typeObj.TypeName + " =" + typeIdx + "= " + typeObj.Words + " [" + typeObj.Words.length + "]. sum=" + sum);
+            });
+            // summary of the best fit
+            // console.log("maxType = " + JSON.stringify(maxType) + ". Type==" + JSON.stringify(objectInfoTypes[maxType.index]) + ". TypeId=" + objectInfoTypes[maxType.index].TypeId);
+            if (maxType.weight > 0) {
+                $(`#TypeId${i}`).val(objectInfoTypes[maxType.index].TypeId);
+            }
+            else {
+                $(`#TypeId${i}`).val(TypeId_Raw);
+            }
+        }
+
+        // type changed handler
+        function FileTypeChanged(i) {
+            ValidateFileTypeByIndex(i);
+            AddPropertiesFormIfRequired(i);
+        }
+
+        // validation of file with i-index
+        function ValidateFileTypeByIndex(i) { // i == index of File
+            const fileName = $("input[type='hidden'][name='file" + i + "']").val();
+            const objectName = $("input[type='text'][name='name" + i + "']").val();
+            const typeId = $(`#TypeId${i}`).val();
+            ValidateFileType(fileName, objectName, typeId, i);
+        }
+
+        // Loads properties form according to thew type selected
+        async function AddPropertiesFormIfRequired(i) {
+            const typeId = $(`#TypeId${i}`).val();
+            const seq = app.types.filter(x => x.TypeId == typeId);
+            if (seq.length != 1) {
+                console.log(`AddPropertiesFormIfRequired: type ${typeId} not found, quit...`);
+                return;
+            }
+            console.log(seq);
+            if (seq[0].SettingsJson == null || JSON.parse(seq[0].SettingsJson).IncludePropertiesForm != 1) {
+                console.log(`AddPropertiesFormIfRequired: type ${typeId} SettingsJson.IncludePropertiesForm is not set to 1, clear form...`);
+                $(`#iprop${i}`).html("");
+                return;
+            }
+            // load the form and initialize it...
+            let data = await $.ajax({
+                async: true,
+                type: "GET",
+                url: `/properties/ajaxgetpropertiesform?objectFormPrefix=i${i}&typeId=${typeId}`,
+                data: {},
+                dataType: "html"
+            });
+            // Error (GetPropertiesAllForObject_Join_Template): _Template object not found for type [TypeId=12, ObjectId=0, TypeId=12];
+            if (data.length < 256 && data.indexOf("_Template object not found") >=0 ) {
+                console.log(data);
+                data = "";  // we do not want to show errors (template not found) to user
+            } else {
+                $(`#iprop${i}`).html(data);
+                MakePropertiesTableCollapsible({ objectFormPrefix: "i" + i });
+            }
+        }
+        // validation of file name for correspondence with typeId
+        function ValidateFileType(fileName, objectName, typeId, i) {
+            // wait mode...
+            $("#title" + i + " .bi").removeClass("bi-bag-check").removeClass("bi-bag-x").addClass("bi-hourglass-split");
+            $.ajax({
+                type: "POST",
+                url: "/uploadfiles/validate",
+                data: { typeId: typeId, fileName: fileName, objectName: objectName },
+                dataType: "json",
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    let msg = XMLHttpRequest.responseText;
+                    if (msg.indexOf('\n') > 0) {
+                        msg = msg.substr(0, msg.indexOf('\n'))
+                    }
+                    $("#title" + i + " .bi").removeClass("bi-bag-check").removeClass("bi-bag-x").removeClass("bi-hourglass-split");
+                    $("#title" + i + " .bi").addClass("bi-bag-x").html(msg);
+                    $("#title" + i + " a").addClass("d-none");
+                },
+                success: function (data, status) {
+                    // console.log(data);
+                    $("#title" + i + " .bi").removeClass("bi-bag-check").removeClass("bi-bag-x").removeClass("bi-hourglass-split");
+                    if (data.code == 0) {
+                        $("#title" + i + " .bi").addClass("bi-bag-check").html(data.warning);
+                        $("#title" + i + " a").removeClass("d-none");
+                    } else {
+                        $("#title" + i + " .bi").addClass("bi-bag-x").html(data.message);
+                        $("#title" + i + " a").addClass("d-none");
+                    }
+                }
+            });
+        }
+
+        // onReady:
+        $(document).ready(function () {
+            // Recognise File Types
+            $("input[type='hidden'][name='i']").each(i => RecogniseFileType(i));
+            // Validate File Types & load properties form
+            $("input[type='hidden'][name='i']").each(i => FileTypeChanged(i));
+        });
+    </script>
+}
+
+

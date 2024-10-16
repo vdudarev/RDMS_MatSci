@@ -1,0 +1,15 @@
+﻿@using System.Net;
+@model (int TypeId, int ObjectId, int RubricId, string rawUrl)
+@inject InfProject.DBContext.DataContext dataContext
+@inject IConfiguration config
+@{
+    (int TypeId, int ObjectId, int RubricId, string rawUrl) = Model;
+
+    var type = await dataContext.GetType(TypeId);
+    string path = type.GetSettingsCustomEditPath(); // "/custom/editsample";
+    //string template = $"<a href=\"{path}/{ObjectId}/?returl={WebUtility.UrlEncode(rawUrl)}\" class=\"btn btn-primary btnedit\" title=\"Edit {type.TypeName}\" style=\"float:right; margin-left:1rem\"><i class=\"bi bi-pencil-fill\"></i></a>";
+    string content = string.IsNullOrEmpty(path) 
+        ? string.Empty 
+        : $"<a href=\"{path}/{ObjectId}/?idr={RubricId}&returl={WebUtility.UrlEncode(rawUrl)}\" class=\"btn btn-primary btnedit\" title=\"Edit {type.TypeName}\" style=\"float:right; margin-left:1rem\"><i class=\"bi bi-pencil-fill\"></i></a>";
+}
+@Html.Raw(content)

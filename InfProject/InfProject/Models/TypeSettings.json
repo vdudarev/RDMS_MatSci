@@ -1,0 +1,22 @@
+// TypeInfo.ValidationSchema
+//    type:TypeValidationLibrary.TypeValidator_Ok             Ok - checks extensions only (Vic)
+//    type:TypeValidationLibrary.TypeValidator_EDX_CSV        EDX (Vic)
+//    https://validation.matinf.pro/edx/validation            EDX (Vic)
+//    https://htts.matinf.pro/resistance/csv/validation       HTTS (HTTS Resistance CSV, Azadeh)
+//    https://htts.matinf.pro/resistance/txt/validation       HTTS (HTTS Resistance TXT, Azadeh)
+//    https://thickness.matinf.pro/thickness/xlsx/validation  Thickness XLSX (Azadeh)
+//    https://thickness.matinf.pro/thickness/txt/validation   Thickness TXT (Azadeh)
+
+// TypeInfo.DataSchema
+//    type:TypeValidationLibrary.TypeValidator_EDX_CSV        EDX (Vic)
+//    https://validation.matinf.pro/edx/data                  EDX (Vic)
+//    https://htts.matinf.pro/resistance/csv/data             HTTS (HTTS Resistance CSV, Azadeh)
+//    https://htts.matinf.pro/resistance/txt/data             HTTS (HTTS Resistance TXT, Azadeh)
+//    https://thickness.matinf.pro/thickness/xlsx/data        Thickness XLSX (Azadeh)
+//    https://thickness.matinf.pro/thickness/txt/data         Thickness TXT (Azadeh)
+{
+  "ApplyForTypeIds": [ 6 ], // For Handover Event (applicable to types - specify type identifiers in CSV)
+  "CustomEditPath": "/custom/editsample", // For Sample Type (custom edit form implementation)
+  "AllowedExtensions": [ ".txt", ".csv" ], // Array of allowed extensions for data files
+  "UrlPostVisualizer": "/file/postcsv" // EDX Visualization (Vic)        // "http://10.56.115.145/VisualizeRT", // Resistance Visualization (Azadeh)
+}

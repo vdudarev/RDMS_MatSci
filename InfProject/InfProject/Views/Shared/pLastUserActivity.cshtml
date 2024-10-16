@@ -1,0 +1,67 @@
+﻿@using InfProject.Utils;
+@using WebUtilsLib;
+@inject IConfiguration config
+@inject InfProject.DBContext.DataContext dataContext
+@model UserContext
+@{
+    UserContext userCtx = Model;
+    // 0. show pending incoming handovers:
+    List<HandoverSample> incoming = userCtx.userId != 0 ? await dataContext.GetHandoverSamplesForUser(userCtx.userId, Handover.HandoverType.Incoming, filterPendingOnly: true) : new List<HandoverSample>();
+
+    string sqlProjects = $@"SELECT TOP 3 OI.RubricId, RI.RubricName, RI.RubricPath, RI.RubricNameUrl, MAX(OI._updated) as _updated
+from ObjectInfo as OI
+INNER JOIN RubricInfo as RI on RI.RubricId=OI.RubricId
+WHERE OI.TenantId=@TenantId AND OI._updatedBy=@userId
+GROUP BY OI.RubricId, RI.RubricName, RI.RubricPath, RI.RubricNameUrl
+ORDER BY _updated desc";
+    List<dynamic> projects = userCtx.userId != 0 ? await dataContext.GetList_ExecDevelopment<dynamic>(sqlProjects, new { dataContext.TenantId, userId = userCtx.userId }) : new List<dynamic>();
+
+    string sqlSamples = $@"SELECT TOP 3 * FROM dbo.ObjectInfo WHERE TenantId=@TenantId AND _updatedBy=@userId AND TypeId IN (6, 99) ORDER BY _updated desc";
+    List<ObjectInfo> samples = userCtx.userId != 0 ? await dataContext.GetList_ExecDevelopment<ObjectInfo>(sqlSamples, new { dataContext.TenantId, userId = userCtx.userId }) : new List<ObjectInfo>();
+    var rawUrl = System.Net.WebUtility.UrlEncode(Context.Request.Path);
+}
+
+@if (incoming?.Count > 0)
+{
+    <div id="HandoverEvents" class="mt-4" data-incoming-count="@incoming.Count">
+        <h3>Incoming Handovers (awaiting your confirmartion)</h3>
+        @{
+            List<WebAppUser> users = await dataContext.GetUserListAll();
+            var modelIncoming = (userCtx, incoming, users, rawUrl);
+        }
+        <partial name="pListIncomingHandovers" model=@modelIncoming />
+    </div>
+}
+else if (userCtx.userId != 0)
+{
+    <p>No incoming handovers for you.</p>
+}
+
+@if (projects?.Count > 0)
+{
+    <div id="userRecentProjects" class="list-group rubric">
+        <h3>Your recent projects</h3>
+        <ol>
+        @foreach (var row in projects)
+        {
+            <li>
+                <a href="/rubric/@row.RubricNameUrl" title="@row.RubricName">@Html.Raw(row.RubricPath.Replace("}", " / "))</a>
+            </li>
+        }
+        </ol>
+    </div>
+}
+
+@if (samples.Count > 0)
+{
+    <div id="userRecentProjects" class="list-group rubric">
+        <h3>Your recent samples</h3>
+        <ol>
+            @foreach (var row in samples)
+            {
+                (ObjectInfo obj, string rawUrl, UserContext userCtx, bool showDate, int? RubricId) listItemModel = (row, rawUrl, userCtx, true, null);
+                <partial name="pListItem" model=@listItemModel />
+            }
+        </ol>
+    </div>
+}

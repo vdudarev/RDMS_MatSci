@@ -1,0 +1,33 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@inject InfProject.DBContext.DataContext dataContext
+@model Sample
+@{
+    Sample sample = Model;
+    bool isComposition = (await dataContext.GetType(Model.TypeId)).TableName == "Composition";
+    sample.Elements = sample.Elements?.Trim('-');
+}
+<p><b><label asp-for="Elements" class="control-label"></label></b>: @sample.Elements</p>
+<div id="ElementsTD">
+    @if (isComposition)  // based on composition
+    {
+        <h4>Composition</h4>
+        <table class="compoundTable" id="compoundTable">
+            <thead><tr><th>Element</th><th class="ps-3">Absolute</th><th></th><th class="ps-3">Percentage</th></tr></thead>
+            <tbody id="compoundTableBody">
+                @{
+                    List<Composition.CompositionItem> rows = await dataContext.GetComposition(Model.SampleId);
+                }
+                @foreach (var item in rows)
+                {
+                    <tr data-element="@item.ElementName">
+                        <th class="cell">@item.ElementName</th>
+                        <td class="cell text-center">@(item.ValueAbsolute > 0 ? Math.Round(item.ValueAbsolute, 3).ToString() : string.Empty)</td>
+                        <td class="cell"><!--or--></td>
+                    <td class="cell text-center">@(item.ValuePercent > 0 ? Math.Round(item.ValuePercent, 3) + " %" : string.Empty)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

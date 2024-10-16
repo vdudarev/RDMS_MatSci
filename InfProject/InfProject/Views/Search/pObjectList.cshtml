@@ -1,0 +1,68 @@
+﻿@model (IEnumerable<ObjectInfo>, int)
+@inject InfProject.DBContext.DataContext dataContext
+@{
+    (IEnumerable<ObjectInfo> list, int count) = @Model;
+    bool isSample = list is IEnumerable<Sample>;
+    Sample tmp;
+}
+<div class="container-fluid" id="SearchList">
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button class="nav-link active" id="nav-table-tab" data-bs-toggle="tab" data-bs-target="#nav-table" type="button" role="tab" aria-controls="nav-table" aria-selected="false">Table (@count)</button>
+@*             <button class="nav-link" id="nav-list-tab" data-bs-toggle="tab" data-bs-target="#nav-list" type="button" role="tab" aria-controls="nav-list" aria-selected="true">List (@count)</button>*@
+            <button id="nav-enrich" type="button" class="btn btn-outline-secondary d-none" onclick="EnrichWithProperties()">Enrich with properties</button>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-table" role="tabpanel" aria-labelledby="nav-table-tab">
+            <table class="table table-striped" id="searchList" style="margin-top:0">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Type</th>
+                        <th>Name / Description</th>
+                        @if (isSample){
+                            <th>N</th>
+                            <th>System</th>
+                        }
+                        <th>Document</th>
+                        <th>Created</th>
+                        <th>Person</th>
+                        <th>Access</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in list)
+                    {
+                        <tr data-id="@item.ObjectId">
+                            <td><a href="/object/@item.ObjectNameUrl">@Html.Raw(item.ObjectId)</a></td>
+                            <td>@dataContext.GetType(item.TypeId).Result.TypeName</td>
+                            <td>@Html.Raw(item.ObjectName)<br><small>@Html.Raw(item.ObjectDescription)</small></td>
+                            @if (isSample){
+                                tmp = item as Sample;
+                                <td>@tmp.ElemNumber</td>
+                                <td>@tmp.Elements.Trim('-')</td>
+                            }
+                            <td>@(string.IsNullOrEmpty(item.ObjectFile) ? string.Empty : Html.Raw($"<a href=\"/file/download/{item.ObjectId}\">{item.ObjectFile}</a>"))</td>
+                            <td>@item._created?.ToString("yyyy-MM-dd")</td>
+                            <td>@dataContext.GetUser((int)item._createdBy!).Result</td>
+                            <td>@item.AccessControl</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+@*         <div class="tab-pane fade" id="nav-list" role="tabpanel" aria-labelledby="nav-list-tab">
+            <ul class="list-group">
+                @foreach (var item in list)
+                {
+                    <li class="list-group-item">
+                        <a href="/object/@item.ObjectNameUrl">@Html.Raw(item.ObjectName) (@item._created?.ToString("yyyy-MM-dd") by @dataContext.GetUser((int)item._createdBy!).Result)</a>
+                        <small class="d-block">@Html.Raw(item.ObjectDescription)</small>
+                        <small class="d-block float-end">[@dataContext.GetType(item.TypeId).Result.TypeName, @item.AccessControl, id: @item.ObjectId]</small>
+                    </li>
+                }
+            </ul>
+        </div> *@
+    </div>
+</div>

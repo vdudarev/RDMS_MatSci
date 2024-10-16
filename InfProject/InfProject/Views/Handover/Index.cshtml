@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Mvc.ViewEngines;
+@using WebUtilsLib;
+@using InfProject.Utils;
+@model (UserContext userCtx, List<HandoverSample> current, List<HandoverSample> incoming, List<HandoverSample> outcoming)
+@inject InfProject.DBContext.DataContext dataContext
+@inject IConfiguration config
+@{
+    (UserContext userCtx, List<HandoverSample> current, List<HandoverSample> incoming, List<HandoverSample> outcoming) = Model;
+
+    List<WebAppUser> users = await dataContext.GetUserListAll();
+    WebAppUser user = await dataContext.GetUser(userCtx.userId);
+    WebAppUser sender, recepient;
+    var rawUrl = System.Net.WebUtility.UrlEncode(Context.Request.Path);
+
+    Layout = "_Layout";
+    string title = $"Handovers for {user.Name}";
+    if (string.IsNullOrEmpty(user.Project))
+    {
+        title += $" ({user.Project})";
+    }
+    RubricInfo rubric = new RubricInfo() { RubricId = 0, RubricName = title };
+    ViewData["Title"] = title;
+    ViewData["RubricId"] = rubric.RubricId;
+    (RubricInfo rubric, ObjectInfo obj) item = (rubric, null);
+}
+
+<partial name="RubricBreadCrumbs" model=@item />
+
+
+<div id="HandoverEvents" class="mt-4" data-current-count="@current.Count" data-incoming-count="@incoming.Count" data-outcoming-count="@outcoming.Count">
+    <h3>Current Samples</h3>
+    <p><small>Collection of samples that are now physically held by you (according to samples' handover information - last record).</small></p>
+    @if (current?.Count > 0)
+    {
+        var modelCurrent = (userCtx, current, users, rawUrl);
+        <partial name="pListIncomingHandovers" model=@modelCurrent />
+    }
+    else
+    {
+        <p>No current samples.</p>
+    }
+
+    <h3>Incoming Handovers for you</h3>
+    @if (incoming?.Count > 0)
+    {
+        var modelIncoming = (userCtx, incoming, users, rawUrl);
+        <partial name="pListIncomingHandovers" model=@modelIncoming />
+    }
+    else
+    {
+        <p>No incoming handovers.</p>
+    }
+
+
+    <h3>Outcoming Handovers from you</h3>
+    @if (outcoming?.Count > 0)
+    {
+        var modelOutcoming = (userCtx, outcoming, users, rawUrl);
+        <partial name="pListOutcomingHandovers" model=@modelOutcoming />
+    }
+    else
+    {
+        <p>No outcoming handovers.</p>
+    }
+
+
+    <p>To add a handover, please go to the sample page and create a handover associated with the sample.</p>
+</div>

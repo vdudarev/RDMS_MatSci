@@ -1,0 +1,77 @@
+﻿@using InfProject.Utils
+@using WebUtilsLib;
+@inject InfProject.DBContext.DataContext dataContext
+@model (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, int rubricCount, int objectLinkCount)
+@{
+    (List<dynamic> data, List<WebAppUser> persons, int selectedUserId, int rubricCount, int objectLinkCount) = Model;
+    string selectedPerson = selectedUserId != 0 ? persons.First(x => x.Id == selectedUserId).Name : string.Empty;
+    // mode == "weak", "full"
+    string adds = string.IsNullOrEmpty(selectedPerson) ? string.Empty : " for " + selectedPerson;
+
+    // Requests For Synthesis
+    var objectsData = await dataContext.GetList_ExecDevelopment<dynamic>($@"select *,
+(select count(*) from dbo.vObjectLinkObject WHERE ParentObjectId=OI.ObjectId and ChildTypeId=@SampleTypeId) as SampleCount
+from dbo.ObjectInfo as OI
+where OI.TenantId=@TenantId and OI.TypeId=@RequestForSynthesisTypeId
+ORDER BY _created desc", new { TenantId = dataContext.TenantId, 
+        SampleTypeId = InfProject.DBContext.DataContext.SampleTypeId, 
+        RequestForSynthesisTypeId = InfProject.DBContext.DataContext.RequestForSynthesisTypeId, 
+    });
+
+    string title = $"Requests For Synthesis";
+    ViewData["Title"] = title;
+}
+
+<h1 class="display-4">@ViewData["Title"]</h1>
+<p>
+    Green are requests associated with at least one sample (i.e. "completed" or "closed" requests).
+    Red requests require attention and upcoming sample synthesis (i.e. "pending" or "open" requests).
+    Once sample is created it should be associated with corresponding request in order to "complete" it</u>.
+</p>
+
+<table id="grid" class="table table-striped mt-0" id="tableObjects">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Name / Description</th>
+            <th>Created by</th>
+            <th>Samples Synthesised</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in objectsData)
+        {
+            <tr class="bg-gradient @(item.SampleCount > 0 ? "table-success" : "table-danger")">
+                <td>@item._created</td>
+                <td><a href="/object/@item.ObjectNameUrl">@Html.Raw(item.ObjectName)</a> <small>@Html.Raw(item.ObjectDescription)</small></td>
+                <td>@dataContext.GetUser((int)item._createdBy!).Result</td>
+                <td>@item.SampleCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script src="~/js/moment.js" type="text/javascript"></script>
+    <link href="~/css/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/datatables.min.js" type="text/javascript"></script>
+    <script src="~/js/datetime-moment.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            // https://datatables.net/plug-ins/sorting/datetime-moment
+            // https://momentjs.com/docs/#/displaying/
+            $.fn.dataTable.moment('M/D/YYYY h:mm:ss A');
+            initDataTable("#grid", {
+                paging: false,
+                searching: false,
+                fixedHeader: {
+                    header: true,
+                    footer: false
+                }
+                //, order: [ [1, 'asc']]
+            });
+        });
+    </script>
+}

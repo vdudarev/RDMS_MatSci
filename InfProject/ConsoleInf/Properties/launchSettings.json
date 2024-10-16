@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleInf": {
+      "commandName": "Project",
+      "commandLineArgs": "\"[storageRoot]\" \"[connectionString]\" \"[hostname]\""
+    }
+  }
+}
